@@ -281,6 +281,17 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  transition: all 300ms ease;
+}
+
+.review-card-item.leader-card {
+  background: rgba(0, 103, 244, 0.04);
+  border-color: rgba(0, 103, 244, 0.2);
+}
+
+.leader-icon {
+  color: var(--color-accent);
+  margin-right: 4px;
 }
 
 .review-card-top {

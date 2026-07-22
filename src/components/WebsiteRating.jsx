@@ -1,9 +1,34 @@
 import { useState, useEffect } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, MessageSquare, ThumbsUp } from 'lucide-react'
+import { Star, Send, Sparkles, CheckCircle2, Award } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import './WebsiteRating.css'
 
-const DEFAULT_RATINGS = [5, 5, 5, 5, 4, 5, 5, 4, 5, 5, 5, 5]
+const DEFAULT_RATINGS = [5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5]
+
+const DEFAULT_REVIEWS = [
+  {
+    id: 1,
+    name: 'Badisa Srikanth (Founder & CEO)',
+    star: 5,
+    comment: 'Building innovative software and AI-powered solutions that empower businesses to grow, automate, and succeed in the digital era.',
+    date: 'Jul 20, 2026',
+    isLeader: true,
+  },
+  {
+    id: 2,
+    name: 'Narasimha Reddy (Founder, TFS Fintech)',
+    star: 5,
+    comment: "SriVoraTech transformed our vision into India's 1st subscription fintech app within 2 months!",
+    date: 'Jul 18, 2026',
+  },
+  {
+    id: 3,
+    name: 'Sujith Reddy (Founder, FluentPro AI)',
+    star: 5,
+    comment: 'FluentPro AI voice engine was engineered from scratch by SriVoraTech — 85,000+ active learners love it!',
+    date: 'Jul 15, 2026',
+  },
+]
 
 export default function WebsiteRating() {
   const [ref, isVisible] = useScrollAnimation()
@@ -14,7 +39,7 @@ export default function WebsiteRating() {
   const [userReview, setUserReview] = useState('')
   const [userHasRated, setUserHasRated] = useState(false)
   const [userRatingData, setUserRatingData] = useState(null)
-  const [recentReviews, setRecentReviews] = useState([])
+  const [recentReviews, setRecentReviews] = useState(DEFAULT_REVIEWS)
 
   useEffect(() => {
     // Load stored ratings list from localStorage if present
@@ -26,7 +51,7 @@ export default function WebsiteRating() {
           setRatingsList(parsed)
         }
       } catch (e) {
-        // fallback to default
+        // fallback
       }
     }
 
@@ -35,7 +60,7 @@ export default function WebsiteRating() {
     if (savedReviews) {
       try {
         const parsed = JSON.parse(savedReviews)
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           setRecentReviews(parsed)
         }
       } catch (e) {
@@ -84,7 +109,7 @@ export default function WebsiteRating() {
       id: Date.now(),
       name: userName.trim() || 'Verified Visitor',
       star: selectedStar,
-      comment: userReview.trim() || 'Great platform and technical architecture!',
+      comment: userReview.trim() || 'Great digital product engineering and smooth performance!',
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     }
 
@@ -103,10 +128,10 @@ export default function WebsiteRating() {
         <div ref={ref} className={`animate-on-scroll ${isVisible ? 'visible' : ''}`}>
           <div className="rating-badge">
             <Sparkles size={14} />
-            Community Reviews & Feedback
+            Community Reviews & Leadership Feedback
           </div>
           <h2 className="section-title">
-            User <span className="gradient-text">Ratings & Reviews</span>
+            User <span className="gradient-text">Ratings & Leadership</span>
           </h2>
           <p className="section-subtitle">
             Every user rating helps us continuously refine our digital platform and user experience.
@@ -244,12 +269,15 @@ export default function WebsiteRating() {
           {/* Recent Reviews Stream */}
           {recentReviews.length > 0 && (
             <div className="recent-reviews-stream">
-              <h4 className="stream-title">Recent Community Feedback</h4>
+              <h4 className="stream-title">Founder & Verified Client Feedback</h4>
               <div className="reviews-grid">
                 {recentReviews.slice(0, 3).map((r) => (
-                  <div key={r.id} className="review-card-item">
+                  <div key={r.id} className={`review-card-item ${r.isLeader ? 'leader-card' : ''}`}>
                     <div className="review-card-top">
-                      <strong className="r-name">{r.name}</strong>
+                      <strong className="r-name">
+                        {r.isLeader && <Award size={14} className="leader-icon" />}
+                        {r.name}
+                      </strong>
                       <div className="r-stars">
                         {[...Array(r.star)].map((_, i) => (
                           <Star key={i} size={13} fill="#f59e0b" color="#f59e0b" />
