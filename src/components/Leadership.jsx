@@ -1,5 +1,5 @@
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import { Sparkles, Award, Code2, Smartphone, Bot, Palette, Cloud, TestTube, BarChart3, HeartHandshake, Quote, CheckCircle2 } from 'lucide-react'
+import { Sparkles, Award, Code2, Smartphone, Bot, Palette, Cloud, TestTube, BarChart3, HeartHandshake, Quote, CheckCircle2, Linkedin, Mail, ShieldCheck } from 'lucide-react'
 import './Leadership.css'
 import saiPhoto from '../assets/sai_manindra.jpg'
 
@@ -12,6 +12,8 @@ const leaders = [
     initials: 'BS',
     color: '#0067f4',
     photo: null,
+    linkedin: 'https://linkedin.com',
+    email: 'srikanth@srivoratech.com',
     bio: "Badisa Srikanth is the Founder and CEO of SriVoraTech. He leads the company's vision, product strategy, business growth, and innovation initiatives. Passionate about software engineering, artificial intelligence, and entrepreneurship, he focuses on building scalable digital solutions that help businesses accelerate their digital transformation.",
     expertise: [
       'Business Strategy',
@@ -30,6 +32,8 @@ const leaders = [
     initials: 'VK',
     color: '#8b5cf6',
     photo: null,
+    linkedin: 'https://in.linkedin.com/in/vamsi-krishna-badisa-8b03ba1aa',
+    email: 'vamsi@srivoratech.com',
     bio: 'Badisa Vamsi Krishna oversees daily operations, project delivery, business development, and customer relationships. He ensures efficient execution, operational excellence, and seamless collaboration between teams and clients.',
     expertise: [
       'Operations Management',
@@ -48,6 +52,8 @@ const leaders = [
     initials: 'SM',
     color: '#10b981',
     photo: saiPhoto,
+    linkedin: 'https://linkedin.com',
+    email: 'manindra@srivoratech.com',
     bio: "Sai Manindra leads the company's technology vision, engineering excellence, and software architecture. He is responsible for building secure, scalable, and high-performance web applications, mobile apps, cloud platforms, and AI-powered solutions.",
     expertise: [
       'Software Engineering',
@@ -140,6 +146,9 @@ export default function Leadership() {
               className={`leader-card glass-card animate-on-scroll ${isVisible ? 'visible' : ''}`}
               style={{ '--leader-accent': leader.color, '--delay': `${0.06 + idx * 0.08}s` }}
             >
+              {/* Top Accent Gradient Ribbon */}
+              <div className="card-top-accent-line" style={{ background: `linear-gradient(90deg, ${leader.color}, #38bdf8)` }} />
+
               {/* WhatsApp / LinkedIn style Medium Circular Profile Avatar on Top */}
               <div className="leader-top-profile">
                 <div className="leader-avatar-wrapper">
@@ -150,15 +159,42 @@ export default function Leadership() {
                       <span>{leader.initials}</span>
                     </div>
                   )}
-                  <span className="avatar-glow-ring" style={{ background: `${leader.color}40` }} />
+                  <span className="avatar-glow-ring" style={{ background: `${leader.color}35` }} />
                 </div>
 
-                <span className="leader-level-badge" style={{ color: leader.color, borderColor: `${leader.color}40`, background: `${leader.color}10` }}>
-                  <Award size={13} /> {leader.level}
-                </span>
+                <div className="leader-badge-row">
+                  <span className="leader-level-badge" style={{ color: leader.color, borderColor: `${leader.color}40`, background: `${leader.color}10` }}>
+                    <Award size={13} /> {leader.level}
+                  </span>
+                  <span className="verified-leadership-chip">
+                    <ShieldCheck size={12} style={{ color: '#10b981' }} /> Verified Executive
+                  </span>
+                </div>
 
                 <h3 className="leader-name">{leader.name}</h3>
                 <p className="leader-role" style={{ color: leader.color }}>{leader.role}</p>
+
+                {/* Social Quick Action Buttons */}
+                <div className="leader-social-actions">
+                  <a
+                    href={leader.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="leader-action-btn"
+                    title={`Connect with ${leader.name} on LinkedIn`}
+                    aria-label={`LinkedIn Profile for ${leader.name}`}
+                  >
+                    <Linkedin size={15} />
+                  </a>
+                  <a
+                    href={`mailto:${leader.email}`}
+                    className="leader-action-btn"
+                    title={`Email ${leader.name}`}
+                    aria-label={`Email ${leader.name}`}
+                  >
+                    <Mail size={15} />
+                  </a>
+                </div>
               </div>
 
               {/* Bio & Description BELOW the photo */}
@@ -168,7 +204,7 @@ export default function Leadership() {
 
               {/* Core Expertise Chips */}
               <div className="leader-expertise-section">
-                <span className="expertise-title">CORE EXPERTISE</span>
+                <span className="expertise-title">CORE EXPERTISE & SKILLS</span>
                 <div className="expertise-chips-grid">
                   {leader.expertise.map((item) => (
                     <span key={item} className="expertise-chip">
