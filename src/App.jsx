@@ -20,10 +20,12 @@ import Footer from './components/Footer'
 import FloatingActions from './components/FloatingActions'
 import AIChatWidget from './components/AIChatWidget'
 import CareersPage from './components/CareersPage'
+import WelcomeSplash from './components/WelcomeSplash'
 
 export default function App() {
   const glowRef = useRef(null)
   const [showCareers, setShowCareers] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -112,6 +114,9 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* 3D Cinematic Opening Splash Overlay */}
+      {showSplash && <WelcomeSplash onComplete={() => setShowSplash(false)} />}
+
       {/* Mouse-follow cursor glow */}
       <div ref={glowRef} className="cursor-glow" />
       <Navbar onOpenCareers={() => setShowCareers(true)} />
