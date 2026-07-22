@@ -76,6 +76,17 @@
   z-index: 1;
 }
 
+.leader-avatar-img {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
 .avatar-glow-ring {
   position: absolute;
   inset: -4px;
