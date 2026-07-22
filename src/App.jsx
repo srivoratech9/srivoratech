@@ -5,6 +5,7 @@ import ProjectCards from './components/ProjectCards'
 import QuoteBlock from './components/QuoteBlock'
 import Challenges from './components/Challenges'
 import WhyChoose from './components/WhyChoose'
+import Leadership from './components/Leadership'
 import OnboardingSteps from './components/OnboardingSteps'
 import Services from './components/Services'
 import ProjectEstimator from './components/ProjectEstimator'
@@ -54,7 +55,7 @@ export default function App() {
 
       // Interactive card mouse-follow spotlight & 3D tilt
       const card = e.target.closest(
-        '.challenge-card, .service-card, .why-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card, .estimator-card, .rating-card'
+        '.challenge-card, .service-card, .why-card, .leader-card, .team-discipline-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card, .estimator-card, .rating-card'
       )
       if (card) {
         const rect = card.getBoundingClientRect()
@@ -74,7 +75,7 @@ export default function App() {
 
     const handleMouseOut = (e) => {
       const card = e.target.closest(
-        '.challenge-card, .service-card, .why-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card, .estimator-card, .rating-card'
+        '.challenge-card, .service-card, .why-card, .leader-card, .team-discipline-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card, .estimator-card, .rating-card'
       )
       if (card && !card.contains(e.relatedTarget)) {
         card.style.setProperty('--tilt-x', '0deg')
@@ -120,6 +121,7 @@ export default function App() {
         <QuoteBlock />
         <Challenges />
         <WhyChoose />
+        <Leadership />
         <OnboardingSteps />
         <Services />
         <ProjectEstimator />
