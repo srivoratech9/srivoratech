@@ -1,0 +1,59 @@
+.quote-block {
+  padding: 80px 0 100px;
+  background: var(--color-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.quote-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto;
+  gap: 24px;
+}
+
+.quote-label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(0, 103, 244, 0.08);
+  padding: 6px 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(0, 103, 244, 0.2);
+}
+
+.quote-text {
+  font-family: var(--font-heading);
+  font-size: clamp(24px, 4.5vw, 40px);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+  position: relative;
+}
+
+.quote-author {
+  font-size: 15.5px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.quote-block.visible .quote-label {
+  opacity: 0;
+  animation: fadeInUp 0.5s var(--ease-out-smooth) forwards 0.1s;
+}
+
+.quote-block.visible .quote-text {
+  opacity: 0;
+  animation: fadeInUp 0.5s var(--ease-out-smooth) forwards 0.25s;
+}
+
+.quote-block.visible .quote-author {
+  opacity: 0;
+  animation: fadeInUp 0.5s var(--ease-out-smooth) forwards 0.4s;
+}
