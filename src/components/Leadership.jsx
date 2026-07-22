@@ -2,6 +2,7 @@ import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { Sparkles, Award, Code2, Smartphone, Bot, Palette, Cloud, TestTube, BarChart3, HeartHandshake, Quote, CheckCircle2, Linkedin, Mail, ShieldCheck } from 'lucide-react'
 import './Leadership.css'
 import saiPhoto from '../assets/sai_manindra.jpg'
+import srikanthPhoto from '../assets/badisa_srikanth.jpg'
 
 const leaders = [
   {
@@ -11,7 +12,7 @@ const leaders = [
     level: 'Executive Leadership',
     initials: 'BS',
     color: '#0067f4',
-    photo: null,
+    photo: srikanthPhoto,
     linkedin: 'https://linkedin.com',
     email: 'srikanth@srivoratech.com',
     bio: "Badisa Srikanth is the Founder and CEO of SriVoraTech. He leads the company's vision, product strategy, business growth, and innovation initiatives. Passionate about software engineering, artificial intelligence, and entrepreneurship, he focuses on building scalable digital solutions that help businesses accelerate their digital transformation.",
