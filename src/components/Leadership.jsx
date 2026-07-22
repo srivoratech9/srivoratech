@@ -47,15 +47,15 @@ const leaders = [
   },
   {
     id: 'manindra',
-    name: 'Sai Manindra',
+    name: 'Garapati Sai Manindra',
     role: 'Chief Technology Officer (CTO)',
     level: 'Technical Leadership',
-    initials: 'SM',
+    initials: 'GSM',
     color: '#10b981',
     photo: saiPhoto,
     linkedin: 'https://linkedin.com',
     email: 'manindra@srivoratech.com',
-    bio: "Sai Manindra leads the company's technology vision, engineering excellence, and software architecture. He is responsible for building secure, scalable, and high-performance web applications, mobile apps, cloud platforms, and AI-powered solutions.",
+    bio: "Garapati Sai Manindra leads the company's technology vision, engineering excellence, and software architecture. He is responsible for building secure, scalable, and high-performance web applications, mobile apps, cloud platforms, and AI-powered solutions.",
     expertise: [
       'Software Engineering',
       'System Architecture',
