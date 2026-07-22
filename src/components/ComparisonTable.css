@@ -1,110 +1,135 @@
 .comparison {
-  background: var(--color-bg);
-  padding: var(--section-padding-y) 0;
+  background: var(--color-gray-50);
   position: relative;
 }
 
-.comparison-table-wrap {
-  max-width: 860px;
-  margin: 0 auto;
-  overflow-x: auto;
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: var(--shadow-md);
-  transition: all 400ms var(--ease-out-smooth);
+.comparison-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(0, 103, 244, 0.08);
+  border: 1px solid rgba(0, 103, 244, 0.2);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 0 auto 16px;
+  width: fit-content;
 }
 
-.comparison-table-wrap:hover {
-  box-shadow: var(--shadow-hover);
-  border-color: rgba(0, 103, 244, 0.2);
+.comparison-table-wrap {
+  overflow-x: auto;
+  padding: 0;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-gray-200);
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
 }
 
 .comparison-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 520px;
-}
-
-.comparison-table th,
-.comparison-table td {
-  padding: 18px 24px;
-  text-align: center;
-  font-size: 14.5px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  text-align: left;
+  min-width: 800px;
 }
 
 .comparison-table th {
+  padding: 24px 20px;
   font-family: var(--font-heading);
+  font-size: 14px;
   font-weight: 700;
-  font-size: 13.5px;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 22px;
-  background: rgba(248, 250, 252, 0.8);
+  color: var(--color-gray-700);
+  border-bottom: 1px solid var(--color-gray-200);
+  background: var(--color-gray-50);
 }
 
 .feature-col {
-  text-align: left !important;
-}
-
-.feature-cell {
-  text-align: left;
-  font-weight: 600;
-  color: #0f172a;
+  width: 28%;
 }
 
 .highlight-col {
-  background: linear-gradient(135deg, #0067f4 0%, #2563eb 100%) !important;
-  color: #ffffff !important;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: rgba(0, 103, 244, 0.04) !important;
+  border-left: 2px solid var(--color-accent);
+  border-right: 2px solid var(--color-accent);
+}
+
+.svt-col-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.svt-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  background: var(--color-accent);
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.svt-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.comparison-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-gray-100);
+  font-size: 14px;
+  color: var(--color-gray-700);
+  vertical-align: middle;
+}
+
+.feature-cell strong {
+  color: var(--color-gray-900);
+  font-size: 14.5px;
 }
 
 .highlight-cell {
-  background: rgba(0, 103, 244, 0.04);
+  background: rgba(0, 103, 244, 0.02) !important;
+  border-left: 2px solid var(--color-accent);
+  border-right: 2px solid var(--color-accent);
 }
 
-.comparison-table tbody tr:hover td {
-  background: rgba(0, 103, 244, 0.02);
-}
-
-.comparison-table tbody tr:last-child td {
-  border-bottom: none;
+/* Status Pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .status-check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #dcfce7;
-  color: #16a34a;
-  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.15);
+  background: rgba(34, 197, 94, 0.1);
+  color: #15803d;
 }
 
-.status-x {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #fef2f2;
-  color: #dc2626;
+.status-check svg {
+  color: #22c55e;
 }
 
 .status-minus {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #fef9c3;
-  color: #ca8a04;
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+}
+
+.status-minus svg {
+  color: #f59e0b;
+}
+
+.status-x {
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+}
+
+.status-x svg {
+  color: #ef4444;
 }

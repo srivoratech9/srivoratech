@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import ProjectCards from './components/ProjectCards'
@@ -7,16 +7,36 @@ import Challenges from './components/Challenges'
 import WhyChoose from './components/WhyChoose'
 import OnboardingSteps from './components/OnboardingSteps'
 import Services from './components/Services'
+import ProjectEstimator from './components/ProjectEstimator'
 import TechStack from './components/TechStack'
 import WorkShowcase from './components/WorkShowcase'
 import Achievements from './components/Achievements'
 import FAQ from './components/FAQ'
+import WebsiteRating from './components/WebsiteRating'
 import Contact from './components/Contact'
 import PreFooterCTA from './components/PreFooterCTA'
 import Footer from './components/Footer'
+import FloatingActions from './components/FloatingActions'
+import AIChatWidget from './components/AIChatWidget'
+import CareersPage from './components/CareersPage'
 
 export default function App() {
   const glowRef = useRef(null)
+  const [showCareers, setShowCareers] = useState(false)
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#careers') {
+        setShowCareers(true)
+      } else {
+        setShowCareers(false)
+      }
+    }
+
+    handleHashChange()
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
 
   useEffect(() => {
     const glow = glowRef.current
@@ -34,7 +54,7 @@ export default function App() {
 
       // Interactive card mouse-follow spotlight & 3D tilt
       const card = e.target.closest(
-        '.challenge-card, .service-card, .why-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card'
+        '.challenge-card, .service-card, .why-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card, .estimator-card, .rating-card'
       )
       if (card) {
         const rect = card.getBoundingClientRect()
@@ -42,8 +62,8 @@ export default function App() {
         const y = e.clientY - rect.top
         const centerX = rect.width / 2
         const centerY = rect.height / 2
-        const tiltX = ((y - centerY) / centerY) * -5
-        const tiltY = ((x - centerX) / centerX) * 5
+        const tiltX = ((y - centerY) / centerY) * -4
+        const tiltY = ((x - centerX) / centerX) * 4
 
         card.style.setProperty('--mouse-x', `${x}px`)
         card.style.setProperty('--mouse-y', `${y}px`)
@@ -54,7 +74,7 @@ export default function App() {
 
     const handleMouseOut = (e) => {
       const card = e.target.closest(
-        '.challenge-card, .service-card, .why-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card'
+        '.challenge-card, .service-card, .why-card, .work-card, .achievement-card, .onboarding-step, .faq-item, .project-card, .spotlight-card, .estimator-card, .rating-card'
       )
       if (card && !card.contains(e.relatedTarget)) {
         card.style.setProperty('--tilt-x', '0deg')
@@ -78,11 +98,22 @@ export default function App() {
     }
   }, [])
 
+  if (showCareers) {
+    return (
+      <CareersPage
+        onBack={() => {
+          window.location.hash = ''
+          setShowCareers(false)
+        }}
+      />
+    )
+  }
+
   return (
     <div className="app">
       {/* Mouse-follow cursor glow */}
       <div ref={glowRef} className="cursor-glow" />
-      <Navbar />
+      <Navbar onOpenCareers={() => setShowCareers(true)} />
       <main>
         <Hero />
         <ProjectCards />
@@ -91,14 +122,18 @@ export default function App() {
         <WhyChoose />
         <OnboardingSteps />
         <Services />
+        <ProjectEstimator />
         <TechStack />
         <WorkShowcase />
         <Achievements />
         <FAQ />
+        <WebsiteRating />
         <Contact />
         <PreFooterCTA />
       </main>
-      <Footer />
+      <Footer onOpenCareers={() => setShowCareers(true)} />
+      <FloatingActions />
+      <AIChatWidget />
     </div>
   )
 }

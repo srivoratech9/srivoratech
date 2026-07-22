@@ -12,39 +12,43 @@
 
 :root {
   /* Colors */
-  --color-bg: #f5f5f5;
+  --color-bg: #fafafa;
   --color-white: #ffffff;
-  --color-dark: #0f172a;
-  --color-dark-hover: #1e293b;
+  --color-dark: #090d16;
+  --color-dark-hover: #131b2e;
   --color-text-primary: #1e293b;
   --color-text-heading: #0f172a;
   --color-text-secondary: #475569;
   --color-text-muted: #94a3b8;
   --color-accent: #0067F4;
   --color-accent-hover: #0047A8;
-  --color-accent-glow: rgba(0, 103, 244, 0.16);
-  --color-border: rgba(226, 232, 240, 0.8);
+  --color-accent-glow: rgba(0, 103, 244, 0.18);
+  --color-border: rgba(226, 232, 240, 0.85);
   --color-border-light: #f1f5f9;
-  --color-card-bg: rgba(255, 255, 255, 0.85);
+  --color-card-bg: rgba(255, 255, 255, 0.88);
+  --color-gray-50: #f8fafc;
   --color-gray-100: #f1f5f9;
   --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
   --color-gray-400: #94a3b8;
   --color-gray-500: #64748b;
   --color-gray-600: #475569;
   --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
   --color-gray-900: #0f172a;
 
   /* Typography */
-  --font-heading: 'Satoshi', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Satoshi', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Spacing */
-  --section-padding-y: 96px;
+  --section-padding-y: 100px;
   --section-padding-x: 24px;
   --max-width: 1240px;
   --max-width-lg: 1440px;
 
-  /* Premium Card Radius (18-24px) */
+  /* Premium Card Radius */
+  --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 24px;
@@ -52,12 +56,13 @@
   --radius-full: 9999px;
 
   /* Depth Shadows */
-  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.03);
-  --shadow-md: 0 8px 24px -4px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 20px 40px -8px rgba(15, 23, 42, 0.08);
-  --shadow-hover: 0 24px 48px -12px rgba(0, 103, 244, 0.14), 0 12px 24px -6px rgba(15, 23, 42, 0.04);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 12px 32px -4px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 24px 48px -8px rgba(15, 23, 42, 0.09);
+  --shadow-hover: 0 30px 60px -12px rgba(0, 103, 244, 0.16), 0 16px 32px -6px rgba(15, 23, 42, 0.05);
   --shadow-button: 0 4px 14px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08);
-  --shadow-glow: 0 0 50px rgba(0, 103, 244, 0.15);
+  --shadow-glow: 0 0 60px rgba(0, 103, 244, 0.2);
 
   /* Easing & Transitions */
   --ease-out-smooth: cubic-bezier(0.16, 1, 0.3, 1);
@@ -77,7 +82,7 @@ body {
   font-family: var(--font-body);
   color: var(--color-text-primary);
   background: var(--color-white);
-  min-width: 350px;
+  min-width: 320px;
   line-height: 1.6;
   overflow-x: hidden;
 }
@@ -104,7 +109,7 @@ ul, ol {
   list-style: none;
 }
 
-input, textarea {
+input, textarea, select {
   font-family: inherit;
   border: none;
   outline: none;
@@ -132,7 +137,7 @@ input, textarea {
 
 .section-title {
   font-family: var(--font-heading);
-  font-size: clamp(32px, 5vw, 46px);
+  font-size: clamp(32px, 4.5vw, 48px);
   font-weight: 800;
   color: var(--color-text-heading);
   text-align: center;
@@ -142,10 +147,10 @@ input, textarea {
 }
 
 .section-subtitle {
-  font-size: clamp(15px, 2vw, 18px);
+  font-size: clamp(15px, 1.8vw, 18px);
   color: var(--color-text-secondary);
   text-align: center;
-  max-width: 640px;
+  max-width: 680px;
   margin: 0 auto 56px;
   letter-spacing: -0.01em;
   line-height: 1.6;
@@ -160,7 +165,7 @@ input, textarea {
 .achievement-card,
 .onboarding-step,
 .faq-item {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(226, 232, 240, 0.9);
@@ -173,11 +178,9 @@ input, textarea {
               border-color 450ms var(--ease-out-smooth),
               background 450ms var(--ease-out-smooth);
   will-change: transform, box-shadow;
-  transform-style: preserve-3d;
-  perspective: 1000px;
 }
 
-/* Mouse-follow spotlight light effect */
+/* Spotlight cursor effect */
 .glass-card::after,
 .challenge-card::after,
 .service-card::after,
@@ -191,7 +194,7 @@ input, textarea {
   inset: 0;
   border-radius: inherit;
   background: radial-gradient(
-    450px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
     rgba(0, 103, 244, 0.12),
     transparent 75%
   );
@@ -212,7 +215,7 @@ input, textarea {
   opacity: 1;
 }
 
-/* Card Hover Lift — clean, subtle (CodeDale-style) */
+/* Card Hover Lift */
 .glass-card:hover,
 .challenge-card:hover,
 .service-card:hover,
@@ -221,12 +224,12 @@ input, textarea {
 .achievement-card:hover,
 .onboarding-step:hover {
   transform: translateY(-8px);
-  border-color: rgba(0, 103, 244, 0.15);
-  box-shadow: 0px 22px 33px 0px rgba(0,0,0,0.03);
+  border-color: rgba(0, 103, 244, 0.2);
+  box-shadow: var(--shadow-hover);
   background: #ffffff;
 }
 
-/* ===== BUTTON STYLES WITH RIPPLE & GLOW ===== */
+/* ===== BUTTON STYLES WITH SHIMMER & GLOW ===== */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -248,7 +251,6 @@ input, textarea {
   cursor: pointer;
 }
 
-/* Gradient sweep on hover */
 .btn-primary::before {
   content: '';
   position: absolute;
@@ -256,7 +258,7 @@ input, textarea {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 600ms var(--ease-out-smooth);
 }
 
@@ -281,7 +283,7 @@ input, textarea {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.2);
   flex-shrink: 0;
   transition: transform 400ms var(--ease-out-smooth);
@@ -309,6 +311,7 @@ input, textarea {
   overflow: hidden;
   will-change: transform;
   box-shadow: 0 6px 20px rgba(0, 103, 244, 0.35);
+  cursor: pointer;
 }
 
 .btn-accent::before {
@@ -318,7 +321,7 @@ input, textarea {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
   transition: left 650ms var(--ease-out-smooth);
 }
 
@@ -339,7 +342,7 @@ input, textarea {
 /* ===== HIGH-PERFORMANCE SCROLL ANIMATIONS ===== */
 .animate-on-scroll {
   opacity: 0;
-  transform: translateY(40px) scale(0.96);
+  transform: translateY(35px) scale(0.97);
   transition: opacity 800ms var(--ease-out-smooth),
               transform 800ms var(--ease-out-smooth);
   will-change: opacity, transform;
@@ -438,7 +441,7 @@ input, textarea {
 /* ===== RESPONSIVE HELPERS ===== */
 @media (max-width: 768px) {
   :root {
-    --section-padding-y: 60px;
+    --section-padding-y: 64px;
     --section-padding-x: 16px;
   }
   .cursor-glow {

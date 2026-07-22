@@ -33,7 +33,20 @@
   left: 24px;
   height: 48px;
   align-items: center;
+  gap: 10px;
   z-index: 2;
+}
+
+.logo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 103, 244, 0.3);
 }
 
 .logo-text {
@@ -65,15 +78,21 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
   color: #0f172a;
   width: 100%;
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
   transition: all 400ms var(--ease-out-smooth);
+}
+
+.navbar-wrapper.scrolled .navbar-pill {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
+  border-color: rgba(0, 103, 244, 0.25);
 }
 
 .navbar-pill:hover {
@@ -206,7 +225,9 @@
   }
 
   .navbar-cta-right {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 }
 

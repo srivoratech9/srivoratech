@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Menu, X, ArrowRight } from 'lucide-react'
+import { Menu, X, ArrowRight, Zap } from 'lucide-react'
 import './Navbar.css'
 
 const navLinks = [
   { label: 'Services', href: '#services' },
+  { label: 'Estimator', href: '#estimator' },
   { label: 'Tech Stack', href: '#tech-stack' },
   { label: 'Our Work', href: '#our-works' },
-  { label: 'Achievements', href: '#achievements' },
   { label: 'FAQs', href: '#faq' },
+  { label: 'Careers', href: '#careers' },
   { label: 'Contact', href: '#contact' },
 ]
-
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -26,7 +26,12 @@ export default function Navbar() {
     <div className={`navbar-wrapper ${scrolled ? 'scrolled' : ''}`}>
       {/* Desktop logo left */}
       <a className="navbar-logo-left" href="#home">
-        <div className="logo-text">SriVora<span className="logo-accent">Tech</span></div>
+        <div className="logo-badge">
+          <Zap size={16} className="logo-icon" />
+        </div>
+        <div className="logo-text">
+          SriVora<span className="logo-accent">Tech</span>
+        </div>
       </a>
 
       {/* Center nav pill */}
@@ -34,7 +39,9 @@ export default function Navbar() {
         <div className="navbar-pill-inner">
           {/* Mobile logo */}
           <a className="navbar-logo-mobile" href="#home">
-            <div className="logo-text-sm">SriVora<span className="logo-accent">Tech</span></div>
+            <div className="logo-text-sm">
+              SriVora<span className="logo-accent">Tech</span>
+            </div>
           </a>
 
           {/* Desktop nav links */}

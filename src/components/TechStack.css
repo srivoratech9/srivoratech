@@ -188,16 +188,48 @@
   box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
 }
 
-/* Category Filter Tabs */
+/* Interactive Category Filter Pills */
+.tech-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto 2.5rem;
+  position: relative;
+  z-index: 2;
+}
+
 .tech-category-tabs {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-bottom: 2.5rem;
-  position: relative;
-  z-index: 1;
+}
+
+.tech-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  width: 260px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: all 250ms var(--ease-out-smooth);
+}
+
+.tech-search-box:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 4px 14px rgba(0, 103, 244, 0.15);
+}
+
+.tech-search-box input {
+  width: 100%;
+  font-size: 13.5px;
+  color: var(--color-gray-800);
 }
 
 .tech-tab-btn {

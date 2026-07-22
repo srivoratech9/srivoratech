@@ -1,343 +1,78 @@
-/* ============================================
-   Achievements — Premium Visual Metrics Cards
-   Matching Codedale-style rich card interiors
-   ============================================ */
-
 .achievements {
-  background: #ffffff;
-  padding: 100px 0;
+  background: var(--color-gray-50);
   position: relative;
-  overflow: hidden;
 }
 
-.achievements-grid {
+.achievements-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-full);
+  color: #8b5cf6;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 0 auto 16px;
+  width: fit-content;
+}
+
+.achievements-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 28px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* ===== BASE CARD ===== */
-.achievement-card {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 28px;
-  padding: 0;
+.metric-card {
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 500ms cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 400ms ease;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  will-change: transform, box-shadow;
-  position: relative;
-}
-
-.achievement-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(0, 103, 244, 0.15);
-  box-shadow:
-    0 22px 44px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(0, 103, 244, 0.08);
-}
-
-/* ===== VISUAL AREA (TOP OF CARD) ===== */
-.ach-visual {
-  width: 100%;
-  height: 220px;
-  position: relative;
-  overflow: hidden;
-  display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-/* --- Card 1: Projects Served — App Previews --- */
-.ach-visual--projects {
-  background: linear-gradient(145deg, #f0e6ff 0%, #e8d5ff 40%, #fce7f3 100%);
-  padding: 28px 24px 0;
-  align-items: flex-end;
-  justify-content: center;
+  text-align: center;
   gap: 12px;
-}
-
-.ach-app-preview {
-  width: 140px;
-  border-radius: 14px 14px 0 0;
   background: #ffffff;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  transform: translateY(8px);
-  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-md);
+  transition: all 400ms var(--ease-out-smooth);
 }
 
-.achievement-card:hover .ach-app-preview {
-  transform: translateY(0);
+.metric-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(0, 103, 244, 0.25);
+  box-shadow: var(--shadow-hover);
 }
 
-.ach-app-preview--secondary {
-  width: 120px;
-  transform: translateY(20px);
-  opacity: 0.85;
-}
-
-.achievement-card:hover .ach-app-preview--secondary {
-  transform: translateY(12px);
-  opacity: 1;
-}
-
-.ach-app-header {
-  padding: 8px 10px;
-  background: #6366f1;
+.metric-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
 }
 
-.ach-app-header--alt {
-  background: #f59e0b;
-}
-
-.ach-app-dots {
-  display: flex;
-  gap: 4px;
-}
-
-.ach-app-dots span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.ach-app-content {
-  padding: 12px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.ach-app-title-bar {
-  width: 65%;
-  height: 8px;
-  border-radius: 4px;
-  background: #e2e8f0;
-}
-
-.ach-app-line {
-  height: 5px;
-  border-radius: 3px;
-  background: #f1f5f9;
-}
-
-.ach-app-line--long { width: 90%; }
-.ach-app-line--medium { width: 70%; }
-.ach-app-line--short { width: 50%; }
-
-.ach-app-btn {
-  width: 55%;
-  height: 10px;
-  border-radius: 5px;
-  background: #6366f1;
-  margin-top: 4px;
-}
-
-.ach-app-blocks {
-  display: flex;
-  gap: 6px;
-}
-
-.ach-block {
-  flex: 1;
-  height: 28px;
-  border-radius: 6px;
-  background: #fef3c7;
-}
-
-/* --- Card 2: Experience — Big Number + Floating Tags --- */
-.ach-visual--experience {
-  background: linear-gradient(145deg, #f5f5f5 0%, #ebebeb 100%);
-  position: relative;
-}
-
-.ach-big-number {
-  font-family: var(--font-heading, 'Inter', sans-serif);
-  font-size: 160px;
-  font-weight: 900;
-  color: rgba(0, 0, 0, 0.08);
-  line-height: 1;
-  position: relative;
-  z-index: 1;
-  user-select: none;
-}
-
-.ach-floating-tags {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.ach-float-tag {
-  position: absolute;
-  display: inline-block;
-  padding: 6px 14px;
-  font-size: 11px;
-  font-weight: 600;
-  background: #ffffff;
-  color: #1e293b;
-  border-radius: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  white-space: nowrap;
-  animation: floatTag 5s infinite ease-in-out;
-  pointer-events: auto;
-  transition: transform 300ms ease, box-shadow 300ms ease;
-}
-
-.ach-float-tag:hover {
-  transform: scale(1.08) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-/* Position each tag around the big number */
-.ach-float-tag:nth-child(1) { top: 14%; left: 6%; }
-.ach-float-tag:nth-child(2) { top: 8%; right: 8%; }
-.ach-float-tag:nth-child(3) { top: 38%; left: 2%; }
-.ach-float-tag:nth-child(4) { top: 34%; right: 4%; }
-.ach-float-tag:nth-child(5) { top: 58%; left: 8%; }
-.ach-float-tag:nth-child(6) { top: 56%; right: 6%; }
-.ach-float-tag:nth-child(7) { top: 78%; left: 12%; }
-.ach-float-tag:nth-child(8) { top: 76%; right: 10%; }
-
-@keyframes floatTag {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-/* --- Card 3: Scaling — Growth Chart --- */
-.ach-visual--scaling {
-  background: #ffffff;
-  padding: 24px 24px 0;
-  align-items: flex-start;
-  justify-content: flex-start;
-}
-
-.ach-chart-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.ach-scaling-title {
-  font-family: var(--font-heading, 'Inter', sans-serif);
-  font-size: 28px;
+.metric-number {
+  font-family: var(--font-heading);
+  font-size: 42px;
   font-weight: 800;
-  color: #111827;
-  letter-spacing: -0.03em;
-}
-
-.ach-growth-badge {
-  display: inline-block;
-  width: fit-content;
-  margin-top: 4px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #10b981;
-  background: #ecfdf5;
-  border-radius: 20px;
-  border: 1px solid #a7f3d0;
-}
-
-.ach-growth-chart {
-  width: 100%;
-  height: auto;
-  margin-top: 8px;
-  flex-grow: 1;
-}
-
-.ach-chart-line {
-  stroke-dashoffset: 400;
-  animation: drawChart 2s ease-out forwards;
-}
-
-@keyframes drawChart {
-  to { stroke-dashoffset: 0; }
-}
-
-.ach-chart-area {
-  opacity: 0;
-  animation: fadeInChart 1s 1s ease-out forwards;
-}
-
-@keyframes fadeInChart {
-  to { opacity: 1; }
-}
-
-/* ===== TEXT AREA (BOTTOM OF CARD) ===== */
-.ach-text {
-  padding: 24px 28px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.achievement-number {
-  font-family: var(--font-heading, 'Inter', sans-serif);
-  font-size: 32px;
-  font-weight: 900;
   letter-spacing: -0.04em;
-  line-height: 1;
-  color: #111827;
+  line-height: 1.1;
 }
 
-.achievement-label {
-  font-family: var(--font-heading, 'Inter', sans-serif);
-  font-size: 18px;
+.metric-label {
+  font-family: var(--font-heading);
+  font-size: 16px;
   font-weight: 700;
-  color: #111827;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
+  color: var(--color-gray-900);
 }
 
-.achievement-desc {
-  font-size: 14px;
-  color: #64748b;
-  line-height: 1.6;
-  margin-top: 2px;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .achievements-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .achievements-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .achievements {
-    padding: 60px 0;
-  }
-
-  .ach-visual {
-    height: 180px;
-  }
-
-  .ach-big-number {
-    font-size: 120px;
-  }
-
-  .ach-float-tag {
-    font-size: 10px;
-    padding: 4px 10px;
-  }
+.metric-desc {
+  font-size: 13.5px;
+  color: var(--color-gray-600);
+  line-height: 1.5;
 }

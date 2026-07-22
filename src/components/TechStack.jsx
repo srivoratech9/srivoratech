@@ -13,7 +13,9 @@ import {
   Terminal,
   ShieldCheck,
   Flame,
-  Boxes
+  Boxes,
+  Search,
+  X
 } from 'lucide-react'
 import './TechStack.css'
 
@@ -214,10 +216,16 @@ const marqueeRow2 = [
 export default function TechStack() {
   const [sectionRef, isVisible] = useScrollAnimation()
   const [activeCategory, setActiveCategory] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredTech = activeCategory === 'all'
-    ? technologies
-    : technologies.filter(t => t.category === activeCategory)
+  const filteredTech = technologies.filter((t) => {
+    const matchesCategory = activeCategory === 'all' || t.category === activeCategory
+    const matchesSearch = searchQuery === '' || 
+      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    return matchesCategory && matchesSearch
+  })
 
   return (
     <section className="tech-section section" id="tech-stack">
@@ -260,22 +268,39 @@ export default function TechStack() {
           </div>
         </div>
 
-        {/* Interactive Category Filter Pills */}
-        <div className="tech-category-tabs">
-          {categories.map((cat) => {
-            const Icon = cat.icon
-            const isActive = activeCategory === cat.id
-            return (
-              <button
-                key={cat.id}
-                className={`tech-tab-btn ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.id)}
-              >
-                <Icon size={16} className="tab-icon" />
-                <span>{cat.label}</span>
+        {/* Category Filter Pills & Search */}
+        <div className="tech-filter-row">
+          <div className="tech-category-tabs">
+            {categories.map((cat) => {
+              const Icon = cat.icon
+              const isActive = activeCategory === cat.id
+              return (
+                <button
+                  key={cat.id}
+                  className={`tech-tab-btn ${isActive ? 'active' : ''}`}
+                  onClick={() => setActiveCategory(cat.id)}
+                >
+                  <Icon size={16} className="tab-icon" />
+                  <span>{cat.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="tech-search-box">
+            <Search size={16} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search tech stack..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="search-clear" onClick={() => setSearchQuery('')}>
+                <X size={14} />
               </button>
-            )
-          })}
+            )}
+          </div>
         </div>
 
         {/* Tech Cards Grid */}

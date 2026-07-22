@@ -13,12 +13,22 @@ import {
   Users,
   Palette,
   ShieldCheck,
+  ChevronDown,
 } from 'lucide-react'
 import './Services.css'
+
+const serviceCategories = [
+  { id: 'all', label: 'All Services' },
+  { id: 'web-mobile', label: 'Web & Mobile Apps' },
+  { id: 'ai-auto', label: 'AI & Automation' },
+  { id: 'enterprise', label: 'Enterprise & ERP' },
+  { id: 'design', label: 'Design & Advisory' },
+]
 
 const servicesList = [
   {
     title: 'Custom Software Development',
+    category: 'web-mobile',
     desc: 'Tailored software solutions built from scratch to solve your unique business challenges with precision and scalability.',
     icon: Laptop,
     color: '#6366f1',
@@ -28,6 +38,7 @@ const servicesList = [
   },
   {
     title: 'Website Design & Development',
+    category: 'web-mobile',
     desc: 'Beautiful, responsive websites that captivate visitors and drive conversions with modern design and smooth interactions.',
     icon: Globe,
     color: '#8b5cf6',
@@ -37,6 +48,7 @@ const servicesList = [
   },
   {
     title: 'Full Stack Web Application Development',
+    category: 'web-mobile',
     desc: 'End-to-end web applications using React, Next.js, Node.js, and modern databases for lightning-fast performance.',
     icon: Code,
     color: '#0067f4',
@@ -46,6 +58,7 @@ const servicesList = [
   },
   {
     title: 'Mobile App Development',
+    category: 'web-mobile',
     desc: 'Native and cross-platform mobile apps for iOS & Android built with Flutter and React Native for maximum reach.',
     icon: Smartphone,
     color: '#10b981',
@@ -55,6 +68,7 @@ const servicesList = [
   },
   {
     title: 'AI Chatbots & Virtual Assistants',
+    category: 'ai-auto',
     desc: 'Intelligent conversational AI agents that automate customer support, qualify leads, and engage users 24/7.',
     icon: Bot,
     color: '#f59e0b',
@@ -64,6 +78,7 @@ const servicesList = [
   },
   {
     title: 'AI Automation Solutions',
+    category: 'ai-auto',
     desc: 'Streamline workflows with intelligent automation, eliminating repetitive tasks and boosting operational efficiency.',
     icon: Workflow,
     color: '#ef4444',
@@ -73,6 +88,7 @@ const servicesList = [
   },
   {
     title: 'Generative AI Solutions',
+    category: 'ai-auto',
     desc: 'Custom LLM pipelines, content generation, and AI-powered tools that transform how your business creates and consumes information.',
     icon: Brain,
     color: '#ec4899',
@@ -82,6 +98,7 @@ const servicesList = [
   },
   {
     title: 'AI-Powered Websites',
+    category: 'ai-auto',
     desc: 'Next-generation websites with AI-driven personalization, smart search, and dynamic content that adapts to every visitor.',
     icon: Cpu,
     color: '#06b6d4',
@@ -91,6 +108,7 @@ const servicesList = [
   },
   {
     title: 'ERP Development',
+    category: 'enterprise',
     desc: 'Enterprise Resource Planning systems that unify your operations, inventory, finance, and HR in one powerful platform.',
     icon: Building2,
     color: '#f97316',
@@ -100,6 +118,7 @@ const servicesList = [
   },
   {
     title: 'CRM Development',
+    category: 'enterprise',
     desc: 'Customer Relationship Management solutions that help you track leads, manage pipelines, and nurture client relationships.',
     icon: Users,
     color: '#14b8a6',
@@ -109,6 +128,7 @@ const servicesList = [
   },
   {
     title: 'UI/UX & Product Design',
+    category: 'design',
     desc: 'User-centered interface design, interactive prototypes, Figma design systems, and modern digital branding experiences.',
     icon: Palette,
     color: '#a855f7',
@@ -118,6 +138,7 @@ const servicesList = [
   },
   {
     title: 'Enterprise Tech Advisory',
+    category: 'design',
     desc: 'Architecture audits, performance optimization, security compliance, and strategic engineering consulting for growth.',
     icon: ShieldCheck,
     color: '#0ea5e9',
@@ -130,15 +151,20 @@ const servicesList = [
 export default function Services() {
   const [ref, isVisible] = useScrollAnimation()
   const [expandedId, setExpandedId] = useState(null)
+  const [activeCategory, setActiveCategory] = useState('all')
 
   const toggleService = (title) => {
     setExpandedId(expandedId === title ? null : title)
   }
 
+  const filteredServices = activeCategory === 'all'
+    ? servicesList
+    : servicesList.filter(s => s.category === activeCategory)
+
   return (
-    <section className="services section" id="services">
+    <section ref={ref} className="services section" id="services">
       <div className="container">
-        <div ref={ref} className={`animate-on-scroll ${isVisible ? 'visible' : ''}`}>
+        <div className={`animate-on-scroll ${isVisible ? 'visible' : ''}`}>
           <div className="services-badge">
             <span className="services-badge-dot" />
             What We Offer
@@ -151,34 +177,45 @@ export default function Services() {
           </p>
         </div>
 
+        {/* Filter Category Pills */}
+        <div className="services-category-tabs">
+          {serviceCategories.map((cat) => (
+            <button
+              key={cat.id}
+              className={`svc-tab-btn ${activeCategory === cat.id ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat.id)}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
         <div className={`services-grid ${isVisible ? 'cards-visible' : ''}`}>
-          {servicesList.map((service, idx) => {
+          {filteredServices.map((service, idx) => {
             const Icon = service.icon
+            const isExpanded = expandedId === service.title
             return (
               <div
                 key={service.title}
-                className={`service-card animate-on-scroll ${expandedId === service.title ? 'expanded' : ''}`}
-                style={{ '--service-color': service.color, '--delay': `${0.05 + idx * 0.05}s` }}
+                className={`service-card animate-on-scroll ${isVisible ? 'visible' : ''} ${isExpanded ? 'expanded' : ''}`}
+                style={{ '--service-color': service.color, '--delay': `${0.04 + idx * 0.04}s` }}
               >
                 <div className="service-card-glow" />
                 <div className="service-icon-box">
                   <Icon size={26} className="service-icon" />
                 </div>
                 <div className="service-card-content">
-                  <div className="service-card-header">
+                  <div className="service-card-header" onClick={() => toggleService(service.title)}>
                     <div>
                       <h3 className="service-card-title">{service.title}</h3>
                       <p className="service-card-desc">{service.desc}</p>
                     </div>
-                    <button className="service-card-arrow" onClick={() => toggleService(service.title)} aria-label="Toggle service details">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 12h14" />
-                        <path d="m12 5 7 7-7 7" />
-                      </svg>
+                    <button className="service-card-arrow" aria-label="Toggle service details">
+                      <ChevronDown size={20} className="arrow-icon" />
                     </button>
                   </div>
 
-                  {expandedId === service.title && (
+                  {isExpanded && (
                     <div className="service-card-expanded">
                       <div className="expanded-section">
                         <h4>Technologies</h4>

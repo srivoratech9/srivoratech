@@ -1,231 +1,109 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { ChevronLeft, ChevronRight, Sparkles, CheckCircle2, ShieldCheck, Zap, ArrowRight, Layers, Cpu, ShoppingBag, Activity, GraduationCap, Briefcase } from 'lucide-react'
 import './ProjectCards.css'
 
 const projects = [
   {
     id: 1,
-    name: 'Narasimha Reddy',
-    role: 'Founder & CEO of TFS',
-    message: 'SriVoraTech built our fintech mobile app for loans and insurance, with live application tracking and a rewards + referral system.',
-    reply: 'Loved building it with you.',
-    color: '#6366f1',
-    initial: 'N',
-    type: 'fintech'
+    name: 'SriERP Pro',
+    category: 'Enterprise Software (ERP)',
+    desc: 'A comprehensive Enterprise Resource Planning (ERP) platform managing HR, payroll, inventory, finance, attendance, customer management, and project workflows from one centralized dashboard.',
+    techs: ['React.js', 'NestJS', 'PostgreSQL', 'Docker', 'AWS'],
+    color: '#0067f4',
+    initial: 'E',
+    icon: Layers,
+    metrics: ['Automated Payroll & HR', 'Real-Time Inventory', 'Sub-Second Analytics']
   },
   {
     id: 2,
-    name: 'Sujith Reddy Gopu',
-    role: 'Founder of Fluent Pro',
-    message: 'SriVoraTech built Fluent Pro: an AI-powered English learning platform with instant, personalized feedback for students.',
-    reply: 'Excited to support your impact.',
-    color: '#f59e0b',
-    initial: 'S',
-    type: 'edtech'
+    name: 'SmartAI Assistant',
+    category: 'Artificial Intelligence',
+    desc: 'An AI-powered virtual assistant that answers customer queries, automates business workflows, summarizes documents, and integrates with websites, CRM, and ERP platforms to improve productivity.',
+    techs: ['Python', 'FastAPI', 'OpenAI / Gemini', 'LangChain', 'Vector Database'],
+    color: '#8b5cf6',
+    initial: 'A',
+    icon: Cpu,
+    metrics: ['99.4% Query Accuracy', 'Automated Workflows', 'Vector Search Engine']
   },
   {
     id: 3,
-    name: 'Abhishek',
-    role: 'Senior Business Analyst at Conquer',
-    message: 'SriVoraTech built our B2B e-commerce platform with contract-based catalogues, client-specific SKUs, and dynamic discount programs.',
-    reply: 'Proud to ship this together.',
+    name: 'ShopSphere Commerce',
+    category: 'E-Commerce Platform',
+    desc: 'A modern e-commerce platform featuring secure payments, inventory management, order tracking, analytics, customer accounts, discount management, and an intuitive admin dashboard.',
+    techs: ['Next.js', 'Node.js', 'MongoDB', 'Stripe / Razorpay', 'Cloudinary'],
     color: '#10b981',
-    initial: 'A',
-    type: 'ecommerce'
+    initial: 'S',
+    icon: ShoppingBag,
+    metrics: ['Stripe / Razorpay Sync', 'Bulk Order Tracking', 'Instant Checkout']
   },
   {
     id: 4,
-    name: 'Aryan',
-    role: 'Founder/CEO, PayAtom',
-    message: 'SriVoraTech revamped payatom.com into a sleek, interactive fintech experience with Spline 3D elements and smooth scroll animations.',
-    reply: 'Seamless payments, global reach.',
+    name: 'HealthConnect',
+    category: 'Healthcare Platform',
+    desc: 'A digital healthcare solution enabling online appointment booking, electronic medical records, teleconsultation, prescription management, and patient-doctor communication in a secure environment.',
+    techs: ['React.js', 'Node.js', 'MySQL', 'WebRTC', 'Firebase'],
     color: '#ec4899',
-    initial: 'A',
-    type: 'payment'
+    initial: 'H',
+    icon: Activity,
+    metrics: ['HD Teleconsultation', 'Encrypted E-Records', 'Real-Time Rx Sync']
+  },
+  {
+    id: 5,
+    name: 'EduVerse LMS',
+    category: 'Education Platform',
+    desc: 'A cloud-based Learning Management System (LMS) for schools, colleges, and training institutes, providing online classes, assessments, course management, attendance tracking, and progress analytics.',
+    techs: ['React.js', 'Django', 'PostgreSQL', 'AWS S3', 'JWT Auth'],
+    color: '#f59e0b',
+    initial: 'E',
+    icon: GraduationCap,
+    metrics: ['Live Assessments', 'Progress Analytics', 'Cloud AWS S3 Storage']
+  },
+  {
+    id: 6,
+    name: 'ProjectFlow CRM',
+    category: 'Business CRM & Project Management',
+    desc: 'A customer relationship and project management platform with lead tracking, client communication, task assignment, milestone tracking, invoicing, team collaboration, and real-time reporting.',
+    techs: ['React.js', 'Express.js', 'MongoDB', 'Socket.IO', 'Docker'],
+    color: '#06b6d4',
+    initial: 'P',
+    icon: Briefcase,
+    metrics: ['Socket.IO Real-Time Chat', 'Automated Invoicing', 'Lead Pipeline Graph']
   },
 ]
 
-function ProjectMockup({ type, color }) {
-  if (type === 'fintech') {
-    return (
-      <div className="mockup-container fintech-mockup">
-        <div className="phone-frame">
-          <div className="phone-screen">
-            <div className="phone-notch" />
-            <div className="phone-header">
-              <span className="phone-time">9:41</span>
-              <div className="phone-status-icons">
-                <span className="phone-battery" />
-              </div>
-            </div>
-            <div className="phone-app-content">
-              <div className="app-bar">
-                <span className="app-title">TFS Finance</span>
-                <span className="app-bell">🔔</span>
-              </div>
-              <div className="app-card" style={{ background: `linear-gradient(135deg, ${color}, #4f46e5)` }}>
-                <div className="card-top">
-                  <span>Balance</span>
-                  <span className="card-chip" />
-                </div>
-                <div className="card-amount">$12,450.00</div>
-                <div className="card-bottom">
-                  <span>**** 4890</span>
-                  <span>VISA</span>
-                </div>
-              </div>
-              <div className="app-section">
-                <div className="section-header">
-                  <span>Active Loan</span>
-                  <span className="section-link">View</span>
-                </div>
-                <div className="progress-container">
-                  <div className="progress-labels">
-                    <span>Paid: $4,500</span>
-                    <span>Remaining: $5,500</span>
-                  </div>
-                  <div className="progress-bar-bg">
-                    <div className="progress-bar-fill" style={{ width: '45%', background: color }} />
-                  </div>
-                </div>
-              </div>
-              <div className="app-rewards">
-                <div className="rewards-badge" style={{ background: `${color}22`, color }}>
-                  🎉 500 Referral Points Earned
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+const founderQuote = {
+  name: 'Badisa Srikanth',
+  role: 'Founder & CEO – SriVoraTech',
+  text: '"Building innovative software and AI-powered solutions that empower businesses to grow, automate, and succeed in the digital era."',
+  avatar: 'B'
+}
 
-  if (type === 'edtech') {
-    return (
-      <div className="mockup-container edtech-mockup">
-        <div className="browser-frame">
-          <div className="browser-header">
-            <div className="browser-dots">
-              <span /><span /><span />
-            </div>
-            <div className="browser-url">fluentpro.ai/dashboard</div>
-          </div>
-          <div className="browser-screen">
-            <div className="dashboard-sidebar">
-              <div className="sidebar-logo">FP</div>
-              <div className="sidebar-nav">
-                <div className="nav-item active" style={{ color }} />
-                <div className="nav-item" />
-                <div className="nav-item" />
-              </div>
-            </div>
-            <div className="dashboard-content">
-              <div className="content-header">
-                <h2>English Daily</h2>
-                <div className="streak-badge">🔥 14 Days</div>
-              </div>
-              <div className="pronunciation-card">
-                <div className="pronunciation-title">Pronunciation Score</div>
-                <div className="score-radial">
-                  <svg viewBox="0 0 36 36" className="circular-chart">
-                    <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="circle" stroke={color} strokeDasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <text x="18" y="20.35" className="percentage" fill={color}>85%</text>
-                  </svg>
-                </div>
-                <div className="voice-waves">
-                  <span style={{ animationDelay: '0.1s', background: color }} />
-                  <span style={{ animationDelay: '0.3s', background: color }} />
-                  <span style={{ animationDelay: '0.2s', background: color }} />
-                  <span style={{ animationDelay: '0.4s', background: color }} />
-                  <span style={{ animationDelay: '0.5s', background: color }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (type === 'ecommerce') {
-    return (
-      <div className="mockup-container ecommerce-mockup">
-        <div className="browser-frame">
-          <div className="browser-header">
-            <div className="browser-dots">
-              <span /><span /><span />
-            </div>
-            <div className="browser-url">conquer-b2b.com/portal</div>
-          </div>
-          <div className="browser-screen">
-            <div className="portal-header">
-              <span>Client: Intel Corp</span>
-              <span className="price-contract" style={{ color }}>Contract: Gold Tier</span>
-            </div>
-            <div className="portal-body">
-              <div className="catalog-search">
-                <div className="search-bar-mock" />
-              </div>
-              <div className="catalog-grid">
-                <div className="catalog-item">
-                  <div className="item-img-mock" style={{ background: `${color}15` }} />
-                  <div className="item-details">
-                    <span className="item-title">Xeon Processor</span>
-                    <span className="item-sku">SKU-990-XP</span>
-                    <div className="item-pricing">
-                      <span className="item-old-price">$450</span>
-                      <span className="item-new-price" style={{ color }}>$380</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="catalog-item">
-                  <div className="item-img-mock" style={{ background: `${color}15` }} />
-                  <div className="item-details">
-                    <span className="item-title">Core i9 CPU</span>
-                    <span className="item-sku">SKU-775-CI</span>
-                    <div className="item-pricing">
-                      <span className="item-old-price">$310</span>
-                      <span className="item-new-price" style={{ color }}>$275</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+function ProjectMockup({ project }) {
+  const Icon = project.icon
 
   return (
-    <div className="mockup-container payment-mockup">
-      <div className="glass-card">
-        <div className="glass-card-bg" style={{ background: `radial-gradient(circle at 80% 20%, ${color}aa, transparent)` }} />
-        <div className="glass-card-content">
-          <div className="glass-card-top">
-            <span className="logo-atom">PayAtom</span>
-            <span className="card-contactless">📶</span>
-          </div>
-          <div className="glass-card-middle">
-            <span className="card-number">**** **** **** 8820</span>
-            <div className="card-holder-row">
-              <div className="card-holder">
-                <span className="card-label">CARD HOLDER</span>
-                <span className="card-val">ARYAN SINHA</span>
-              </div>
-              <div className="card-expiry">
-                <span className="card-label">EXPIRES</span>
-                <span className="card-val">09/30</span>
-              </div>
+    <div className="mockup-frame-box">
+      <div className="browser-mock-wrapper">
+        <div className="b-header">
+          <div className="b-dots"><span /><span /><span /></div>
+          <span className="b-url">srivoratech.com/products/{project.name.toLowerCase().replace(/\s+/g, '-')}</span>
+        </div>
+        <div className="b-body">
+          <div className="b-score-card" style={{ background: `${project.color}08`, borderColor: `${project.color}30` }}>
+            <div className="b-project-icon-box" style={{ background: project.color, color: '#ffffff' }}>
+              <Icon size={22} />
             </div>
+            <span className="b-score-title" style={{ color: project.color }}>{project.category}</span>
+            <strong className="b-score-val" style={{ color: '#0f172a' }}>{project.name}</strong>
           </div>
-          <div className="glass-card-bottom">
-            <div className="live-badge">
-              <span className="live-dot" />
-              LIVE TRANSACTIONS
-            </div>
+
+          <div className="b-tech-pills">
+            {project.techs.map((tech) => (
+              <span key={tech} className="b-tech-chip">
+                {tech}
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -237,71 +115,104 @@ export default function ProjectCards() {
   const [ref, isVisible] = useScrollAnimation()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
-  const [direction, setDirection] = useState(1)
 
   const goNext = useCallback(() => {
-    setDirection(1)
     setCurrentIndex((prev) => (prev + 1) % projects.length)
   }, [])
 
   const goPrev = useCallback(() => {
-    setDirection(-1)
     setCurrentIndex((prev) => (prev - 1 + projects.length) % projects.length)
   }, [])
 
   useEffect(() => {
     if (isHovering) return
     const timer = setInterval(() => {
-      setDirection(1)
       setCurrentIndex((prev) => (prev + 1) % projects.length)
-    }, 2400)
+    }, 5000)
     return () => clearInterval(timer)
   }, [isHovering])
 
   const project = projects[currentIndex]
 
   return (
-    <section ref={ref} className={`project-cards-section animate-on-scroll ${isVisible ? 'visible' : ''}`}>
-      <div
-        className="project-cards-viewport"
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
-        <div className="project-cards-stage">
-          <div
-            key={currentIndex}
-            className={`project-card-active ${direction > 0 ? 'enter-left' : 'enter-right'}`}
-          >
-            <div className="project-card">
-              <div className="project-card-banner" style={{ background: `linear-gradient(135deg, ${project.color}05, ${project.color}15)` }}>
-                <ProjectMockup type={project.type} color={project.color} />
+    <section ref={ref} className={`project-cards-section section animate-on-scroll ${isVisible ? 'visible' : ''}`} id="our-products">
+      <div className="container">
+        <div className="project-cards-header">
+          <div className="section-badge">
+            <Sparkles size={14} />
+            Featured Enterprise Products & Platforms
+          </div>
+          <h2 className="section-title">
+            Featured <span className="gradient-text">Solutions We Build</span>
+          </h2>
+          <p className="section-subtitle">
+            From Enterprise ERPs to AI Assistants and Healthcare Platforms, explore our signature products built with security and scalability.
+          </p>
+        </div>
+
+        <div
+          className="project-cards-stage-wrap"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          <div className="project-card-container glass-card">
+            {/* Left Product Display */}
+            <div className="project-card-left" style={{ background: `linear-gradient(135deg, ${project.color}10, ${project.color}25)` }}>
+              <div className="project-tag-pill" style={{ background: project.color }}>
+                {project.category}
               </div>
-              <div className="project-card-chat">
-                <div className="chat-bubble chat-bubble-client">
-                  <p className="chat-bubble-text">{project.message}</p>
-                  <span className="chat-bubble-author">{project.name.split(' ')[0]}</span>
+
+              <ProjectMockup project={project} />
+
+              <div className="project-metrics-row">
+                {project.metrics.map((m) => (
+                  <span key={m} className="metric-badge">
+                    <CheckCircle2 size={13} style={{ color: project.color }} /> {m}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Product Info & Founder Quote */}
+            <div className="project-card-right">
+              <div className="chat-thread">
+                <div className="chat-bubble chat-client">
+                  <h3 className="project-feature-name" style={{ color: project.color }}>{project.name}</h3>
+                  <p className="chat-text">{project.desc}</p>
                 </div>
-                <div className="chat-bubble chat-bubble-reply">
-                  <p className="chat-bubble-text">{project.reply}</p>
-                  <span className="chat-bubble-author">SriVoraTech</span>
+
+                <div className="chat-bubble chat-reply">
+                  <p className="chat-text">{founderQuote.text}</p>
+                  <span className="chat-author">{founderQuote.name} • {founderQuote.role}</span>
                 </div>
               </div>
-              <div className="project-card-person">
-                <div className="project-card-avatar" style={{ background: project.color, color: '#fff' }}>
-                  {project.initial}
+
+              <div className="person-row">
+                <div className="person-avatar" style={{ background: '#0067f4' }}>
+                  {founderQuote.avatar}
                 </div>
-                <div className="project-card-info">
-                  <p className="project-card-name">{project.name}</p>
-                  <span className="project-card-role">{project.role}</span>
+                <div className="person-meta">
+                  <strong className="person-name">{founderQuote.name}</strong>
+                  <span className="person-role">{founderQuote.role}</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="project-cards-nav">
-          <button className="scroll-btn" onClick={goPrev} aria-label="Scroll left">←</button>
-          <button className="scroll-btn" onClick={goNext} aria-label="Scroll right">→</button>
+          {/* Navigation Controls */}
+          <div className="project-controls-bar">
+            <button className="nav-arrow-btn" onClick={goPrev} aria-label="Previous product">
+              <ChevronLeft size={20} />
+            </button>
+
+            <div className="slide-counter">
+              <strong>0{currentIndex + 1}</strong> / <span>0{projects.length}</span>
+            </div>
+
+            <button className="nav-arrow-btn" onClick={goNext} aria-label="Next product">
+              <ChevronRight size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </section>
