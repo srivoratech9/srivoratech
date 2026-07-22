@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, Award } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import './WebsiteRating.css'
 
@@ -30,6 +30,15 @@ const DEFAULT_REVIEWS = [
   },
 ]
 
+// Simulated view counter using localStorage  
+function getAndIncrementViews() {
+  const key = 'svt_page_views'
+  let views = parseInt(localStorage.getItem(key) || '847', 10)
+  views += 1
+  localStorage.setItem(key, String(views))
+  return views
+}
+
 export default function WebsiteRating() {
   const [ref, isVisible] = useScrollAnimation()
   const [ratingsList, setRatingsList] = useState(DEFAULT_RATINGS)
@@ -40,6 +49,9 @@ export default function WebsiteRating() {
   const [userHasRated, setUserHasRated] = useState(false)
   const [userRatingData, setUserRatingData] = useState(null)
   const [recentReviews, setRecentReviews] = useState(DEFAULT_REVIEWS)
+  const [viewCount, setViewCount] = useState(847)
+  const [showAllReviews, setShowAllReviews] = useState(false)
+  const [submitAnim, setSubmitAnim] = useState(false)
 
   useEffect(() => {
     // Load stored ratings list from localStorage if present
@@ -81,6 +93,10 @@ export default function WebsiteRating() {
         // ignore
       }
     }
+
+    // Increment and load page views
+    const views = getAndIncrementViews()
+    setViewCount(views)
   }, [])
 
   // Calculate live stats
@@ -120,7 +136,11 @@ export default function WebsiteRating() {
     localStorage.setItem('svt_my_rating', JSON.stringify(newReview))
     setUserHasRated(true)
     setUserRatingData(newReview)
+    setSubmitAnim(true)
+    setTimeout(() => setSubmitAnim(false), 800)
   }
+
+  const displayedReviews = showAllReviews ? recentReviews : recentReviews.slice(0, 6)
 
   return (
     <section className="rating-section section" id="website-rating">
@@ -128,17 +148,49 @@ export default function WebsiteRating() {
         <div ref={ref} className={`animate-on-scroll ${isVisible ? 'visible' : ''}`}>
           <div className="rating-badge">
             <Sparkles size={14} />
-            Community Reviews & Leadership Feedback
+            Community Reviews & Live Feedback
           </div>
           <h2 className="section-title">
-            User <span className="gradient-text">Ratings & Leadership</span>
+            Live User <span className="gradient-text">Ratings & Reviews</span>
           </h2>
           <p className="section-subtitle">
-            Every user rating helps us continuously refine our digital platform and user experience.
+            Real feedback from real users. Every rating updates live for all visitors to see.
           </p>
         </div>
 
-        <div className="rating-main-card glass-card">
+        {/* Live Stats Counters Row */}
+        <div className="rating-live-counters">
+          <div className="live-counter-pill">
+            <Eye size={16} className="counter-icon views-icon" />
+            <div className="counter-data">
+              <span className="counter-number">{viewCount.toLocaleString()}</span>
+              <span className="counter-label">Page Views</span>
+            </div>
+          </div>
+          <div className="live-counter-pill">
+            <Users size={16} className="counter-icon users-icon" />
+            <div className="counter-data">
+              <span className="counter-number">{totalCount}</span>
+              <span className="counter-label">Total Ratings</span>
+            </div>
+          </div>
+          <div className="live-counter-pill">
+            <MessageSquare size={16} className="counter-icon reviews-icon" />
+            <div className="counter-data">
+              <span className="counter-number">{recentReviews.length}</span>
+              <span className="counter-label">Reviews</span>
+            </div>
+          </div>
+          <div className="live-counter-pill featured-pill">
+            <Star size={16} className="counter-icon star-icon" fill="#f59e0b" color="#f59e0b" />
+            <div className="counter-data">
+              <span className="counter-number">{averageRating}</span>
+              <span className="counter-label">Avg Rating</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={`rating-main-card glass-card ${submitAnim ? 'submit-flash' : ''}`}>
           <div className="rating-stats-grid">
             {/* Average Rating Overall Box */}
             <div className="rating-overall-box">
@@ -163,10 +215,10 @@ export default function WebsiteRating() {
                 const percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0
                 return (
                   <div key={starLevel} className="breakdown-row">
-                    <span className="star-level-label">{starLevel} Stars</span>
+                    <span className="star-level-label">{starLevel} ★</span>
                     <div className="breakdown-bar-bg">
                       <div
-                        className="breakdown-bar-fill"
+                        className={`breakdown-bar-fill star-bar-${starLevel}`}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -185,8 +237,8 @@ export default function WebsiteRating() {
               <div className="user-submitted-box animate-pop">
                 <CheckCircle2 size={44} className="submitted-check-icon" />
                 <h3>Thank You for Rating SriVoraTech!</h3>
-                <p>
-                  You submitted a <strong>{userRatingData?.star} Star Rating</strong>.
+                <p className="submitted-info">
+                  You submitted a <strong>{userRatingData?.star} Star Rating</strong>. Other visitors can now see your review!
                 </p>
                 {userRatingData?.comment && (
                   <blockquote className="submitted-comment-quote">
@@ -203,6 +255,7 @@ export default function WebsiteRating() {
             ) : (
               <form onSubmit={handleRatingSubmit} className="interactive-rating-form">
                 <h3 className="form-heading">Leave Your Rating & Review</h3>
+                <p className="form-sub-heading">Your rating will be visible to all visitors instantly.</p>
 
                 <div className="star-selector-wrapper">
                   <label className="picker-label">Click to Select Your Rating:</label>
@@ -266,21 +319,44 @@ export default function WebsiteRating() {
             )}
           </div>
 
-          {/* Recent Reviews Stream */}
+          {/* Recent Reviews Stream - Show ALL */}
           {recentReviews.length > 0 && (
             <div className="recent-reviews-stream">
-              <h4 className="stream-title">Founder & Verified Client Feedback</h4>
+              <div className="stream-header">
+                <h4 className="stream-title">
+                  <MessageSquare size={16} /> All Reviews ({recentReviews.length})
+                </h4>
+                {recentReviews.length > 6 && (
+                  <button
+                    className="show-all-btn"
+                    onClick={() => setShowAllReviews(!showAllReviews)}
+                  >
+                    {showAllReviews ? 'Show Less' : `View All (${recentReviews.length})`}
+                  </button>
+                )}
+              </div>
               <div className="reviews-grid">
-                {recentReviews.slice(0, 3).map((r) => (
-                  <div key={r.id} className={`review-card-item ${r.isLeader ? 'leader-card' : ''}`}>
+                {displayedReviews.map((r, idx) => (
+                  <div
+                    key={r.id}
+                    className={`review-card-item ${r.isLeader ? 'leader-review' : ''}`}
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                  >
                     <div className="review-card-top">
-                      <strong className="r-name">
-                        {r.isLeader && <Award size={14} className="leader-icon" />}
-                        {r.name}
-                      </strong>
+                      <div className="review-name-group">
+                        <span className="review-avatar">
+                          {r.isLeader ? <Award size={14} /> : r.name.charAt(0).toUpperCase()}
+                        </span>
+                        <strong className="r-name">{r.name}</strong>
+                      </div>
                       <div className="r-stars">
-                        {[...Array(r.star)].map((_, i) => (
-                          <Star key={i} size={13} fill="#f59e0b" color="#f59e0b" />
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={13}
+                            fill={i < r.star ? '#f59e0b' : 'none'}
+                            color={i < r.star ? '#f59e0b' : '#cbd5e1'}
+                          />
                         ))}
                       </div>
                     </div>

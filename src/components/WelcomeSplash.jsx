@@ -50,6 +50,7 @@ export default function WelcomeSplash({ onComplete }) {
       {/* 3D Dynamic Ambient Light Beam Orbs */}
       <div className="splash-light-beam beam-1" />
       <div className="splash-light-beam beam-2" />
+      <div className="splash-light-beam beam-3" />
       <div className="splash-grid-dots" />
 
       <div className="splash-content-container">
