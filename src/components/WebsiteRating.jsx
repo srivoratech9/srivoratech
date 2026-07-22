@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Wifi, WifiOff } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { subscribeToRatings, submitRating, incrementViewCount, FIREBASE_ENABLED } from '../services/ratingsService'
 import './WebsiteRating.css'
-
-const DEFAULT_RATINGS = [5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5]
 
 const DEFAULT_REVIEWS = [
   {
@@ -30,18 +29,9 @@ const DEFAULT_REVIEWS = [
   },
 ]
 
-// Simulated view counter using localStorage  
-function getAndIncrementViews() {
-  const key = 'svt_page_views'
-  let views = parseInt(localStorage.getItem(key) || '847', 10)
-  views += 1
-  localStorage.setItem(key, String(views))
-  return views
-}
-
 export default function WebsiteRating() {
   const [ref, isVisible] = useScrollAnimation()
-  const [ratingsList, setRatingsList] = useState(DEFAULT_RATINGS)
+  const [ratingsList, setRatingsList] = useState([5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5])
   const [selectedStar, setSelectedStar] = useState(5)
   const [hoverStar, setHoverStar] = useState(0)
   const [userName, setUserName] = useState('')
@@ -52,33 +42,13 @@ export default function WebsiteRating() {
   const [viewCount, setViewCount] = useState(847)
   const [showAllReviews, setShowAllReviews] = useState(false)
   const [submitAnim, setSubmitAnim] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    // Load stored ratings list from localStorage if present
-    const savedRatings = localStorage.getItem('svt_ratings_array')
-    if (savedRatings) {
-      try {
-        const parsed = JSON.parse(savedRatings)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setRatingsList(parsed)
-        }
-      } catch (e) {
-        // fallback
-      }
-    }
-
-    // Load recent user reviews
-    const savedReviews = localStorage.getItem('svt_user_reviews_list')
-    if (savedReviews) {
-      try {
-        const parsed = JSON.parse(savedReviews)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setRecentReviews(parsed)
-        }
-      } catch (e) {
-        // fallback
-      }
-    }
+    // Increment page view
+    incrementViewCount().then((views) => {
+      setViewCount(views)
+    })
 
     // Check if current user has already submitted a rating
     const myRating = localStorage.getItem('svt_my_rating')
@@ -94,9 +64,21 @@ export default function WebsiteRating() {
       }
     }
 
-    // Increment and load page views
-    const views = getAndIncrementViews()
-    setViewCount(views)
+    // Subscribe to real-time ratings updates
+    const unsubscribe = subscribeToRatings(({ ratings, reviews, viewCount: vc }) => {
+      if (ratings && ratings.length > 0) {
+        setRatingsList(ratings)
+      }
+      if (reviews && reviews.length > 0) {
+        // Merge Firebase reviews with default founder reviews
+        const firebaseIds = new Set(reviews.map(r => r.id))
+        const defaultReviews = DEFAULT_REVIEWS.filter(r => !firebaseIds.has(r.id))
+        setRecentReviews([...reviews, ...defaultReviews])
+      }
+      if (vc) setViewCount(vc)
+    })
+
+    return () => unsubscribe()
   }, [])
 
   // Calculate live stats
@@ -113,31 +95,29 @@ export default function WebsiteRating() {
     1: ratingsList.filter((r) => r === 1).length,
   }
 
-  const handleRatingSubmit = (e) => {
+  const handleRatingSubmit = async (e) => {
     e.preventDefault()
-    if (selectedStar < 1 || selectedStar > 5) return
+    if (selectedStar < 1 || selectedStar > 5 || isSubmitting) return
 
-    const newRatings = [...ratingsList, selectedStar]
-    setRatingsList(newRatings)
-    localStorage.setItem('svt_ratings_array', JSON.stringify(newRatings))
+    setIsSubmitting(true)
 
-    const newReview = {
-      id: Date.now(),
-      name: userName.trim() || 'Verified Visitor',
-      star: selectedStar,
-      comment: userReview.trim() || 'Great digital product engineering and smooth performance!',
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    try {
+      const review = await submitRating({
+        name: userName,
+        star: selectedStar,
+        comment: userReview,
+      })
+
+      localStorage.setItem('svt_my_rating', JSON.stringify(review))
+      setUserHasRated(true)
+      setUserRatingData(review)
+      setSubmitAnim(true)
+      setTimeout(() => setSubmitAnim(false), 800)
+    } catch (error) {
+      console.error('Rating submit failed:', error)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    const updatedReviews = [newReview, ...recentReviews]
-    setRecentReviews(updatedReviews)
-    localStorage.setItem('svt_user_reviews_list', JSON.stringify(updatedReviews))
-
-    localStorage.setItem('svt_my_rating', JSON.stringify(newReview))
-    setUserHasRated(true)
-    setUserRatingData(newReview)
-    setSubmitAnim(true)
-    setTimeout(() => setSubmitAnim(false), 800)
   }
 
   const displayedReviews = showAllReviews ? recentReviews : recentReviews.slice(0, 6)
@@ -156,6 +136,19 @@ export default function WebsiteRating() {
           <p className="section-subtitle">
             Real feedback from real users. Every rating updates live for all visitors to see.
           </p>
+        </div>
+
+        {/* Real-time Connection Status */}
+        <div className="rating-connection-status">
+          {FIREBASE_ENABLED ? (
+            <span className="connection-pill connected">
+              <Wifi size={13} /> Real-Time Sync Active
+            </span>
+          ) : (
+            <span className="connection-pill local">
+              <WifiOff size={13} /> Local Storage Mode
+            </span>
+          )}
         </div>
 
         {/* Live Stats Counters Row */}
@@ -238,7 +231,10 @@ export default function WebsiteRating() {
                 <CheckCircle2 size={44} className="submitted-check-icon" />
                 <h3>Thank You for Rating SriVoraTech!</h3>
                 <p className="submitted-info">
-                  You submitted a <strong>{userRatingData?.star} Star Rating</strong>. Other visitors can now see your review!
+                  You submitted a <strong>{userRatingData?.star} Star Rating</strong>. 
+                  {FIREBASE_ENABLED 
+                    ? ' Other visitors can now see your review in real-time!' 
+                    : ' Your rating is saved locally.'}
                 </p>
                 {userRatingData?.comment && (
                   <blockquote className="submitted-comment-quote">
@@ -255,7 +251,11 @@ export default function WebsiteRating() {
             ) : (
               <form onSubmit={handleRatingSubmit} className="interactive-rating-form">
                 <h3 className="form-heading">Leave Your Rating & Review</h3>
-                <p className="form-sub-heading">Your rating will be visible to all visitors instantly.</p>
+                <p className="form-sub-heading">
+                  {FIREBASE_ENABLED 
+                    ? 'Your rating will be visible to all visitors in real-time.' 
+                    : 'Your rating will be saved and displayed locally.'}
+                </p>
 
                 <div className="star-selector-wrapper">
                   <label className="picker-label">Click to Select Your Rating:</label>
@@ -311,9 +311,13 @@ export default function WebsiteRating() {
                   </div>
                 </div>
 
-                <button type="submit" className="btn-accent submit-review-btn">
+                <button 
+                  type="submit" 
+                  className="btn-accent submit-review-btn"
+                  disabled={isSubmitting}
+                >
                   <Send size={16} />
-                  Submit Rating ({selectedStar} Stars)
+                  {isSubmitting ? 'Submitting...' : `Submit Rating (${selectedStar} Stars)`}
                 </button>
               </form>
             )}
