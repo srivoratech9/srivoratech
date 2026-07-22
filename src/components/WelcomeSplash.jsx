@@ -1,40 +1,49 @@
 import { useState, useEffect } from 'react'
-import { Sparkles, ArrowRight, ShieldCheck, Zap } from 'lucide-react'
+import { Sparkles, ArrowRight, Zap, ShieldCheck } from 'lucide-react'
 import './WelcomeSplash.css'
 
 export default function WelcomeSplash({ onComplete }) {
   const [progress, setProgress] = useState(0)
   const [isDismissing, setIsDismissing] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
+    // Check session storage if splash was already shown
+    const splashSeen = sessionStorage.getItem('svt_splash_seen')
+    if (splashSeen === 'true') {
+      setIsDismissed(true)
+      if (onComplete) onComplete()
+      return
+    }
+
     // Progress counter animation
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval)
+          setTimeout(() => {
+            triggerDismiss()
+          }, 200)
           return 100
         }
-        return prev + 4
+        return prev + 5
       })
-    }, 40)
+    }, 45)
 
-    // Auto dismiss splash screen after 2.4s
-    const timer = setTimeout(() => {
-      handleDismiss()
-    }, 2400)
-
-    return () => {
-      clearInterval(interval)
-      clearTimeout(timer)
-    }
+    return () => clearInterval(interval)
   }, [])
 
-  const handleDismiss = () => {
+  const triggerDismiss = () => {
+    if (isDismissing) return
     setIsDismissing(true)
+    sessionStorage.setItem('svt_splash_seen', 'true')
     setTimeout(() => {
+      setIsDismissed(true)
       if (onComplete) onComplete()
-    }, 600)
+    }, 550)
   }
+
+  if (isDismissed) return null
 
   return (
     <div className={`welcome-splash-overlay ${isDismissing ? 'splash-fade-out' : ''}`}>
@@ -72,7 +81,7 @@ export default function WelcomeSplash({ onComplete }) {
             <span className="splash-status-text">
               <Zap size={13} className="live-zap" /> Loading Sprints 60fps... {progress}%
             </span>
-            <button className="splash-skip-btn" onClick={handleDismiss}>
+            <button className="splash-skip-btn" onClick={triggerDismiss}>
               Explore Platform <ArrowRight size={13} />
             </button>
           </div>
