@@ -140,8 +140,8 @@ export default function Leadership() {
               className={`leader-card glass-card animate-on-scroll ${isVisible ? 'visible' : ''}`}
               style={{ '--leader-accent': leader.color, '--delay': `${0.06 + idx * 0.08}s` }}
             >
-              <div className="leader-card-header">
-                {/* Circular Profile Avatar */}
+              {/* WhatsApp / LinkedIn style Medium Circular Profile Avatar on Top */}
+              <div className="leader-top-profile">
                 <div className="leader-avatar-wrapper">
                   {leader.photo ? (
                     <img src={leader.photo} alt={leader.name} className="leader-avatar-img" />
@@ -153,19 +153,20 @@ export default function Leadership() {
                   <span className="avatar-glow-ring" style={{ background: `${leader.color}40` }} />
                 </div>
 
-                <div className="leader-header-info">
-                  <span className="leader-level-badge" style={{ color: leader.color, borderColor: `${leader.color}40`, background: `${leader.color}10` }}>
-                    <Award size={12} /> {leader.level}
-                  </span>
-                  <h3 className="leader-name">{leader.name}</h3>
-                  <p className="leader-role" style={{ color: leader.color }}>{leader.role}</p>
-                </div>
+                <span className="leader-level-badge" style={{ color: leader.color, borderColor: `${leader.color}40`, background: `${leader.color}10` }}>
+                  <Award size={13} /> {leader.level}
+                </span>
+
+                <h3 className="leader-name">{leader.name}</h3>
+                <p className="leader-role" style={{ color: leader.color }}>{leader.role}</p>
               </div>
 
+              {/* Bio & Description BELOW the photo */}
               <div className="leader-bio-body">
                 <p>{leader.bio}</p>
               </div>
 
+              {/* Core Expertise Chips */}
               <div className="leader-expertise-section">
                 <span className="expertise-title">CORE EXPERTISE</span>
                 <div className="expertise-chips-grid">

@@ -22,15 +22,17 @@
 .leader-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 28px;
+  gap: 32px;
   max-width: 1200px;
   margin: 0 auto 48px;
 }
 
 .leader-card {
-  padding: 32px;
+  padding: 36px 32px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 20px;
   background: #ffffff;
   border-radius: var(--radius-xl);
@@ -45,115 +47,117 @@
   box-shadow: var(--shadow-hover);
 }
 
-.leader-card-header {
+/* Medium-Sized Circular Profile Avatar (LinkedIn / WhatsApp Style) */
+.leader-top-profile {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
+  width: 100%;
 }
 
 .leader-avatar-wrapper {
   position: relative;
-  width: 68px;
-  height: 68px;
-  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 4px;
 }
 
 .leader-avatar-circle {
-  width: 68px;
-  height: 68px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   font-family: var(--font-heading);
-  font-size: 24px;
+  font-size: 34px;
   font-weight: 900;
   letter-spacing: -0.02em;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  border: 3px solid #ffffff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+  border: 4px solid #ffffff;
   position: relative;
   z-index: 1;
 }
 
 .leader-avatar-img {
-  width: 68px;
-  height: 68px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 4px solid #ffffff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 1;
 }
 
 .avatar-glow-ring {
   position: absolute;
-  inset: -4px;
+  inset: -5px;
   border-radius: 50%;
-  filter: blur(8px);
+  filter: blur(10px);
   z-index: 0;
   animation: pulseRing 3s infinite alternate;
-}
-
-.leader-header-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .leader-level-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 11.5px;
   font-weight: 800;
   letter-spacing: 0.04em;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   border: 1px solid;
-  width: fit-content;
 }
 
 .leader-name {
   font-family: var(--font-heading);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--color-gray-900);
-  line-height: 1.25;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
 .leader-role {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
+/* Bio Description BELOW the Picture */
 .leader-bio-body p {
   font-size: 14px;
   color: var(--color-gray-600);
   line-height: 1.65;
+  text-align: center;
 }
 
 .leader-expertise-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-top: 16px;
+  align-items: center;
+  gap: 12px;
+  padding-top: 20px;
   border-top: 1px solid var(--color-gray-100);
+  width: 100%;
   margin-top: auto;
 }
 
 .expertise-title {
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--color-gray-400);
 }
 
 .expertise-chips-grid {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
 }
 
@@ -291,9 +295,8 @@
 }
 
 @media (max-width: 768px) {
-  .leader-card-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .leader-card {
+    padding: 28px 20px;
   }
   .leadership-quote-card {
     padding: 24px;
