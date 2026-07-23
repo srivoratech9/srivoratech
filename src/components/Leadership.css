@@ -140,6 +140,7 @@
   overflow: hidden;
   transition: all 400ms var(--ease-out-smooth);
   outline: none;
+  cursor: pointer;
 }
 
 .card-top-accent-line {
@@ -153,13 +154,15 @@
 }
 
 .leader-card:hover,
-.leader-card:focus-within {
+.leader-card:focus-within,
+.leader-card.is-expanded {
   transform: translateY(-8px);
   border-color: var(--leader-accent, #0067f4);
   box-shadow: 0 24px 60px rgba(0, 103, 244, 0.16);
 }
 
-.leader-card:hover .card-top-accent-line {
+.leader-card:hover .card-top-accent-line,
+.leader-card.is-expanded .card-top-accent-line {
   height: 6px;
   opacity: 1;
 }
@@ -214,12 +217,14 @@
   transition: opacity 300ms ease, transform 300ms ease;
 }
 
-.leader-card:hover .circular-pic {
+.leader-card:hover .circular-pic,
+.leader-card.is-expanded .circular-pic {
   transform: scale(1.08);
   box-shadow: 0 16px 40px rgba(0, 103, 244, 0.3);
 }
 
-.leader-card:hover .avatar-glow-ring {
+.leader-card:hover .avatar-glow-ring,
+.leader-card.is-expanded .avatar-glow-ring {
   opacity: 1;
   transform: scale(1.15);
 }
@@ -275,27 +280,28 @@
   font-weight: 700;
   color: var(--color-accent);
   background: rgba(0, 103, 244, 0.06);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   margin-top: 2px;
-  transition: opacity 250ms ease, transform 250ms ease;
+  transition: all 250ms ease;
 }
 
-.leader-card:hover .leader-hover-hint {
-  opacity: 0;
-  transform: translateY(-4px);
-  pointer-events: none;
+.leader-card:hover .leader-hover-hint,
+.leader-card.is-expanded .leader-hover-hint {
+  background: var(--color-accent);
+  color: #ffffff;
 }
 
 .leader-social-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 4px;
 }
 
 .leader-action-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--color-gray-100);
   display: flex;
@@ -305,10 +311,18 @@
   transition: all 200ms ease;
 }
 
-.leader-action-btn:hover {
-  background: var(--leader-accent, #0067f4);
+.leader-action-btn.linkedin:hover {
+  background: #0a66c2;
   color: #ffffff;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.3);
+}
+
+.leader-action-btn.email:hover {
+  background: #ea4335;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
 }
 
 /* ── Animated Hover Description Drawer ── */
@@ -325,8 +339,9 @@
 }
 
 .leader-card:hover .leader-hover-drawer,
-.leader-card:focus-within .leader-hover-drawer {
-  max-height: 420px;
+.leader-card:focus-within .leader-hover-drawer,
+.leader-card.is-expanded .leader-hover-drawer {
+  max-height: 480px;
   opacity: 1;
   transform: translateY(0);
 }
@@ -336,8 +351,8 @@
   font-size: 13.5px;
   color: var(--color-gray-700);
   line-height: 1.6;
-  padding: 14px;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
@@ -374,6 +389,32 @@
   font-size: 11.5px;
   font-weight: 600;
   color: var(--color-gray-700);
+}
+
+/* Dots Bar */
+.leadership-dots-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.leadership-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-gray-300);
+  border: none;
+  cursor: pointer;
+  transition: all 250ms ease;
+}
+
+.leadership-dot.active,
+.leadership-dot:hover {
+  width: 24px;
+  border-radius: var(--radius-full);
+  background: var(--dot-color, var(--color-accent));
 }
 
 @media (max-width: 768px) {
