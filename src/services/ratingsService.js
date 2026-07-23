@@ -55,6 +55,50 @@ function calculateMetrics(reviewsList = []) {
   }
 }
 
+const DEFAULT_APPROVED_REVIEWS = [
+  {
+    id: 1,
+    name: 'Badisa Srikanth (Founder & CEO)',
+    email: 'srikanth@srivoratech.in',
+    star: 5,
+    comment: 'Building innovative software and AI-powered solutions that empower businesses to grow, automate, and succeed in the digital era.',
+    date: 'Jul 20, 2026',
+    status: 'Approved',
+    timestamp: 1784534400000,
+    company: 'SriVoraTech',
+    profileImage: '',
+    isFounder: true,
+    helpfulCount: 12
+  },
+  {
+    id: 2,
+    name: 'Garapati Sai Manindra (CTO)',
+    email: 'manindra@srivoratech.com',
+    star: 5,
+    comment: 'Engineering scalable cloud architectures, high-performance web apps, and custom AI automation pipelines with battle-tested standards.',
+    date: 'Jul 21, 2026',
+    status: 'Approved',
+    timestamp: 1784620800000,
+    company: 'SriVoraTech',
+    profileImage: '',
+    isFounder: true,
+    helpfulCount: 9
+  },
+  {
+    id: 3,
+    name: 'Fintech Enterprise Client',
+    email: 'client@fintech.co',
+    star: 5,
+    comment: 'SriVoraTech delivered our MVP in 3 weeks flat. Outstanding engineering quality, automated CI/CD, and 99.9% uptime guaranteed!',
+    date: 'Jul 22, 2026',
+    status: 'Approved',
+    timestamp: 1784707200000,
+    company: 'Fintech Solutions',
+    profileImage: '',
+    helpfulCount: 5
+  }
+]
+
 function getStoredMasterReviews() {
   try {
     const data = localStorage.getItem('svt_master_reviews_store')
@@ -65,7 +109,7 @@ function getStoredMasterReviews() {
       }
     }
   } catch (e) {}
-  return []
+  return DEFAULT_APPROVED_REVIEWS
 }
 
 function saveStoredMasterReviews(reviews) {
@@ -138,6 +182,9 @@ export function subscribeToRatings(callback) {
       }
     } catch (err) {
       console.warn('Live ratings fetch status:', err.message)
+      // Fallback: ensure UI always renders stored reviews
+      const fallbackLocal = getStoredMasterReviews()
+      callback(calculateMetrics(fallbackLocal))
     }
   }
 

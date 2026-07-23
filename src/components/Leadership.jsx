@@ -1,5 +1,6 @@
+import { useRef } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import { Sparkles, Award, Code2, Smartphone, Bot, Palette, Cloud, TestTube, BarChart3, HeartHandshake, Quote, CheckCircle2, Linkedin, Mail, ShieldCheck } from 'lucide-react'
+import { Sparkles, Award, CheckCircle2, Linkedin, Mail, ShieldCheck, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import './Leadership.css'
 import saiPhoto from '../assets/sai_manindra.jpg'
 import srikanthPhoto from '../assets/badisa_srikanth.jpg'
@@ -67,195 +68,145 @@ const leaders = [
   },
 ]
 
-const teamDisciplines = [
-  {
-    icon: Code2,
-    title: 'Full Stack Developers',
-    desc: 'Building secure, scalable, and high-performance web applications using modern technologies.',
-    color: '#0067f4',
-  },
-  {
-    icon: Smartphone,
-    title: 'Mobile App Developers',
-    desc: 'Creating intuitive Android and iOS applications with exceptional user experiences.',
-    color: '#8b5cf6',
-  },
-  {
-    icon: Bot,
-    title: 'AI & Machine Learning Engineers',
-    desc: 'Developing intelligent AI chatbots, automation systems, predictive models, and generative AI solutions.',
-    color: '#ec4899',
-  },
-  {
-    icon: Palette,
-    title: 'UI/UX Designers',
-    desc: 'Designing beautiful, user-centered interfaces that deliver engaging digital experiences.',
-    color: '#a855f7',
-  },
-  {
-    icon: Cloud,
-    title: 'Cloud & DevOps Engineers',
-    desc: 'Managing cloud infrastructure, CI/CD pipelines, deployments, monitoring, and application scalability.',
-    color: '#06b6d4',
-  },
-  {
-    icon: TestTube,
-    title: 'Quality Assurance Engineers',
-    desc: 'Ensuring every product meets the highest standards of performance, security, reliability, and usability.',
-    color: '#f59e0b',
-  },
-  {
-    icon: BarChart3,
-    title: 'Project Managers',
-    desc: 'Coordinating teams, managing timelines, and ensuring transparent communication throughout every project.',
-    color: '#10b981',
-  },
-  {
-    icon: HeartHandshake,
-    title: 'Business Development & Customer Success',
-    desc: 'Helping clients identify the right solutions while ensuring long-term partnerships and exceptional support.',
-    color: '#ef4444',
-  },
-]
-
 export default function Leadership() {
   const [ref, isVisible] = useScrollAnimation()
-  const [refTeam, isTeamVisible] = useScrollAnimation()
+  const scrollStreamRef = useRef(null)
+
+  const scrollLeadership = (direction) => {
+    if (scrollStreamRef.current) {
+      const scrollAmount = direction === 'left' ? -380 : 380
+      scrollStreamRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+    }
+  }
 
   return (
     <section ref={ref} className="leadership section" id="leadership">
       <div className="container">
         {/* Header */}
         <div className={`animate-on-scroll ${isVisible ? 'visible' : ''}`}>
-          <div className="leadership-badge">
-            <Sparkles size={14} />
-            Executive Leadership & Vision
+          <div className="leadership-badge-header-row">
+            <div className="leadership-badge">
+              <Sparkles size={14} />
+              Executive Leadership & Vision
+            </div>
+
+            {/* Horizontal Scroll Controls */}
+            <div className="leadership-scroll-nav">
+              <button
+                type="button"
+                onClick={() => scrollLeadership('left')}
+                className="leadership-nav-btn"
+                title="Scroll Left"
+                aria-label="Scroll leadership left"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollLeadership('right')}
+                className="leadership-nav-btn"
+                title="Scroll Right"
+                aria-label="Scroll leadership right"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
           </div>
+
           <h2 className="section-title">
             Meet Our <span className="gradient-text">Leadership</span>
           </h2>
           <p className="section-subtitle">
-            Driven by Innovation. United by Vision. At SriVoraTech, our leadership team combines technical expertise, innovation, and strategic thinking to deliver world-class software, AI, and digital transformation solutions.
+            Driven by Innovation. United by Vision. At SriVoraTech, our leadership team combines technical expertise, innovation, and strategic thinking.
+            <span className="hover-hint-span"> (Hover or tap any profile to view full executive bio & expertise)</span>
           </p>
         </div>
 
-        {/* Executive Leader Cards Grid */}
-        <div className={`leader-cards-grid ${isVisible ? 'cards-visible' : ''}`}>
-          {leaders.map((leader, idx) => (
-            <div
-              key={leader.id}
-              className={`leader-card glass-card animate-on-scroll ${isVisible ? 'visible' : ''}`}
-              style={{ '--leader-accent': leader.color, '--delay': `${0.06 + idx * 0.08}s` }}
-            >
-              {/* Top Accent Gradient Ribbon */}
-              <div className="card-top-accent-line" style={{ background: `linear-gradient(90deg, ${leader.color}, #38bdf8)` }} />
+        {/* Executive Leader Cards Carousel (Left-to-Right Horizontal Moving Stream) */}
+        <div className="leadership-carousel-wrapper" ref={scrollStreamRef}>
+          <div className={`leadership-carousel-track ${isVisible ? 'cards-visible' : ''}`}>
+            {leaders.map((leader, idx) => (
+              <div
+                key={leader.id}
+                className={`leader-card glass-card animate-on-scroll ${isVisible ? 'visible' : ''}`}
+                style={{ '--leader-accent': leader.color, '--delay': `${0.06 + idx * 0.08}s` }}
+                tabIndex={0}
+              >
+                {/* Top Accent Gradient Ribbon */}
+                <div className="card-top-accent-line" style={{ background: `linear-gradient(90deg, ${leader.color}, #38bdf8)` }} />
 
-              {/* WhatsApp / LinkedIn style Medium Circular Profile Avatar on Top */}
-              <div className="leader-top-profile">
-                <div className="leader-avatar-wrapper">
-                  {leader.photo ? (
-                    <img src={leader.photo} alt={leader.name} className="leader-avatar-img" />
-                  ) : (
-                    <div className="leader-avatar-circle" style={{ background: leader.color }}>
-                      <span>{leader.initials}</span>
-                    </div>
-                  )}
-                  <span className="avatar-glow-ring" style={{ background: `${leader.color}35` }} />
-                </div>
-
-                <div className="leader-badge-row">
-                  <span className="leader-level-badge" style={{ color: leader.color, borderColor: `${leader.color}40`, background: `${leader.color}10` }}>
-                    <Award size={13} /> {leader.level}
-                  </span>
-                  <span className="verified-leadership-chip">
-                    <ShieldCheck size={12} style={{ color: '#10b981' }} /> Verified Executive
-                  </span>
-                </div>
-
-                <h3 className="leader-name">{leader.name}</h3>
-                <p className="leader-role" style={{ color: leader.color }}>{leader.role}</p>
-
-                {/* Social Quick Action Buttons */}
-                <div className="leader-social-actions">
-                  <a
-                    href={leader.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="leader-action-btn"
-                    title={`Connect with ${leader.name} on LinkedIn`}
-                    aria-label={`LinkedIn Profile for ${leader.name}`}
-                  >
-                    <Linkedin size={15} />
-                  </a>
-                  <a
-                    href={`mailto:${leader.email}`}
-                    className="leader-action-btn"
-                    title={`Email ${leader.name}`}
-                    aria-label={`Email ${leader.name}`}
-                  >
-                    <Mail size={15} />
-                  </a>
-                </div>
-              </div>
-
-              {/* Bio & Description BELOW the photo */}
-              <div className="leader-bio-body">
-                <p>{leader.bio}</p>
-              </div>
-
-              {/* Core Expertise Chips */}
-              <div className="leader-expertise-section">
-                <span className="expertise-title">CORE EXPERTISE & SKILLS</span>
-                <div className="expertise-chips-grid">
-                  {leader.expertise.map((item) => (
-                    <span key={item} className="expertise-chip">
-                      <CheckCircle2 size={12} style={{ color: leader.color }} /> {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Leadership Quote Banner */}
-        <div className="leadership-quote-card animate-on-scroll visible">
-          <div className="quote-icon-box">
-            <Quote size={32} />
-          </div>
-          <blockquote className="quote-text">
-            "At SriVoraTech, we believe technology should solve real-world problems. Our mission is to create innovative, secure, and intelligent digital solutions that empower businesses to grow, innovate, and succeed in an ever-evolving digital world."
-          </blockquote>
-          <div className="quote-author">
-            <strong>Badisa Srikanth</strong>
-            <span>Founder & CEO, SriVoraTech</span>
-          </div>
-        </div>
-
-        {/* Our Team Section */}
-        <div ref={refTeam} className={`our-team-container animate-on-scroll ${isTeamVisible ? 'visible' : ''}`}>
-          <div className="team-header-block">
-            <h3 className="team-section-title">
-              Our <span className="gradient-text">Team</span>
-            </h3>
-            <p className="team-section-subtitle">
-              A Team Passionate About Building the Future — Our multidisciplinary team of engineers, designers, AI specialists, and project managers collaborates to transform ideas into innovative digital products.
-            </p>
-          </div>
-
-          <div className="team-disciplines-grid">
-            {teamDisciplines.map((item) => {
-              const Icon = item.icon
-              return (
-                <div key={item.title} className="team-discipline-card glass-card">
-                  <div className="discipline-icon-box" style={{ background: `${item.color}15`, color: item.color }}>
-                    <Icon size={24} />
+                {/* Circular Profile Avatar (Strict 100% Circular Shape) */}
+                <div className="leader-top-profile">
+                  <div className="leader-avatar-wrapper">
+                    {leader.photo ? (
+                      <img src={leader.photo} alt={leader.name} className="leader-avatar-img circular-pic" />
+                    ) : (
+                      <div className="leader-avatar-circle circular-pic" style={{ background: leader.color }}>
+                        <span>{leader.initials}</span>
+                      </div>
+                    )}
+                    <span className="avatar-glow-ring" style={{ background: `${leader.color}45` }} />
                   </div>
-                  <h4 className="discipline-title">{item.title}</h4>
-                  <p className="discipline-desc">{item.desc}</p>
+
+                  <div className="leader-badge-row">
+                    <span className="leader-level-badge" style={{ color: leader.color, borderColor: `${leader.color}40`, background: `${leader.color}10` }}>
+                      <Award size={13} /> {leader.level}
+                    </span>
+                    <span className="verified-leadership-chip">
+                      <ShieldCheck size={12} style={{ color: '#10b981' }} /> Verified
+                    </span>
+                  </div>
+
+                  <h3 className="leader-name">{leader.name}</h3>
+                  <p className="leader-role" style={{ color: leader.color }}>{leader.role}</p>
+
+                  {/* Hover Hint Button */}
+                  <div className="leader-hover-hint">
+                    <Eye size={12} /> Hover to view bio
+                  </div>
+
+                  {/* Social Action Buttons */}
+                  <div className="leader-social-actions">
+                    <a
+                      href={leader.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="leader-action-btn"
+                      title={`Connect with ${leader.name} on LinkedIn`}
+                      aria-label={`LinkedIn Profile for ${leader.name}`}
+                    >
+                      <Linkedin size={15} />
+                    </a>
+                    <a
+                      href={`mailto:${leader.email}`}
+                      className="leader-action-btn"
+                      title={`Email ${leader.name}`}
+                      aria-label={`Email ${leader.name}`}
+                    >
+                      <Mail size={15} />
+                    </a>
+                  </div>
                 </div>
-              )
-            })}
+
+                {/* Animated Hover Description Drawer */}
+                <div className="leader-hover-drawer">
+                  <div className="leader-bio-body">
+                    <p>{leader.bio}</p>
+                  </div>
+
+                  <div className="leader-expertise-section">
+                    <span className="expertise-title">CORE EXPERTISE & SKILLS</span>
+                    <div className="expertise-chips-grid">
+                      {leader.expertise.map((item) => (
+                        <span key={item} className="expertise-chip">
+                          <CheckCircle2 size={12} style={{ color: leader.color }} /> {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
