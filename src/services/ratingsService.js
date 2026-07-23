@@ -157,34 +157,49 @@ export function subscribeToRatings(callback) {
     callback(calculateMetrics(initialLocal))
   }
 
+  const GOOGLE_RATINGS_URL = 'https://script.google.com/macros/s/AKfycbzzB8S5E3JqKFYuj-2RX7oHWXkv0taRPv0aQBAjIr2TQkVp0K0grPCIcZWVrbbXQlSo/exec?action=ratings'
+
   const fetchUpdatedRatings = async () => {
+    let serverReviews = []
+
+    // 1. Fetch from local/Vercel server API
     try {
       const res = await fetch(`/api/reviews?_t=${Date.now()}`)
-      if (!res.ok) {
-        throw new Error(`Server DB HTTP ${res.status}`)
-      }
-      const contentType = res.headers.get('content-type') || ''
-      if (!contentType.includes('application/json')) {
-        throw new Error('Server returned non-JSON response')
-      }
-      const data = await res.json()
-      if (data && data.success && Array.isArray(data.reviews)) {
-        const localMaster = getStoredMasterReviews()
-        const mergedReviews = mergeUniqueReviews(localMaster, data.reviews)
-        saveStoredMasterReviews(mergedReviews)
-
-        const currentReviewsString = JSON.stringify(mergedReviews)
-
-        if (currentReviewsString !== prevReviewsString) {
-          prevReviewsString = currentReviewsString
-          callback(calculateMetrics(mergedReviews))
+      if (res.ok) {
+        const contentType = res.headers.get('content-type') || ''
+        if (contentType.includes('application/json')) {
+          const data = await res.json()
+          if (data && data.success && Array.isArray(data.reviews)) {
+            serverReviews = data.reviews
+          }
         }
       }
     } catch (err) {
-      console.warn('Live ratings fetch status:', err.message)
-      // Fallback: ensure UI always renders stored reviews
-      const fallbackLocal = getStoredMasterReviews()
-      callback(calculateMetrics(fallbackLocal))
+      console.warn('Local API live ratings fetch status:', err.message)
+    }
+
+    // 2. Fetch from Google Apps Script centralized database (multi-user sync across all mobile devices)
+    try {
+      const sheetRes = await fetch(`${GOOGLE_RATINGS_URL}&_t=${Date.now()}`)
+      if (sheetRes.ok) {
+        const sheetData = await sheetRes.json()
+        if (sheetData && sheetData.success && Array.isArray(sheetData.reviews) && sheetData.reviews.length > 0) {
+          serverReviews = mergeUniqueReviews(serverReviews, sheetData.reviews)
+        }
+      }
+    } catch (sheetErr) {
+      console.warn('Google Sheet live ratings fetch status:', sheetErr.message)
+    }
+
+    // 3. Merge with local master store
+    const localMaster = getStoredMasterReviews()
+    const mergedReviews = mergeUniqueReviews(localMaster, serverReviews)
+    saveStoredMasterReviews(mergedReviews)
+
+    const currentReviewsString = JSON.stringify(mergedReviews)
+    if (currentReviewsString !== prevReviewsString) {
+      prevReviewsString = currentReviewsString
+      callback(calculateMetrics(mergedReviews))
     }
   }
 
