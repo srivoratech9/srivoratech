@@ -613,4 +613,88 @@
   color: #059669;
 }
 
+/* ── Success Card Premium Layout ── */
+.success-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.success-title-main {
+  font-size: 1.75rem !important;
+  font-weight: 800;
+  color: #111827 !important;
+  margin-bottom: 0.5rem;
+  -webkit-text-fill-color: initial !important;
+  background: none !important;
+}
+
+.success-subtitle-main {
+  font-size: 1.05rem;
+  color: #50576b !important;
+  margin-bottom: 2rem;
+}
+
+.success-details-receipt {
+  background: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  position: relative;
+  z-index: 10;
+}
+
+.receipt-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0067f4;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+.receipt-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.receipt-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.receipt-value {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.receipt-status-badge {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+
 

@@ -1,134 +1,223 @@
-// Real-time Ratings Service
-// Uses Firebase Realtime Database for cross-browser data sharing
-// Falls back to localStorage if Firebase is not configured
+// Real-time Ratings & Admin Review Service
+// Communicates with our Express backend database
 
-import { db } from '../firebase'
-import { ref, push, onValue, set, get } from 'firebase/database'
-
-const FIREBASE_ENABLED = !!db
-
-// ── localStorage fallback helpers ──
-function getLocalRatings() {
-  try {
-    const saved = localStorage.getItem('svt_ratings_array')
-    return saved ? JSON.parse(saved) : null
-  } catch { return null }
+// Client helper to get the saved admin token
+export function getAdminToken() {
+  return localStorage.getItem('svt_admin_token') || ''
 }
 
-function getLocalReviews() {
-  try {
-    const saved = localStorage.getItem('svt_user_reviews_list')
-    return saved ? JSON.parse(saved) : null
-  } catch { return null }
+export function saveAdminToken(token) {
+  localStorage.setItem('svt_admin_token', token)
 }
 
-function getLocalViews() {
-  return parseInt(localStorage.getItem('svt_page_views') || '847', 10)
+export function removeAdminToken() {
+  localStorage.removeItem('svt_admin_token')
 }
 
-// ── Firebase Real-time Listeners ──
+// ── Public Ratings / Reviews ──
 
 /**
- * Subscribe to real-time reviews from Firebase
- * @param {Function} callback - receives { reviews: [], ratings: [], viewCount: number }
- * @returns {Function} unsubscribe function
+ * Polls the public reviews endpoint for real-time visual updates
  */
 export function subscribeToRatings(callback) {
-  if (!FIREBASE_ENABLED) {
-    // Fallback: load from localStorage once
-    const ratings = getLocalRatings() || [5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5]
-    const reviews = getLocalReviews() || []
-    const views = getLocalViews()
-    callback({ ratings, reviews, viewCount: views })
-    return () => {} // no-op unsubscribe
+  let prevDataString = ''
+
+  const fetchUpdatedRatings = async () => {
+    try {
+      const res = await fetch('/api/reviews')
+      const data = await res.json()
+      if (data.success) {
+        const currentDataString = JSON.stringify(data)
+        if (currentDataString !== prevDataString) {
+          prevDataString = currentDataString
+          callback({
+            ratings: data.reviews.map(r => r.star),
+            reviews: data.reviews,
+            viewCount: parseInt(localStorage.getItem('svt_page_views') || '847', 10),
+            totalCount: data.totalCount,
+            averageRating: data.averageRating,
+            distribution: data.distribution,
+            satisfactionRate: data.satisfactionRate
+          })
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch live reviews:', err.message)
+    }
   }
 
-  // Listen to reviews node
-  const reviewsRef = ref(db, 'ratings/reviews')
-  const viewsRef = ref(db, 'ratings/viewCount')
+  // Fetch immediately
+  fetchUpdatedRatings()
 
-  const unsubReviews = onValue(reviewsRef, (snapshot) => {
-    const data = snapshot.val()
-    let reviews = []
-    let ratings = [5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5] // base ratings
+  // Poll every 4 seconds for instant UI refresh
+  const interval = setInterval(fetchUpdatedRatings, 4000)
 
-    if (data) {
-      reviews = Object.values(data).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-      // Add user-submitted ratings to base
-      const userRatings = reviews.map(r => r.star)
-      ratings = [...ratings, ...userRatings]
-    }
+  return () => clearInterval(interval)
+}
 
-    // Also get view count
-    get(viewsRef).then((viewSnap) => {
-      const viewCount = viewSnap.val() || 847
-      callback({ ratings, reviews, viewCount })
-    }).catch(() => {
-      callback({ ratings, reviews, viewCount: 847 })
-    })
+/**
+ * Submit a customer rating with optional profile image upload
+ */
+export async function submitRating({ name, email, star, comment, company, profileImageFile }) {
+  const formData = new FormData()
+  formData.append('name', name)
+  formData.append('rating', star)
+  formData.append('comment', comment)
+  if (email) formData.append('email', email)
+  if (company) formData.append('company', company)
+  if (profileImageFile) {
+    formData.append('profileImage', profileImageFile)
+  }
+
+  const response = await fetch('/api/reviews', {
+    method: 'POST',
+    body: formData
   })
 
-  return () => unsubReviews()
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || 'Submission failed')
+  }
+
+  return result
 }
 
 /**
- * Submit a new rating/review
- */
-export async function submitRating({ name, star, comment }) {
-  const review = {
-    id: Date.now(),
-    name: name.trim() || 'Verified Visitor',
-    star,
-    comment: comment.trim() || 'Great digital product engineering and smooth performance!',
-    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    timestamp: Date.now(),
-  }
-
-  if (FIREBASE_ENABLED) {
-    try {
-      const reviewsRef = ref(db, 'ratings/reviews')
-      await push(reviewsRef, review)
-      return review
-    } catch (error) {
-      console.warn('Firebase write failed, saving locally:', error)
-    }
-  }
-
-  // Fallback: save to localStorage
-  const existingRatings = getLocalRatings() || [5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5]
-  const updatedRatings = [...existingRatings, star]
-  localStorage.setItem('svt_ratings_array', JSON.stringify(updatedRatings))
-
-  const existingReviews = getLocalReviews() || []
-  const updatedReviews = [review, ...existingReviews]
-  localStorage.setItem('svt_user_reviews_list', JSON.stringify(updatedReviews))
-
-  localStorage.setItem('svt_my_rating', JSON.stringify(review))
-
-  return review
-}
-
-/**
- * Increment page view counter
+ * Simple local page view incrementer
  */
 export async function incrementViewCount() {
-  if (FIREBASE_ENABLED) {
-    try {
-      const viewsRef = ref(db, 'ratings/viewCount')
-      const snapshot = await get(viewsRef)
-      const current = snapshot.val() || 847
-      await set(viewsRef, current + 1)
-      return current + 1
-    } catch (error) {
-      console.warn('Firebase view increment failed:', error)
-    }
-  }
-
-  // Fallback: localStorage
-  let views = getLocalViews()
+  let views = parseInt(localStorage.getItem('svt_page_views') || '847', 10)
   views += 1
   localStorage.setItem('svt_page_views', String(views))
   return views
 }
 
-export { FIREBASE_ENABLED }
+// ── Admin Rating Management ──
+
+/**
+ * Admin login authentication
+ */
+export async function adminLogin(username, password) {
+  const response = await fetch('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || 'Login failed')
+  }
+
+  if (result.success && result.token) {
+    saveAdminToken(result.token)
+  }
+
+  return result
+}
+
+/**
+ * Get all reviews (Approved/Pending/Rejected) for Admin console
+ */
+export async function adminGetReviews({ search = '', rating = '', status = '' } = {}) {
+  const query = new URLSearchParams()
+  if (search) query.append('search', search)
+  if (rating) query.append('rating', rating)
+  if (status) query.append('status', status)
+
+  const token = getAdminToken()
+  const response = await fetch(`/api/admin/reviews?${query.toString()}`, {
+    headers: {
+      'x-admin-token': token
+    }
+  })
+
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to load admin reviews')
+  }
+
+  return result.reviews || []
+}
+
+/**
+ * Approve a review
+ */
+export async function adminApproveReview(id) {
+  const token = getAdminToken()
+  const response = await fetch(`/api/admin/reviews/${id}/approve`, {
+    method: 'POST',
+    headers: {
+      'x-admin-token': token
+    }
+  })
+
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to approve review')
+  }
+
+  return result
+}
+
+/**
+ * Reject a review
+ */
+export async function adminRejectReview(id) {
+  const token = getAdminToken()
+  const response = await fetch(`/api/admin/reviews/${id}/reject`, {
+    method: 'POST',
+    headers: {
+      'x-admin-token': token
+    }
+  })
+
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to reject review')
+  }
+
+  return result
+}
+
+/**
+ * Edit a review
+ */
+export async function adminEditReview(id, data) {
+  const token = getAdminToken()
+  const response = await fetch(`/api/admin/reviews/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-token': token
+    },
+    body: JSON.stringify(data)
+  })
+
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to update review')
+  }
+
+  return result
+}
+
+/**
+ * Delete a review
+ */
+export async function adminDeleteReview(id) {
+  const token = getAdminToken()
+  const response = await fetch(`/api/admin/reviews/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-admin-token': token
+    }
+  })
+
+  const result = await response.json()
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to delete review')
+  }
+
+  return result
+}

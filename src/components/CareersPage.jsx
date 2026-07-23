@@ -181,6 +181,10 @@ export default function CareersPage({ onBack }) {
     }
 
 
+    if (!d.portfolio || d.portfolio.trim().length < 5) {
+      errs.portfolio = 'Portfolio / GitHub / LinkedIn link is required.'
+    }
+
     if (!d.resume || d.resume.trim().length < 5) {
       errs.resume = 'Resume / CV link is required.'
     }
@@ -218,16 +222,49 @@ export default function CareersPage({ onBack }) {
         </header>
 
         <main className="careers-success-main">
-          <div className="success-card">
-            <CheckCircle2 size={64} className="success-icon" />
-            <h1>Application Submitted!</h1>
-            <p>Thank you, <strong>{currentData.fullName}</strong>.</p>
+          <div className="success-card glass-card">
+            <div className="success-icon-wrapper">
+              <CheckCircle2 size={48} className="success-icon" />
+            </div>
+            <h1 className="success-title-main">Application Received Successfully!</h1>
+            <p className="success-subtitle-main">Thank you for applying, <strong>{currentData.fullName}</strong>.</p>
+            
+            {/* Detailed Application Receipt */}
+            <div className="success-details-receipt">
+              <div className="receipt-header">
+                <FileText size={16} />
+                <span>Application Reference ID: #{Date.now().toString().slice(-6)}</span>
+              </div>
+              <div className="receipt-body">
+                <div className="receipt-row">
+                  <span className="receipt-label">Applied Role</span>
+                  <strong className="receipt-value">{currentData.role}</strong>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Path</span>
+                  <strong className="receipt-value">{tab === 'fresher' ? 'Fresher' : 'Experienced Professional'}</strong>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Contact Email</span>
+                  <span className="receipt-value">{currentData.email}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Submission Date</span>
+                  <span className="receipt-value">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Application Status</span>
+                  <span className="receipt-status-badge">Received & Pending Review</span>
+                </div>
+              </div>
+            </div>
+
             <p className="success-desc">
-              Your {tab === 'fresher' ? 'fresher' : 'experienced professional'} application for <strong>{currentData.role}</strong> has been received.
-              Our HR team will review your application and contact you soon.
+              Our recruitment team will review your qualifications, technical skills, and resume. We will contact you via email or phone within 48 business hours.
             </p>
             <button onClick={onBack} className="success-home-btn">
-              Return to Home
+              Return to Homepage
+              <ArrowLeft size={16} style={{ transform: 'rotate(180deg)', marginLeft: '6px' }} />
             </button>
           </div>
         </main>
@@ -502,15 +539,16 @@ export default function CareersPage({ onBack }) {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Portfolio / LinkedIn Link</label>
+                    <label className="form-label">Portfolio / LinkedIn Link *</label>
                     <input
                       type="url"
                       name="portfolio"
                       value={expData.portfolio}
                       onChange={handleChange}
                       placeholder="https://linkedin.com/in/username"
-                      className="form-input"
+                      className={`form-input ${errors.portfolio ? 'input-error' : ''}`}
                     />
+                    {errors.portfolio && <span className="error-text">{errors.portfolio}</span>}
                   </div>
                 </div>
               </>
@@ -518,15 +556,16 @@ export default function CareersPage({ onBack }) {
 
             {tab === 'fresher' && (
               <div className="form-group full-width">
-                <label className="form-label">Portfolio / GitHub Link (optional)</label>
+                <label className="form-label">Portfolio / GitHub Link *</label>
                 <input
                   type="url"
                   name="portfolio"
                   value={fresherData.portfolio}
                   onChange={handleChange}
                   placeholder="https://github.com/username"
-                  className="form-input"
+                  className={`form-input ${errors.portfolio ? 'input-error' : ''}`}
                 />
+                {errors.portfolio && <span className="error-text">{errors.portfolio}</span>}
               </div>
             )}
 

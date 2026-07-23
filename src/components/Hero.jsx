@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { ArrowRight, Zap, MousePointer2, Figma, Shield, Clock, Rocket, Sparkles, Cpu, Globe, Palette } from 'lucide-react'
 import HeroCanvas from './HeroCanvas'
@@ -21,6 +21,27 @@ export default function Hero() {
 
   const [colorMode, setColorMode] = useState('sapphire')
   const [activeHeroTab, setActiveHeroTab] = useState('fintech')
+  const [ratingStats, setRatingStats] = useState({ averageRating: 5.0, totalCount: 15 })
+
+  useEffect(() => {
+    const fetchRatingStats = async () => {
+      try {
+        const res = await fetch('/api/reviews')
+        const data = await res.json()
+        if (data.success) {
+          setRatingStats({
+            averageRating: data.averageRating,
+            totalCount: data.totalCount
+          })
+        }
+      } catch (e) {
+        // fallback
+      }
+    }
+    fetchRatingStats()
+    const timer = setInterval(fetchRatingStats, 10000)
+    return () => clearInterval(timer)
+  }, [])
 
   const currentTheme = colorThemes.find(t => t.id === colorMode) || colorThemes[0]
 
@@ -119,15 +140,15 @@ export default function Hero() {
             <span className="hero-avatar-count">+03</span>
           </div>
 
-          <a href="#ratings" className="hero-rating" title="View Community Star Ratings">
+          <a href="#website-rating" className="hero-rating" title="View Community Star Ratings">
             <div className="hero-stars">
               {[...Array(5)].map((_, i) => (
-                <svg key={i} width="15" height="15" fill="currentColor" viewBox="0 0 20 20" className="hero-star">
+                <svg key={i} width="15" height="15" fill={i < Math.round(ratingStats.averageRating) ? "#f59e0b" : "currentColor"} viewBox="0 0 20 20" className="hero-star" style={{ color: i < Math.round(ratingStats.averageRating) ? "#f59e0b" : "#cbd5e1" }}>
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.454a1 1 0 00-1.175 0l-3.38 2.454c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.049 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
                 </svg>
               ))}
             </div>
-            <span className="hero-review-text">Rated 5.0/5 Star Community Rating</span>
+            <span className="hero-review-text">Rated {ratingStats.averageRating}/5 ({ratingStats.totalCount} Approved Reviews)</span>
           </a>
         </div>
 

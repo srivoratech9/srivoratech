@@ -353,6 +353,370 @@ app.post('/api/apply/experienced', upload.single('resume'), async (req, res) => 
   }
 })
 
+// Serve uploaded files statically
+app.use('/uploads', express.static(uploadsDir))
+
+// ── Database Setup for Reviews ──
+const reviewsDataPath = path.join(uploadsDir, 'reviews.json')
+
+const DEFAULT_REVIEWS = [
+  {
+    id: 1,
+    name: 'Badisa Srikanth (Founder & CEO)',
+    email: 'srikanth@srivoratech.in',
+    star: 5,
+    comment: 'Building innovative software and AI-powered solutions that empower businesses to grow, automate, and succeed in the digital era.',
+    date: 'Jul 20, 2026',
+    status: 'Approved',
+    timestamp: 1784534400000,
+    company: 'SriVoraTech',
+    profileImage: ''
+  },
+  {
+    id: 2,
+    name: 'Narasimha Reddy (Founder, TFS Fintech)',
+    email: 'narasimha@tfsfintech.com',
+    star: 5,
+    comment: "SriVoraTech transformed our vision into India's 1st subscription fintech app within 2 months!",
+    date: 'Jul 18, 2026',
+    status: 'Approved',
+    timestamp: 1784361600000,
+    company: 'TFS Fintech',
+    profileImage: ''
+  },
+  {
+    id: 3,
+    name: 'Sujith Reddy (Founder, FluentPro AI)',
+    email: 'sujith@fluentpro.ai',
+    star: 5,
+    comment: 'FluentPro AI voice engine was engineered from scratch by SriVoraTech — 85,000+ active learners love it!',
+    date: 'Jul 15, 2026',
+    status: 'Approved',
+    timestamp: 1784102400000,
+    company: 'FluentPro AI',
+    profileImage: ''
+  }
+]
+
+// Initialize reviews file if it does not exist
+if (!fs.existsSync(reviewsDataPath)) {
+  fs.writeFileSync(reviewsDataPath, JSON.stringify(DEFAULT_REVIEWS, null, 2))
+}
+
+// Helper functions for reading/writing reviews
+function getReviews() {
+  try {
+    if (fs.existsSync(reviewsDataPath)) {
+      return JSON.parse(fs.readFileSync(reviewsDataPath, 'utf8'))
+    }
+  } catch (err) {
+    console.error('Error reading reviews:', err)
+  }
+  return DEFAULT_REVIEWS
+}
+
+function saveReviews(reviews) {
+  try {
+    fs.writeFileSync(reviewsDataPath, JSON.stringify(reviews, null, 2))
+  } catch (err) {
+    console.error('Error writing reviews:', err)
+  }
+}
+
+// Simple IP-based rate limiting memory store
+const submissionRateLimit = new Map()
+
+// Helper to clean HTML tags (XSS protection)
+function sanitizeInput(str = '') {
+  return str.replace(/<[^>]*>/g, '').trim()
+}
+
+// ── Public APIs for Reviews ──
+
+// GET approved reviews + summary metrics
+app.get('/api/reviews', (req, res) => {
+  try {
+    const reviews = getReviews()
+    const approvedReviews = reviews.filter(r => r.status === 'Approved')
+    
+    // Sort newest first
+    approvedReviews.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+
+    const totalApproved = approvedReviews.length
+    const sum = approvedReviews.reduce((acc, curr) => acc + curr.star, 0)
+    const averageRating = totalApproved > 0 ? parseFloat((sum / totalApproved).toFixed(1)) : 5.0
+
+    // Rating distribution calculations
+    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    approvedReviews.forEach(r => {
+      if (distribution[r.star] !== undefined) {
+        distribution[r.star]++
+      }
+    })
+
+    const percentages = {}
+    Object.keys(distribution).forEach(star => {
+      percentages[star] = totalApproved > 0 
+        ? Math.round((distribution[star] / totalApproved) * 100)
+        : 0
+    })
+
+    // Satisfaction score (percentage of 4 and 5 star ratings)
+    const highRatings = distribution[5] + distribution[4]
+    const satisfactionRate = totalApproved > 0
+      ? Math.round((highRatings / totalApproved) * 100)
+      : 100
+
+    res.json({
+      success: true,
+      reviews: approvedReviews,
+      totalCount: totalApproved,
+      averageRating,
+      distribution: percentages,
+      satisfactionRate
+    })
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve reviews' })
+  }
+})
+
+// POST submit a review
+app.post('/api/reviews', upload.single('profileImage'), (req, res) => {
+  try {
+    const ip = req.ip || req.socket.remoteAddress
+    const now = Date.now()
+
+    // Rate Limiting Check: Max 3 submissions per IP per hour
+    const limitRecord = submissionRateLimit.get(ip) || []
+    const oneHourAgo = now - 60 * 60 * 1000
+    const recentSubmissions = limitRecord.filter(time => time > oneHourAgo)
+
+    if (recentSubmissions.length >= 3) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many submissions. Please wait an hour before submitting another review.'
+      })
+    }
+
+    const { name, email, rating, comment, company } = req.body
+    const imageFile = req.file
+
+    if (!name || !rating || !comment) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, Star Rating, and Review Message are required fields.'
+      })
+    }
+
+    const starNum = parseInt(rating, 10)
+    if (isNaN(starNum) || starNum < 1 || starNum > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Star Rating must be an integer between 1 and 5.'
+      })
+    }
+
+    // Input sanitization
+    const cleanName = sanitizeInput(name)
+    const cleanComment = sanitizeInput(comment)
+    const cleanEmail = email ? sanitizeInput(email) : ''
+    const cleanCompany = company ? sanitizeInput(company) : ''
+    const profileImagePath = imageFile ? `/uploads/${imageFile.filename}` : ''
+
+    const reviews = getReviews()
+
+    // Prevent duplicate spam check
+    const isDuplicate = reviews.some(r => 
+      r.name.toLowerCase() === cleanName.toLowerCase() && 
+      r.comment.toLowerCase() === cleanComment.toLowerCase()
+    )
+
+    if (isDuplicate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Duplicate submission detected. This review has already been received.'
+      })
+    }
+
+    const newReview = {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      name: cleanName,
+      email: cleanEmail,
+      star: starNum,
+      comment: cleanComment,
+      company: cleanCompany,
+      profileImage: profileImagePath,
+      status: 'Pending', // Pending admin approval
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      timestamp: now
+    }
+
+    reviews.push(newReview)
+    saveReviews(reviews)
+
+    // Save submission time to rate limit list
+    recentSubmissions.push(now)
+    submissionRateLimit.set(ip, recentSubmissions)
+
+    res.json({
+      success: true,
+      message: 'Review submitted successfully. It will display on the website once approved by our administrator.',
+      review: newReview
+    })
+  } catch (err) {
+    console.error('Submit review error:', err)
+    res.status(500).json({ success: false, message: 'Failed to process submission' })
+  }
+})
+
+// ── Admin Review Console APIs ──
+
+const ADMIN_TOKEN = 'srivoratech_admin_secure_session_token_2026'
+
+// Admin Login
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body
+  if (username === 'admin' && password === 'admin_password_srivoratech_2026') {
+    return res.json({
+      success: true,
+      token: ADMIN_TOKEN
+    })
+  }
+  res.status(401).json({ success: false, message: 'Invalid administrative credentials' })
+})
+
+// Admin authorization middleware
+function requireAdmin(req, res, next) {
+  const token = req.headers['x-admin-token']
+  if (token === ADMIN_TOKEN) {
+    return next()
+  }
+  res.status(403).json({ success: false, message: 'Access denied: Administrator authentication required' })
+}
+
+// GET all reviews with query search & filter
+app.get('/api/admin/reviews', requireAdmin, (req, res) => {
+  try {
+    const { search, rating, status } = req.query
+    let reviews = getReviews()
+
+    // Filter by rating level
+    if (rating) {
+      const rVal = parseInt(rating, 10)
+      reviews = reviews.filter(r => r.star === rVal)
+    }
+
+    // Filter by status (Pending, Approved, Rejected)
+    if (status) {
+      reviews = reviews.filter(r => r.status.toLowerCase() === status.toLowerCase())
+    }
+
+    // Search query matching
+    if (search) {
+      const query = search.toLowerCase()
+      reviews = reviews.filter(r => 
+        r.name.toLowerCase().includes(query) || 
+        r.comment.toLowerCase().includes(query) || 
+        (r.company && r.company.toLowerCase().includes(query))
+      )
+    }
+
+    // Sort newest first
+    reviews.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+
+    res.json({ success: true, reviews })
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to load reviews' })
+  }
+})
+
+// Approve review
+app.post('/api/admin/reviews/:id/approve', requireAdmin, (req, res) => {
+  try {
+    const rId = parseInt(req.params.id, 10)
+    const reviews = getReviews()
+    const match = reviews.find(r => r.id === rId)
+
+    if (!match) {
+      return res.status(404).json({ success: false, message: 'Review not found' })
+    }
+
+    match.status = 'Approved'
+    saveReviews(reviews)
+    res.json({ success: true, message: 'Review approved successfully', review: match })
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to approve review' })
+  }
+})
+
+// Reject review
+app.post('/api/admin/reviews/:id/reject', requireAdmin, (req, res) => {
+  try {
+    const rId = parseInt(req.params.id, 10)
+    const reviews = getReviews()
+    const match = reviews.find(r => r.id === rId)
+
+    if (!match) {
+      return res.status(404).json({ success: false, message: 'Review not found' })
+    }
+
+    match.status = 'Rejected'
+    saveReviews(reviews)
+    res.json({ success: true, message: 'Review rejected successfully', review: match })
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to reject review' })
+  }
+})
+
+// Delete review
+app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
+  try {
+    const rId = parseInt(req.params.id, 10)
+    let reviews = getReviews()
+    const originalLength = reviews.length
+    reviews = reviews.filter(r => r.id !== rId)
+
+    if (reviews.length === originalLength) {
+      return res.status(404).json({ success: false, message: 'Review not found' })
+    }
+
+    saveReviews(reviews)
+    res.json({ success: true, message: 'Review deleted successfully' })
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete review' })
+  }
+})
+
+// Edit review
+app.put('/api/admin/reviews/:id', requireAdmin, (req, res) => {
+  try {
+    const rId = parseInt(req.params.id, 10)
+    const { name, star, comment, company } = req.body
+    const reviews = getReviews()
+    const match = reviews.find(r => r.id === rId)
+
+    if (!match) {
+      return res.status(404).json({ success: false, message: 'Review not found' })
+    }
+
+    if (name) match.name = sanitizeInput(name)
+    if (comment) match.comment = sanitizeInput(comment)
+    if (company !== undefined) match.company = sanitizeInput(company)
+    
+    if (star !== undefined) {
+      const sVal = parseInt(star, 10)
+      if (!isNaN(sVal) && sVal >= 1 && sVal <= 5) {
+        match.star = sVal
+      }
+    }
+
+    saveReviews(reviews)
+    res.json({ success: true, message: 'Review updated successfully', review: match })
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to edit review' })
+  }
+})
+
 // Get all applications (for admin purposes)
 app.get('/api/applications', (req, res) => {
   res.json(applications)
