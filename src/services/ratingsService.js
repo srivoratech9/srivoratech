@@ -381,8 +381,10 @@ export async function adminDeleteReview(id) {
  */
 export async function markReviewHelpful(id) {
   try {
-    const response = await fetch(`/api/reviews/${id}/helpful?id=${id}`, {
-      method: 'POST'
+    const response = await fetch(`/api/reviews?action=helpful&id=${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
     })
     const result = await response.json()
     window.dispatchEvent(new CustomEvent('svt_reviews_changed'))

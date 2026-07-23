@@ -16,6 +16,10 @@
       "destination": "/api/reviews.js"
     },
     {
+      "source": "/api/reviews/(.*)",
+      "destination": "/api/reviews.js?route=/reviews/$1"
+    },
+    {
       "source": "/api/admin/(.*)",
       "destination": "/api/reviews.js?route=/admin/$1"
     },
