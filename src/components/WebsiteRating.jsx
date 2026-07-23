@@ -16,6 +16,8 @@ export default function WebsiteRating() {
   const [satisfactionRate, setSatisfactionRate] = useState(100)
   const [viewCount, setViewCount] = useState(847)
   const [loading, setLoading] = useState(true)
+  const [publicStarFilter, setPublicStarFilter] = useState('')
+  const [publicSearchQuery, setPublicSearchQuery] = useState('')
   
   // Submit review form state
   const [selectedStar, setSelectedStar] = useState(5)
@@ -59,6 +61,18 @@ export default function WebsiteRating() {
   const scrollStreamRef = useRef(null)
 
   const safeAdminReviews = Array.isArray(adminReviews) ? adminReviews : []
+
+  const filteredPublicReviews = (Array.isArray(reviewsList) ? reviewsList : []).filter(r => {
+    if (publicStarFilter && r.star !== parseInt(publicStarFilter, 10)) return false
+    if (publicSearchQuery) {
+      const q = publicSearchQuery.toLowerCase()
+      const matchName = (r.name || '').toLowerCase().includes(q)
+      const matchComment = (r.comment || '').toLowerCase().includes(q)
+      const matchCompany = (r.company || '').toLowerCase().includes(q)
+      if (!matchName && !matchComment && !matchCompany) return false
+    }
+    return true
+  })
 
   const scrollStream = (direction) => {
     if (scrollStreamRef.current) {
@@ -748,7 +762,7 @@ export default function WebsiteRating() {
               <div className="recent-reviews-stream">
                 <div className="stream-header">
                   <h4 className="stream-title">
-                    <MessageSquare size={16} /> Client Feedback & Sprints Reviews ({totalCount})
+                    <MessageSquare size={16} /> Client Feedback & Sprints Reviews ({filteredPublicReviews.length})
                   </h4>
                   {reviewsList.length > 0 && (
                     <div className="stream-nav-controls">
@@ -774,6 +788,39 @@ export default function WebsiteRating() {
                   )}
                 </div>
 
+                {/* Visitor Search & Filter Bar */}
+                <div className="public-visitor-filter-bar">
+                  <div className="public-search-box">
+                    <Search size={14} className="search-icon" />
+                    <input 
+                      type="text" 
+                      placeholder="Search reviews by keyword, company, or reviewer..." 
+                      value={publicSearchQuery}
+                      onChange={e => setPublicSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="public-star-pills">
+                    <button 
+                      onClick={() => setPublicStarFilter('')} 
+                      className={`star-pill-btn ${publicStarFilter === '' ? 'active' : ''}`}
+                    >
+                      All ({reviewsList.length})
+                    </button>
+                    <button 
+                      onClick={() => setPublicStarFilter('5')} 
+                      className={`star-pill-btn ${publicStarFilter === '5' ? 'active' : ''}`}
+                    >
+                      5 ★ ({counts[5] || 0})
+                    </button>
+                    <button 
+                      onClick={() => setPublicStarFilter('4')} 
+                      className={`star-pill-btn ${publicStarFilter === '4' ? 'active' : ''}`}
+                    >
+                      4 ★ ({counts[4] || 0})
+                    </button>
+                  </div>
+                </div>
+
                 {loading ? (
                   // Skeletons
                   <div className="reviews-loading-skeletons">
@@ -787,15 +834,15 @@ export default function WebsiteRating() {
                       </div>
                     ))}
                   </div>
-                ) : reviewsList.length === 0 ? (
+                ) : filteredPublicReviews.length === 0 ? (
                   <div className="admin-empty-state">
                     <MessageSquare size={32} />
-                    <p>No approved customer reviews found. Be the first to leave one!</p>
+                    <p>No customer reviews match your search filter.</p>
                   </div>
                 ) : (
                   <div className="reviews-carousel-wrapper" ref={scrollStreamRef}>
                     <div className="reviews-carousel-track">
-                      {reviewsList.map((review) => (
+                      {filteredPublicReviews.map((review) => (
                         <div key={review.id} className="review-card-item">
                           <div className="review-card-top">
                             <div className="review-name-group">
