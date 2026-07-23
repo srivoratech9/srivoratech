@@ -59,8 +59,8 @@ export function subscribeToRatings(callback) {
   // Listen to immediate refresh events
   window.addEventListener('svt_reviews_changed', fetchUpdatedRatings)
 
-  // Poll every 2.5 seconds for instant UI refresh
-  const interval = setInterval(fetchUpdatedRatings, 2500)
+  // Poll every 1.2 seconds for sub-second UI refresh across all devices
+  const interval = setInterval(fetchUpdatedRatings, 1200)
 
   return () => {
     clearInterval(interval)

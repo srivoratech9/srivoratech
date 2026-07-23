@@ -42,8 +42,12 @@ export default function Hero() {
       }
     }
     fetchRatingStats()
-    const timer = setInterval(fetchRatingStats, 10000)
-    return () => clearInterval(timer)
+    window.addEventListener('svt_reviews_changed', fetchRatingStats)
+    const timer = setInterval(fetchRatingStats, 1200)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener('svt_reviews_changed', fetchRatingStats)
+    }
   }, [])
 
   const currentTheme = colorThemes.find(t => t.id === colorMode) || colorThemes[0]
