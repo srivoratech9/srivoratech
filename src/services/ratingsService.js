@@ -152,8 +152,8 @@ export function subscribeToRatings(callback) {
   }
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
-  // Poll server every 4 seconds
-  const interval = setInterval(fetchUpdatedRatings, 4000)
+  // Fast polling every 2.5 seconds for instant multi-user synchronization
+  const interval = setInterval(fetchUpdatedRatings, 2500)
 
   return () => {
     clearInterval(interval)
