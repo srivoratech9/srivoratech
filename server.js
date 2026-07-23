@@ -478,6 +478,8 @@ app.get('/api/reviews', (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to retrieve reviews' })
   }
+})
+
 // POST mark review helpful
 app.post('/api/reviews/:id/helpful', (req, res) => {
   try {
