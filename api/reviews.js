@@ -96,7 +96,16 @@ export default function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const { name, rating, comment, email, company } = req.body || {}
+      let body = req.body || {}
+      if (typeof body === 'string') {
+        try {
+          body = JSON.parse(body)
+        } catch (parseErr) {
+          body = {}
+        }
+      }
+
+      const { name, rating, comment, email, company } = body
       if (!name || !rating || !comment) {
         return res.status(400).json({
           success: false,

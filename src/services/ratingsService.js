@@ -129,20 +129,28 @@ export function subscribeToRatings(callback) {
  */
 export async function submitRating({ name, email, star, comment, company, profileImageFile }) {
   try {
-    const formData = new FormData()
-    formData.append('name', name)
-    formData.append('rating', star)
-    formData.append('comment', comment)
-    if (email) formData.append('email', email)
-    if (company) formData.append('company', company)
-    if (profileImageFile) {
-      formData.append('profileImage', profileImageFile)
-    }
+    let response
 
-    const response = await fetch('/api/reviews', {
-      method: 'POST',
-      body: formData
-    })
+    if (profileImageFile) {
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('rating', star)
+      formData.append('comment', comment)
+      if (email) formData.append('email', email)
+      if (company) formData.append('company', company)
+      formData.append('profileImage', profileImageFile)
+
+      response = await fetch('/api/reviews', {
+        method: 'POST',
+        body: formData
+      })
+    } else {
+      response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, rating: star, comment, company })
+      })
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`)
