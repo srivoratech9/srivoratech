@@ -384,7 +384,7 @@ export async function markReviewHelpful(id) {
     const response = await fetch(`/api/reviews?action=helpful&id=${id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
+      body: JSON.stringify({ id, isHelpful: true })
     })
     const result = await response.json()
     window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
