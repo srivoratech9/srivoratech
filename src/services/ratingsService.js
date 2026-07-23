@@ -375,3 +375,19 @@ export async function adminDeleteReview(id) {
   window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
   return result
 }
+
+/**
+ * Increment helpful count for a review
+ */
+export async function markReviewHelpful(id) {
+  try {
+    const response = await fetch(`/api/reviews/${id}/helpful?id=${id}`, {
+      method: 'POST'
+    })
+    const result = await response.json()
+    window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
+    return result
+  } catch (e) {
+    return { success: false }
+  }
+}

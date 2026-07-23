@@ -383,6 +383,20 @@ export default async function handler(req, res) {
     })
   }
 
+  // ── 4. Helpful Counter Endpoint ──
+  if (url.includes('/helpful')) {
+    if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' })
+    const targetId = extractReviewId(url, req)
+    const reviews = await getReviewsFromDb()
+    const match = reviews.find(r => String(r.id) === String(targetId) || Number(r.id) === parseInt(targetId, 10))
+    if (!match) return res.status(404).json({ success: false, message: 'Review not found' })
+
+    match.helpfulCount = (match.helpfulCount || 0) + 1
+    saveLocalReviews(reviews)
+    await saveReviewToDb(match)
+    return res.status(200).json({ success: true, helpfulCount: match.helpfulCount, review: match })
+  }
+
   // ── 4. Public POST /api/reviews Endpoint (Defaults to Approved) ──
   if (req.method === 'POST') {
     try {

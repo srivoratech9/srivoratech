@@ -478,6 +478,20 @@ app.get('/api/reviews', (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to retrieve reviews' })
   }
+// POST mark review helpful
+app.post('/api/reviews/:id/helpful', (req, res) => {
+  try {
+    const rId = req.params.id
+    const reviews = getReviews()
+    const match = reviews.find(r => String(r.id) === String(rId) || Number(r.id) === parseInt(rId, 10))
+    if (!match) return res.status(404).json({ success: false, message: 'Review not found' })
+
+    match.helpfulCount = (match.helpfulCount || 0) + 1
+    saveReviews(reviews)
+    return res.json({ success: true, helpfulCount: match.helpfulCount, review: match })
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Failed to increment helpful count' })
+  }
 })
 
 // POST submit a review

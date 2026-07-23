@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight, Download } from 'lucide-react'
+import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight, Download, ThumbsUp } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import { subscribeToRatings, submitRating, incrementViewCount, adminLogin, adminGetReviews, adminApproveReview, adminRejectReview, adminEditReview, adminDeleteReview, getAdminToken, removeAdminToken } from '../services/ratingsService'
+import { subscribeToRatings, submitRating, incrementViewCount, adminLogin, adminGetReviews, adminApproveReview, adminRejectReview, adminEditReview, adminDeleteReview, markReviewHelpful, getAdminToken, removeAdminToken } from '../services/ratingsService'
 import './WebsiteRating.css'
 
 export default function WebsiteRating() {
@@ -18,6 +18,13 @@ export default function WebsiteRating() {
   const [loading, setLoading] = useState(true)
   const [publicStarFilter, setPublicStarFilter] = useState('')
   const [publicSearchQuery, setPublicSearchQuery] = useState('')
+  const [votedHelpful, setVotedHelpful] = useState({})
+
+  const handleHelpfulClick = async (id) => {
+    if (votedHelpful[id]) return
+    setVotedHelpful(prev => ({ ...prev, [id]: true }))
+    await markReviewHelpful(id)
+  }
   
   // Submit review form state
   const [selectedStar, setSelectedStar] = useState(5)
@@ -879,7 +886,17 @@ export default function WebsiteRating() {
                               <p className="reply-content-text">"{review.adminReply}"</p>
                             </div>
                           )}
-                          <span className="r-date">{review.date}</span>
+                          <div className="card-footer-meta">
+                            <span className="r-date">{review.date}</span>
+                            <button 
+                              type="button"
+                              onClick={() => handleHelpfulClick(review.id)} 
+                              className={`helpful-btn ${votedHelpful[review.id] ? 'voted' : ''}`}
+                              title="Mark review as helpful"
+                            >
+                              <ThumbsUp size={12} /> {votedHelpful[review.id] ? 'Helpful' : 'Helpful'} ({review.helpfulCount || 0})
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
