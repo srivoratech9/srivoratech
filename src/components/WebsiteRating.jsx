@@ -1,11 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight, Download, ThumbsUp } from 'lucide-react'
+import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight, Download, ThumbsUp, BadgeCheck } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { subscribeToRatings, submitRating, incrementViewCount, adminLogin, adminGetReviews, adminApproveReview, adminRejectReview, adminEditReview, adminDeleteReview, markReviewHelpful, getAdminToken, removeAdminToken } from '../services/ratingsService'
+import srikanthPhoto from '../assets/badisa_srikanth.jpg'
 import './WebsiteRating.css'
 
 export default function WebsiteRating() {
   const [ref, isVisible] = useScrollAnimation()
+  
+  // Helper to get profile image - use founder photo for known founder reviews
+  const getProfileImage = (review) => {
+    if (review.profileImage) return review.profileImage
+    if (review.isFounder || (review.name && review.name.toLowerCase().includes('srikanth'))) return srikanthPhoto
+    return null
+  }
   
   // Public reviews state
   const [reviewsList, setReviewsList] = useState([])
@@ -849,19 +857,32 @@ export default function WebsiteRating() {
                 ) : (
                   <div className="reviews-carousel-wrapper" ref={scrollStreamRef}>
                     <div className="reviews-carousel-track">
-                      {filteredPublicReviews.map((review) => (
-                        <div key={review.id} className="review-card-item">
+                      {filteredPublicReviews.map((review) => {
+                      const profileImg = getProfileImage(review)
+                      const isFounderReview = review.isFounder || (review.name && review.name.toLowerCase().includes('srikanth'))
+                      return (
+                        <div key={review.id} className={`review-card-item ${isFounderReview ? 'founder-review-card' : ''}`}>
                           <div className="review-card-top">
                             <div className="review-name-group">
-                              {review.profileImage ? (
-                                <img src={review.profileImage} alt={review.name} className="customer-avatar-img" />
+                              {profileImg ? (
+                                <div className="customer-avatar-wrapper">
+                                  <img src={profileImg} alt={review.name} className="customer-avatar-img" />
+                                  {isFounderReview && (
+                                    <span className="avatar-verified-dot" title="Verified Founder">
+                                      <BadgeCheck size={12} />
+                                    </span>
+                                  )}
+                                </div>
                               ) : (
                                 <span className="review-avatar">
                                   {review.name.charAt(0).toUpperCase()}
                                 </span>
                               )}
                               <div className="customer-info-meta">
-                                <strong className="r-name">{review.name}</strong>
+                                <strong className="r-name">
+                                  {review.name}
+                                  {isFounderReview && <span className="founder-badge-inline">Founder</span>}
+                                </strong>
                                 {review.company && <span className="r-company">{review.company}</span>}
                               </div>
                             </div>
@@ -898,7 +919,8 @@ export default function WebsiteRating() {
                             </button>
                           </div>
                         </div>
-                      ))}
+                      )
+                    })}
                     </div>
                   </div>
                 )}

@@ -15,7 +15,9 @@ const DEFAULT_REVIEWS = [
     status: 'Approved',
     timestamp: 1784534400000,
     company: 'SriVoraTech',
-    profileImage: ''
+    profileImage: '',
+    isFounder: true,
+    helpfulCount: 0
   }
 ]
 

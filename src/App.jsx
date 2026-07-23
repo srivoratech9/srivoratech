@@ -11,6 +11,7 @@ import Services from './components/Services'
 import ProjectEstimator from './components/ProjectEstimator'
 import TechStack from './components/TechStack'
 import WorkShowcase from './components/WorkShowcase'
+import TrustTicker from './components/TrustTicker'
 import Achievements from './components/Achievements'
 import FAQ from './components/FAQ'
 import WebsiteRating from './components/WebsiteRating'
@@ -122,6 +123,7 @@ export default function App() {
       <Navbar onOpenCareers={() => setShowCareers(true)} />
       <main>
         <Hero />
+        <TrustTicker />
         <ProjectCards />
         <QuoteBlock />
         <Challenges />

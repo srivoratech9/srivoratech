@@ -560,6 +560,59 @@
   gap: 8px;
 }
 
+.customer-avatar-wrapper {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customer-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--color-white);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.avatar-verified-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.founder-badge-inline {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: rgba(0, 103, 244, 0.08);
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  margin-left: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.founder-review-card {
+  background: linear-gradient(135deg, rgba(0, 103, 244, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%) !important;
+  border-color: rgba(0, 103, 244, 0.15) !important;
+  box-shadow: 0 4px 15px rgba(0, 103, 244, 0.04) !important;
+}
+
 .review-avatar {
   width: 28px;
   height: 28px;

@@ -1,0 +1,141 @@
+/* ── Trust Ticker — Auto-Scrolling Marquee Strip ── */
+.trust-ticker-section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 0;
+}
+
+.ticker-glow-left,
+.ticker-glow-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ticker-glow-left {
+  left: 0;
+  background: linear-gradient(90deg, #0f172a 0%, transparent 100%);
+}
+
+.ticker-glow-right {
+  right: 0;
+  background: linear-gradient(270deg, #0f172a 0%, transparent 100%);
+}
+
+.ticker-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.ticker-track {
+  display: inline-flex;
+  will-change: transform;
+}
+
+.ticker-track-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+/* ── Stat Chip ── */
+.ticker-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  flex-shrink: 0;
+  transition: background 200ms ease, border-color 200ms ease;
+  cursor: default;
+}
+
+.ticker-stat-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.ticker-stat-icon {
+  display: flex;
+  align-items: center;
+}
+
+.ticker-stat-value {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ticker-stat-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
+}
+
+/* ── Trust Badge ── */
+.ticker-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #34d399;
+  flex-shrink: 0;
+  transition: background 200ms ease;
+  cursor: default;
+}
+
+.ticker-trust-badge:hover {
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.ticker-trust-badge svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .trust-ticker-section {
+    padding: 10px 0;
+  }
+
+  .ticker-stat-chip {
+    padding: 5px 10px;
+    gap: 4px;
+  }
+
+  .ticker-stat-value {
+    font-size: 12px;
+  }
+
+  .ticker-stat-label {
+    font-size: 10.5px;
+  }
+
+  .ticker-trust-badge {
+    padding: 4px 10px;
+    font-size: 10.5px;
+  }
+
+  .ticker-glow-left,
+  .ticker-glow-right {
+    width: 40px;
+  }
+}

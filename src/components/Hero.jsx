@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import { ArrowRight, Zap, MousePointer2, Figma, Shield, Clock, Rocket, Sparkles, Cpu, Globe, Palette } from 'lucide-react'
+import { ArrowRight, Zap, MousePointer2, Figma, Shield, Clock, Rocket, Sparkles, Cpu, Globe, Palette, Users, Briefcase } from 'lucide-react'
 import HeroCanvas from './HeroCanvas'
+import srikanthPhoto from '../assets/badisa_srikanth.jpg'
+import saiPhoto from '../assets/sai_manindra.jpg'
 import './Hero.css'
 
 const colorThemes = [
@@ -43,7 +45,7 @@ export default function Hero() {
     }
     fetchRatingStats()
     window.addEventListener('svt_reviews_changed', fetchRatingStats)
-    const timer = setInterval(fetchRatingStats, 1200)
+    const timer = setInterval(fetchRatingStats, 10000)
     return () => {
       clearInterval(timer)
       window.removeEventListener('svt_reviews_changed', fetchRatingStats)
@@ -140,11 +142,11 @@ export default function Hero() {
 
         {/* Social Proof Row */}
         <div ref={ref6} className={`hero-social-proof animate-on-scroll delay-3 ${vis6 ? 'visible' : ''}`}>
-          <div className="hero-avatars-stack" title="Badisa Srikanth (Founder & CEO), Narasimha Reddy, Sujith Reddy">
-            <div className="hero-avatar" style={{ background: '#0067f4', color: '#fff', fontWeight: 800 }}>B</div>
-            <div className="hero-avatar" style={{ background: '#8b5cf6', color: '#fff', fontWeight: 800 }}>N</div>
-            <div className="hero-avatar" style={{ background: '#10b981', color: '#fff', fontWeight: 800 }}>S</div>
-            <span className="hero-avatar-count">+03</span>
+          <div className="hero-avatars-stack" title="Badisa Srikanth (Founder & CEO), Garapati Sai Manindra (CTO), Badisa Vamsi Krishna (COO)">
+            <img src={srikanthPhoto} alt="Badisa Srikanth" className="hero-avatar hero-avatar-img" />
+            <img src={saiPhoto} alt="Garapati Sai Manindra" className="hero-avatar hero-avatar-img" />
+            <div className="hero-avatar" style={{ background: '#8b5cf6', color: '#fff', fontWeight: 800 }}>VK</div>
+            <span className="hero-avatar-count">+07</span>
           </div>
 
           <a href="#website-rating" className="hero-rating" title="View Community Star Ratings">
@@ -191,15 +193,21 @@ export default function Hero() {
           <div className="preview-body">
             {activeHeroTab === 'fintech' && (
               <div className="preview-screen fintech-screen">
-                <div className="preview-stat-card">
-                  <span className="stat-title">Quarterly Loans Volume</span>
-                  <strong className="stat-num">$12,450,000</strong>
-                  <span className="stat-growth">+142% vs last Q</span>
+                <div className="preview-stat-card team-card">
+                  <div className="stat-icon-row">
+                    <Users size={18} className="stat-icon" />
+                  </div>
+                  <span className="stat-title">Number of Team</span>
+                  <strong className="stat-num">10</strong>
+                  <span className="stat-growth green-growth">Growing Strong</span>
                 </div>
-                <div className="preview-stat-card alt-card">
-                  <span className="stat-title">Active Subscribers</span>
-                  <strong className="stat-num">48,920</strong>
-                  <span className="stat-growth green-growth">Live Sync</span>
+                <div className="preview-stat-card alt-card clients-card">
+                  <div className="stat-icon-row">
+                    <Briefcase size={18} className="stat-icon" />
+                  </div>
+                  <span className="stat-title">Number of Clients</span>
+                  <strong className="stat-num">2</strong>
+                  <span className="stat-growth green-growth">Active Partnerships</span>
                 </div>
               </div>
             )}
