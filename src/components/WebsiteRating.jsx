@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight, Download } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { subscribeToRatings, submitRating, incrementViewCount, adminLogin, adminGetReviews, adminApproveReview, adminRejectReview, adminEditReview, adminDeleteReview, getAdminToken, removeAdminToken } from '../services/ratingsService'
 import './WebsiteRating.css'
@@ -213,6 +213,35 @@ export default function WebsiteRating() {
     setShowAdminPortal(false)
   }
 
+  const exportAdminCSV = () => {
+    const safeList = Array.isArray(adminReviews) ? adminReviews : []
+    if (safeList.length === 0) {
+      alert('No reviews available to export.')
+      return
+    }
+
+    const headers = ['ID', 'Name', 'Email', 'Company', 'Rating', 'Comment', 'Date', 'Status']
+    const rows = safeList.map(r => [
+      r.id,
+      `"${(r.name || '').replace(/"/g, '""')}"`,
+      `"${(r.email || '').replace(/"/g, '""')}"`,
+      `"${(r.company || '').replace(/"/g, '""')}"`,
+      r.star,
+      `"${(r.comment || '').replace(/"/g, '""')}"`,
+      `"${(r.date || '').replace(/"/g, '""')}"`,
+      r.status
+    ])
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement('a')
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', `SriVoraTech_Reviews_Export_${Date.now()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const handleApprove = async (id) => {
     try {
       await adminApproveReview(id)
@@ -404,6 +433,9 @@ export default function WebsiteRating() {
                     </div>
                     <button onClick={loadAdminReviews} className="refresh-btn" title="Refresh Feed">
                       <RefreshCw size={14} className={adminLoading ? 'spin-anim' : ''} />
+                    </button>
+                    <button onClick={exportAdminCSV} className="refresh-btn export-csv-btn" title="Export CSV Data Report">
+                      <Download size={14} /> Export CSV
                     </button>
                   </div>
                 </div>
