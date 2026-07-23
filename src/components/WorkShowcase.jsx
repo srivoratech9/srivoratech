@@ -584,6 +584,47 @@ function ProjectDetailPage({ project, onClose, onSelectProject, allProjects }) {
               </div>
             </div>
 
+            {/* Interactive Prototype Frame Preview */}
+            <div className="interactive-prototype-container" style={{ borderColor: `${project.color}40` }}>
+              <div className="device-top-bar">
+                <div className="device-dots">
+                  <span className="dot red" />
+                  <span className="dot yellow" />
+                  <span className="dot green" />
+                </div>
+                <div className="device-title-bar">{project.title} — Interactive Prototype</div>
+                <div className="device-status-badge" style={{ background: `${project.color}20`, color: project.color }}>
+                  ● Live Simulation
+                </div>
+              </div>
+              <div className="device-screen-content">
+                <div className="proto-metrics-header">
+                  <div className="p-metric">
+                    <span className="p-label">System Status</span>
+                    <strong className="p-val text-green">100% Operational</strong>
+                  </div>
+                  <div className="p-metric">
+                    <span className="p-label">Latency</span>
+                    <strong className="p-val">12ms</strong>
+                  </div>
+                  <div className="p-metric">
+                    <span className="p-label">Active Connections</span>
+                    <strong className="p-val">4,890</strong>
+                  </div>
+                </div>
+
+                <div className="proto-mock-card" style={{ background: `linear-gradient(135deg, ${project.color}15, rgba(255,255,255,0.8))` }}>
+                  <h4>{project.headline}</h4>
+                  <p>{project.about}</p>
+                  <div className="proto-features-chips">
+                    {project.features.slice(0, 3).map((f, idx) => (
+                      <span key={idx} className="proto-chip">✓ {f}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* CTA */}
             <div className="project-cta-section">
               <a href="#contact" className="project-cta-btn" onClick={onClose}>

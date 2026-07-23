@@ -627,3 +627,119 @@
   .project-hero-banner { min-height: 180px; padding: 24px 20px; }
   .hero-banner-title { font-size: 24px; }
 }
+
+/* ── Interactive Prototype Frame Preview ── */
+.interactive-prototype-container {
+  margin: 24px 0;
+  background: #ffffff;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.device-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.device-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.device-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.device-dots .dot.red { background: #ef4444; }
+.device-dots .dot.yellow { background: #f59e0b; }
+.device-dots .dot.green { background: #22c55e; }
+
+.device-title-bar {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.device-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.device-screen-content {
+  padding: 20px;
+}
+
+.proto-metrics-header {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.p-metric {
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.p-label {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.p-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.p-val.text-green { color: #16a34a; }
+
+.proto-mock-card {
+  padding: 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.proto-mock-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.proto-mock-card p {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.proto-features-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.proto-chip {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  color: #1e293b;
+}
