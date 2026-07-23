@@ -25,6 +25,32 @@ export default function Hero() {
   const [activeHeroTab, setActiveHeroTab] = useState('fintech')
   const [ratingStats, setRatingStats] = useState({ averageRating: 5.0, totalCount: 15 })
 
+  const [animatedTeamCount, setAnimatedTeamCount] = useState(0)
+  const [animatedClientsCount, setAnimatedClientsCount] = useState(0)
+
+  useEffect(() => {
+    if (activeHeroTab === 'fintech') {
+      let currentTeam = 0
+      let currentClients = 0
+      const steps = 10
+      const timer = setInterval(() => {
+        currentTeam += 1
+        currentClients = Math.min(2, Math.round(currentTeam * 0.2))
+
+        if (currentTeam >= 10) {
+          setAnimatedTeamCount(10)
+          setAnimatedClientsCount(2)
+          clearInterval(timer)
+        } else {
+          setAnimatedTeamCount(currentTeam)
+          setAnimatedClientsCount(currentClients)
+        }
+      }, 50)
+
+      return () => clearInterval(timer)
+    }
+  }, [activeHeroTab])
+
   useEffect(() => {
     const fetchRatingStats = async () => {
       try {
@@ -198,7 +224,7 @@ export default function Hero() {
                     <Users size={18} className="stat-icon" />
                   </div>
                   <span className="stat-title">Number of Team</span>
-                  <strong className="stat-num">10</strong>
+                  <strong className="stat-num">{animatedTeamCount}</strong>
                   <span className="stat-growth green-growth">Growing Strong</span>
                 </div>
                 <div className="preview-stat-card alt-card clients-card">
@@ -206,7 +232,7 @@ export default function Hero() {
                     <Briefcase size={18} className="stat-icon" />
                   </div>
                   <span className="stat-title">Number of Clients</span>
-                  <strong className="stat-num">2</strong>
+                  <strong className="stat-num">{animatedClientsCount}</strong>
                   <span className="stat-growth green-growth">Active Partnerships</span>
                 </div>
               </div>

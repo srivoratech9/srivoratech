@@ -26,6 +26,7 @@ export default function WebsiteRating() {
   const [loading, setLoading] = useState(true)
   const [publicStarFilter, setPublicStarFilter] = useState('')
   const [publicSearchQuery, setPublicSearchQuery] = useState('')
+  const [publicSortBy, setPublicSortBy] = useState('newest') // 'newest' | 'highest' | 'helpful'
   const [publicViewMode, setPublicViewMode] = useState('carousel') // 'carousel' | 'grid'
   const [votedHelpful, setVotedHelpful] = useState({})
 
@@ -78,17 +79,27 @@ export default function WebsiteRating() {
 
   const safeAdminReviews = Array.isArray(adminReviews) ? adminReviews : []
 
-  const filteredPublicReviews = (Array.isArray(reviewsList) ? reviewsList : []).filter(r => {
-    if (publicStarFilter && r.star !== parseInt(publicStarFilter, 10)) return false
-    if (publicSearchQuery) {
-      const q = publicSearchQuery.toLowerCase()
-      const matchName = (r.name || '').toLowerCase().includes(q)
-      const matchComment = (r.comment || '').toLowerCase().includes(q)
-      const matchCompany = (r.company || '').toLowerCase().includes(q)
-      if (!matchName && !matchComment && !matchCompany) return false
-    }
-    return true
-  })
+  const filteredPublicReviews = (Array.isArray(reviewsList) ? [...reviewsList] : [])
+    .filter(r => {
+      if (publicStarFilter && r.star !== parseInt(publicStarFilter, 10)) return false
+      if (publicSearchQuery) {
+        const q = publicSearchQuery.toLowerCase()
+        const matchName = (r.name || '').toLowerCase().includes(q)
+        const matchComment = (r.comment || '').toLowerCase().includes(q)
+        const matchCompany = (r.company || '').toLowerCase().includes(q)
+        if (!matchName && !matchComment && !matchCompany) return false
+      }
+      return true
+    })
+    .sort((a, b) => {
+      if (publicSortBy === 'highest') {
+        return (b.star || 0) - (a.star || 0) || (b.timestamp || 0) - (a.timestamp || 0)
+      }
+      if (publicSortBy === 'helpful') {
+        return (b.helpfulCount || 0) - (a.helpfulCount || 0) || (b.timestamp || 0) - (a.timestamp || 0)
+      }
+      return (b.timestamp || 0) - (a.timestamp || 0)
+    })
 
   const scrollStream = (direction) => {
     if (scrollStreamRef.current) {
@@ -838,6 +849,20 @@ export default function WebsiteRating() {
                       value={publicSearchQuery}
                       onChange={e => setPublicSearchQuery(e.target.value)}
                     />
+                  </div>
+                  
+                  <div className="public-sort-select-wrapper">
+                    <Filter size={12} className="filter-icon" />
+                    <select 
+                      value={publicSortBy} 
+                      onChange={e => setPublicSortBy(e.target.value)}
+                      className="public-sort-select"
+                      title="Sort Reviews"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="highest">Highest Rating</option>
+                      <option value="helpful">Most Helpful</option>
+                    </select>
                   </div>
                   <div className="public-star-pills">
                     <button 
