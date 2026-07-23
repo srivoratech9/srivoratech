@@ -1,8 +1,7 @@
 // MongoDB Atlas Database Client Helper for SriVoraTech
 import { MongoClient } from 'mongodb'
 
-// Default fallback MongoDB Atlas connection string (or process.env.MONGODB_URI)
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://srivoratech_user:SriVoraTech2026SecurePass@cluster0.srivoratech.mongodb.net/srivoratech?retryWrites=true&w=majority'
+const MONGODB_URI = process.env.MONGODB_URI
 const DB_NAME = 'srivoratech'
 
 let cachedClient = null
@@ -13,10 +12,15 @@ export async function connectToDatabase() {
     return { client: cachedClient, db: cachedDb }
   }
 
+  // If no env MONGODB_URI is provided, skip immediately (0ms delay) to fast server storage
+  if (!MONGODB_URI) {
+    return { client: null, db: null }
+  }
+
   try {
     const client = new MongoClient(MONGODB_URI, {
-      connectTimeoutMS: 5000,
-      serverSelectionTimeoutMS: 5000
+      connectTimeoutMS: 1500,
+      serverSelectionTimeoutMS: 1500
     })
 
     await client.connect()
@@ -27,7 +31,7 @@ export async function connectToDatabase() {
 
     return { client, db }
   } catch (error) {
-    console.warn('MongoDB Atlas connection skipped (using file/memory storage fallback):', error.message)
+    console.warn('MongoDB Atlas connection skipped:', error.message)
     return { client: null, db: null }
   }
 }

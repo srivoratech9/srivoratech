@@ -86,64 +86,70 @@ function saveLocalReviews(reviews) {
 }
 
 async function getReviewsFromDb() {
-  try {
-    const { db } = await connectToDatabase()
-    if (db) {
-      const collection = db.collection('reviews')
-      const docs = await collection.find({}).toArray()
-      if (Array.isArray(docs) && docs.length > 0) {
-        const normalized = docs.map(d => {
-          const { _id, ...rest } = d
-          return rest
-        })
-        global._svt_in_memory_reviews = normalized
-        saveLocalReviews(normalized)
-        return normalized
-      } else {
-        await collection.insertMany(DEFAULT_REVIEWS)
-        global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
-        saveLocalReviews(global._svt_in_memory_reviews)
-        return global._svt_in_memory_reviews
+  if (process.env.MONGODB_URI) {
+    try {
+      const { db } = await connectToDatabase()
+      if (db) {
+        const collection = db.collection('reviews')
+        const docs = await collection.find({}).toArray()
+        if (Array.isArray(docs) && docs.length > 0) {
+          const normalized = docs.map(d => {
+            const { _id, ...rest } = d
+            return rest
+          })
+          global._svt_in_memory_reviews = normalized
+          saveLocalReviews(normalized)
+          return normalized
+        } else {
+          await collection.insertMany(DEFAULT_REVIEWS)
+          global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
+          saveLocalReviews(global._svt_in_memory_reviews)
+          return global._svt_in_memory_reviews
+        }
       }
+    } catch (e) {
+      console.warn('MongoDB Atlas fetch fallback:', e.message)
     }
-  } catch (e) {
-    console.warn('MongoDB Atlas fetch fallback:', e.message)
   }
   return getLocalReviews()
 }
 
 async function saveReviewToDb(newReview) {
-  try {
-    const { db } = await connectToDatabase()
-    if (db) {
-      const collection = db.collection('reviews')
-      await collection.updateOne(
-        { id: newReview.id },
-        { $set: newReview },
-        { upsert: true }
-      )
+  if (process.env.MONGODB_URI) {
+    try {
+      const { db } = await connectToDatabase()
+      if (db) {
+        const collection = db.collection('reviews')
+        await collection.updateOne(
+          { id: newReview.id },
+          { $set: newReview },
+          { upsert: true }
+        )
+      }
+    } catch (e) {
+      console.warn('MongoDB Atlas save fallback:', e.message)
     }
-  } catch (e) {
-    console.warn('MongoDB Atlas save fallback:', e.message)
   }
 }
 
 async function deleteReviewFromDb(targetId) {
-  try {
-    const { db } = await connectToDatabase()
-    if (db) {
-      const collection = db.collection('reviews')
-      const numId = parseInt(targetId, 10)
-      await collection.deleteMany({
-        $or: [
-          { id: targetId },
-          { id: String(targetId) },
-          { id: isNaN(numId) ? targetId : numId }
-        ]
-      })
+  if (process.env.MONGODB_URI) {
+    try {
+      const { db } = await connectToDatabase()
+      if (db) {
+        const collection = db.collection('reviews')
+        const numId = parseInt(targetId, 10)
+        await collection.deleteMany({
+          $or: [
+            { id: targetId },
+            { id: String(targetId) },
+            { id: isNaN(numId) ? targetId : numId }
+          ]
+        })
+      }
+    } catch (e) {
+      console.warn('MongoDB Atlas delete fallback:', e.message)
     }
-  } catch (e) {
-    console.warn('MongoDB Atlas delete fallback:', e.message)
   }
 }
 
