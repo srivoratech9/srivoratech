@@ -344,7 +344,34 @@
   color: #22c55e;
 }
 
-.summary-cta {
+.summary-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
   margin-top: 6px;
+}
+
+.summary-cta {
+  width: 100%;
+}
+
+.summary-pdf-btn {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.summary-pdf-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import { Calculator, ArrowRight, CheckCircle, ShieldCheck, Zap, Sparkles } from 'lucide-react'
+import { Calculator, ArrowRight, CheckCircle, ShieldCheck, Zap, Sparkles, FileText } from 'lucide-react'
 import './ProjectEstimator.css'
 
 const projectTypes = [
@@ -105,6 +105,97 @@ export default function ProjectEstimator() {
       detail: { message, budget: mappedBudget }
     })
     window.dispatchEvent(event)
+  }
+
+  const handleDownloadPDFEstimate = () => {
+    const featureNames = selectedFeatures
+      .map(id => addOnFeatures.find(f => f.id === id)?.name)
+      .filter(Boolean)
+      .join(', ') || 'Standard Core Architecture'
+
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) return
+
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>SriVoraTech Project Estimate Proposal</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: auto; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0067f4; padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: 800; color: #0067f4; letter-spacing: -0.5px; }
+          .sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+          .date { font-size: 13px; color: #64748b; font-weight: 600; }
+          .title { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 20px; }
+          .table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+          .table th { background: #f8fafc; text-align: left; padding: 12px 16px; border: 1px solid #e2e8f0; font-size: 12px; text-transform: uppercase; color: #475569; }
+          .table td { padding: 14px 16px; border: 1px solid #e2e8f0; font-size: 14px; }
+          .total-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+          .total-box h3 { margin: 0 0 8px; color: #1e40af; font-size: 18px; }
+          .total-box p { margin: 4px 0; font-size: 14px; color: #1e3a8a; }
+          .footer { font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="logo">SriVoraTech</div>
+            <div class="sub">Enabling Businesses with Advanced Software & AI Solutions</div>
+          </div>
+          <div class="date">${dateStr}</div>
+        </div>
+
+        <div class="title">Official Project Estimate Proposal</div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Specification</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Project Category</strong></td>
+              <td>${selectedType.name}</td>
+            </tr>
+            <tr>
+              <td><strong>Selected Features</strong></td>
+              <td>${featureNames}</td>
+            </tr>
+            <tr>
+              <td><strong>Development Speed</strong></td>
+              <td>${selectedTimeline.label}</td>
+            </tr>
+            <tr>
+              <td><strong>Estimated Duration</strong></td>
+              <td>~${totalWeeks} Weeks</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="total-box">
+          <h3>Estimated Budget Range: ${formattedCostMin} – ${formattedCostMax} (${currency})</h3>
+          <p>✓ Includes 100% Source Code & Complete IP Ownership</p>
+          <p>✓ Fixed-Price Guarantee & Milestone Deliverables</p>
+        </div>
+
+        <div class="footer">
+          SriVoraTech • Contact: srikanth@srivoratech.in • Web: https://srivoratech.vercel.app/
+        </div>
+
+        <script>
+          window.onload = function() { window.print(); }
+        </script>
+      </body>
+      </html>
+    `
+
+    printWindow.document.write(htmlContent)
+    printWindow.document.close()
   }
 
   return (
@@ -249,10 +340,15 @@ export default function ProjectEstimator() {
                   <ShieldCheck size={16} /> 100% Fixed-Price Guarantee & IP Ownership Included
                 </p>
 
-                <button className="btn-accent summary-cta" onClick={handleSendToContact}>
-                  Send Estimate & Book Call
-                  <ArrowRight size={18} />
-                </button>
+                <div className="summary-actions-row">
+                  <button className="btn-accent summary-cta" onClick={handleSendToContact}>
+                    Send Estimate & Book Call
+                    <ArrowRight size={18} />
+                  </button>
+                  <button type="button" className="btn-secondary-light summary-pdf-btn" onClick={handleDownloadPDFEstimate}>
+                    <FileText size={16} /> Download Proposal PDF
+                  </button>
+                </div>
               </div>
             </div>
           </div>
