@@ -383,8 +383,13 @@ export default async function handler(req, res) {
     })
   }
 
+  let reqBody = req.body || {}
+  if (typeof reqBody === 'string') {
+    try { reqBody = JSON.parse(reqBody) } catch(e) { reqBody = {} }
+  }
+
   // ── 4. Helpful Counter Endpoint ──
-  const isHelpfulReq = url.includes('helpful') || req.query?.action === 'helpful' || req.query?.helpful || req.body?.isHelpful
+  const isHelpfulReq = url.includes('helpful') || req.query?.action === 'helpful' || req.query?.helpful || reqBody?.isHelpful || reqBody?.action === 'helpful'
   if (isHelpfulReq) {
     if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' })
     const targetId = extractReviewId(url, req)
@@ -401,14 +406,7 @@ export default async function handler(req, res) {
   // ── 4. Public POST /api/reviews Endpoint (Defaults to Approved) ──
   if (req.method === 'POST') {
     try {
-      let body = req.body || {}
-      if (typeof body === 'string') {
-        try {
-          body = JSON.parse(body)
-        } catch (parseErr) {
-          body = {}
-        }
-      }
+      const body = reqBody
 
       const { name, comment, email, company } = body
       const rawRating = body.rating !== undefined ? body.rating : body.star
