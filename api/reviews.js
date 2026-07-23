@@ -384,7 +384,7 @@ export default async function handler(req, res) {
   }
 
   // ── 4. Helpful Counter Endpoint ──
-  if (url.includes('/helpful')) {
+  if (url.includes('helpful')) {
     if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' })
     const targetId = extractReviewId(url, req)
     const reviews = await getReviewsFromDb()
