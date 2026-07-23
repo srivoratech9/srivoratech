@@ -39,7 +39,7 @@ export async function submitToSheet(formType, data) {
       jsonPayload[key] = value
     }
   })
-  jsonPayload.type = formType === 'fresher' ? 'Fresher' : formType === 'contact' ? 'Contact' : 'Experienced'
+  jsonPayload.type = formType === 'fresher' ? 'Fresher' : formType === 'contact' ? 'Contact' : formType === 'rating' ? 'Rating' : 'Experienced'
 
   // --- Strategy 1: Google Apps Script Web App (direct, no backend server needed) ---
   if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.includes('script.google.com')) {

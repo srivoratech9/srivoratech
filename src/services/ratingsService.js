@@ -229,13 +229,16 @@ export function subscribeToRatings(callback) {
  * Submit a customer rating with optional profile image upload
  */
 export async function submitRating({ name, email, star, comment, company, profileImageFile }) {
-  // 1. Mirror submission to Google Sheets (non-blocking cloud storage fallback)
+  // 1. Mirror submission to Google Sheets (centralized multi-device database)
   try {
     submitToSheet('rating', {
       name,
+      fullName: name,
       email,
-      star,
+      star: parseInt(star, 10) || 5,
+      rating: parseInt(star, 10) || 5,
       comment,
+      message: comment,
       company,
       status: 'Approved'
     })
