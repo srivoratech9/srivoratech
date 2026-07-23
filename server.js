@@ -687,7 +687,7 @@ app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
 app.put('/api/admin/reviews/:id', requireAdmin, (req, res) => {
   try {
     const rId = req.params.id
-    const { name, star, comment, company } = req.body
+    const { name, star, comment, company, adminReply } = req.body
     const reviews = getReviews()
     const match = reviews.find(r => String(r.id) === String(rId))
 
@@ -698,6 +698,7 @@ app.put('/api/admin/reviews/:id', requireAdmin, (req, res) => {
     if (name) match.name = sanitizeInput(name)
     if (comment) match.comment = sanitizeInput(comment)
     if (company !== undefined) match.company = sanitizeInput(company)
+    if (adminReply !== undefined) match.adminReply = sanitizeInput(adminReply)
     
     if (star !== undefined) {
       const sVal = parseInt(star, 10)

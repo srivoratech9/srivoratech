@@ -312,11 +312,12 @@ export default async function handler(req, res) {
         return res.status(404).json({ success: false, message: 'Review not found' })
       }
 
-      const { name, company, star, comment } = body
+      const { name, company, star, comment, adminReply } = body
       if (name) reviews[reviewIndex].name = String(name).replace(/<[^>]*>/g, '').trim()
       if (company !== undefined) reviews[reviewIndex].company = String(company).replace(/<[^>]*>/g, '').trim()
       if (star) reviews[reviewIndex].star = parseInt(star, 10) || 5
       if (comment) reviews[reviewIndex].comment = String(comment).replace(/<[^>]*>/g, '').trim()
+      if (adminReply !== undefined) reviews[reviewIndex].adminReply = String(adminReply).replace(/<[^>]*>/g, '').trim()
 
       saveLocalReviews(reviews)
       await saveReviewToDb(reviews[reviewIndex])

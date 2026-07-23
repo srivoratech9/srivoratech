@@ -273,12 +273,15 @@ export default function WebsiteRating() {
     }
   }
 
+  const [editAdminReply, setEditAdminReply] = useState('')
+
   const openEditModal = (review) => {
     setEditingReview(review)
     setEditName(review.name)
     setEditCompany(review.company || '')
     setEditStar(review.star)
     setEditComment(review.comment)
+    setEditAdminReply(review.adminReply || '')
   }
 
   const handleSaveEdit = async (e) => {
@@ -288,7 +291,8 @@ export default function WebsiteRating() {
         name: editName,
         company: editCompany,
         star: editStar,
-        comment: editComment
+        comment: editComment,
+        adminReply: editAdminReply
       })
       setEditingReview(null)
       loadAdminReviews()
@@ -819,6 +823,15 @@ export default function WebsiteRating() {
                             </div>
                           </div>
                           <p className="r-comment">"{review.comment}"</p>
+                          {review.adminReply && (
+                            <div className="official-admin-reply-box">
+                              <div className="reply-header-meta">
+                                <ShieldCheck size={13} className="reply-badge-icon" />
+                                <span>Official Response from SriVoraTech</span>
+                              </div>
+                              <p className="reply-content-text">"{review.adminReply}"</p>
+                            </div>
+                          )}
                           <span className="r-date">{review.date}</span>
                         </div>
                       ))}
@@ -880,6 +893,15 @@ export default function WebsiteRating() {
                   onChange={e => setEditComment(e.target.value)}
                   rows={3}
                   required
+                />
+              </div>
+              <div className="form-group">
+                <label>Official SriVoraTech Response (Optional)</label>
+                <textarea 
+                  placeholder="Enter official team response to this customer..."
+                  value={editAdminReply}
+                  onChange={e => setEditAdminReply(e.target.value)}
+                  rows={2}
                 />
               </div>
               <div className="modal-actions">
