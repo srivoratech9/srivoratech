@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { connectToDatabase } from './mongodb.js'
 
 const ADMIN_TOKEN = 'srivoratech_admin_secure_session_token_2026'
 
@@ -37,11 +38,10 @@ function getWritableStoragePath() {
   }
 }
 
-function getReviews() {
+function getLocalReviews() {
   const targetPath = getWritableStoragePath()
   const uploadsPath = path.join(process.cwd(), 'uploads', 'reviews.json')
 
-  // 1. Always attempt reading fresh target file first
   try {
     if (fs.existsSync(targetPath)) {
       const data = fs.readFileSync(targetPath, 'utf8')
@@ -51,11 +51,8 @@ function getReviews() {
         return parsed
       }
     }
-  } catch (err) {
-    console.error('Error reading target reviews file:', err)
-  }
+  } catch (err) {}
 
-  // 2. Seed from uploadsPath if target file doesn't exist
   if (targetPath !== uploadsPath) {
     try {
       if (fs.existsSync(uploadsPath)) {
@@ -63,25 +60,20 @@ function getReviews() {
         const seedParsed = JSON.parse(seedData)
         if (Array.isArray(seedParsed) && seedParsed.length > 0) {
           global._svt_in_memory_reviews = seedParsed
-          saveReviews(seedParsed)
           return seedParsed
         }
       }
-    } catch (err) {
-      console.error('Error seeding from uploadsPath:', err)
-    }
+    } catch (err) {}
   }
 
-  // 3. Fallback to global memory or DEFAULT_REVIEWS
   if (!global._svt_in_memory_reviews || global._svt_in_memory_reviews.length === 0) {
     global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
-    saveReviews(global._svt_in_memory_reviews)
   }
 
   return global._svt_in_memory_reviews
 }
 
-function saveReviews(reviews) {
+function saveLocalReviews(reviews) {
   global._svt_in_memory_reviews = reviews
   try {
     const targetPath = getWritableStoragePath()
@@ -90,8 +82,68 @@ function saveReviews(reviews) {
       fs.mkdirSync(dir, { recursive: true })
     }
     fs.writeFileSync(targetPath, JSON.stringify(reviews, null, 2))
-  } catch (err) {
-    console.error('Error saving persistent reviews:', err)
+  } catch (err) {}
+}
+
+async function getReviewsFromDb() {
+  try {
+    const { db } = await connectToDatabase()
+    if (db) {
+      const collection = db.collection('reviews')
+      const docs = await collection.find({}).toArray()
+      if (Array.isArray(docs) && docs.length > 0) {
+        const normalized = docs.map(d => {
+          const { _id, ...rest } = d
+          return rest
+        })
+        global._svt_in_memory_reviews = normalized
+        saveLocalReviews(normalized)
+        return normalized
+      } else {
+        await collection.insertMany(DEFAULT_REVIEWS)
+        global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
+        saveLocalReviews(global._svt_in_memory_reviews)
+        return global._svt_in_memory_reviews
+      }
+    }
+  } catch (e) {
+    console.warn('MongoDB Atlas fetch fallback:', e.message)
+  }
+  return getLocalReviews()
+}
+
+async function saveReviewToDb(newReview) {
+  try {
+    const { db } = await connectToDatabase()
+    if (db) {
+      const collection = db.collection('reviews')
+      await collection.updateOne(
+        { id: newReview.id },
+        { $set: newReview },
+        { upsert: true }
+      )
+    }
+  } catch (e) {
+    console.warn('MongoDB Atlas save fallback:', e.message)
+  }
+}
+
+async function deleteReviewFromDb(targetId) {
+  try {
+    const { db } = await connectToDatabase()
+    if (db) {
+      const collection = db.collection('reviews')
+      const numId = parseInt(targetId, 10)
+      await collection.deleteMany({
+        $or: [
+          { id: targetId },
+          { id: String(targetId) },
+          { id: isNaN(numId) ? targetId : numId }
+        ]
+      })
+    }
+  } catch (e) {
+    console.warn('MongoDB Atlas delete fallback:', e.message)
   }
 }
 
@@ -148,7 +200,7 @@ function findReviewIndex(reviews, url, req) {
   return index
 }
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   // CORS & Cache & CSP Headers
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -204,7 +256,7 @@ export default function handler(req, res) {
       const rating = urlObj.searchParams.get('rating') || ''
       const status = urlObj.searchParams.get('status') || ''
 
-      let resultList = getReviews()
+      let resultList = await getReviewsFromDb()
       if (rating) {
         const rVal = parseInt(rating, 10)
         resultList = resultList.filter(r => r.star === rVal)
@@ -227,7 +279,7 @@ export default function handler(req, res) {
 
     // Admin POST (Approve / Reject)
     if (req.method === 'POST') {
-      const reviews = getReviews()
+      const reviews = await getReviewsFromDb()
       const reviewIndex = findReviewIndex(reviews, url, req)
 
       if (reviewIndex === -1) {
@@ -236,12 +288,14 @@ export default function handler(req, res) {
 
       if (url.includes('/approve')) {
         reviews[reviewIndex].status = 'Approved'
-        saveReviews(reviews)
+        saveLocalReviews(reviews)
+        await saveReviewToDb(reviews[reviewIndex])
         return res.status(200).json({ success: true, message: 'Review approved successfully', review: reviews[reviewIndex] })
       }
       if (url.includes('/reject')) {
         reviews[reviewIndex].status = 'Rejected'
-        saveReviews(reviews)
+        saveLocalReviews(reviews)
+        await saveReviewToDb(reviews[reviewIndex])
         return res.status(200).json({ success: true, message: 'Review rejected successfully', review: reviews[reviewIndex] })
       }
     }
@@ -253,7 +307,7 @@ export default function handler(req, res) {
         try { body = JSON.parse(body) } catch(e) {}
       }
 
-      const reviews = getReviews()
+      const reviews = await getReviewsFromDb()
       const reviewIndex = findReviewIndex(reviews, url, req)
 
       if (reviewIndex === -1) {
@@ -266,13 +320,14 @@ export default function handler(req, res) {
       if (star) reviews[reviewIndex].star = parseInt(star, 10) || 5
       if (comment) reviews[reviewIndex].comment = String(comment).replace(/<[^>]*>/g, '').trim()
 
-      saveReviews(reviews)
+      saveLocalReviews(reviews)
+      await saveReviewToDb(reviews[reviewIndex])
       return res.status(200).json({ success: true, message: 'Review updated successfully', review: reviews[reviewIndex] })
     }
 
     // Admin DELETE (Delete review)
     if (req.method === 'DELETE') {
-      let reviews = getReviews()
+      let reviews = await getReviewsFromDb()
       const targetId = extractReviewId(url, req)
       const originalLength = reviews.length
 
@@ -282,14 +337,15 @@ export default function handler(req, res) {
         return res.status(404).json({ success: false, message: 'Review not found' })
       }
 
-      saveReviews(reviews)
+      saveLocalReviews(reviews)
+      await deleteReviewFromDb(targetId)
       return res.status(200).json({ success: true, message: 'Review deleted successfully' })
     }
   }
 
   // ── 3. Public GET /api/reviews Endpoint (Approved Only) ──
   if (req.method === 'GET') {
-    const allReviews = getReviews()
+    const allReviews = await getReviewsFromDb()
     const approved = allReviews.filter(r => r.status === 'Approved')
     approved.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
 
@@ -363,9 +419,10 @@ export default function handler(req, res) {
         timestamp: Date.now()
       }
 
-      const reviews = getReviews()
+      const reviews = await getReviewsFromDb()
       reviews.unshift(newReview)
-      saveReviews(reviews)
+      saveLocalReviews(reviews)
+      await saveReviewToDb(newReview)
 
       return res.status(200).json({
         success: true,
@@ -377,6 +434,6 @@ export default function handler(req, res) {
     }
   }
 
-  res.status(405).json({ success: false, message: 'Method Not Allowed' })
+  return res.status(405).json({ success: false, message: 'Method Not Allowed' })
 }
 
