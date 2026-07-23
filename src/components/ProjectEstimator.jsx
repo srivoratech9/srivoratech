@@ -69,17 +69,31 @@ export default function ProjectEstimator() {
 - Estimated Timeline: ${totalWeeks} Weeks
 - Estimated Budget Range: ₹${formattedCostMin} - ₹${formattedCostMax}`
 
+    // Map calculated cost to a category in Contact form selection
+    let mappedBudget = "Let's Discuss"
+    if (rawCost < 50000) {
+      mappedBudget = 'Under ₹50,000'
+    } else if (rawCost >= 50000 && rawCost <= 100000) {
+      mappedBudget = '₹50,000 - ₹1,00,000'
+    } else if (rawCost > 100000 && rawCost <= 500000) {
+      mappedBudget = '₹1,00,000 - ₹5,00,000'
+    } else if (rawCost > 500000 && rawCost <= 1000000) {
+      mappedBudget = '₹5,00,000 - ₹10,00,000'
+    } else if (rawCost > 1000000) {
+      mappedBudget = '₹10,00,000+'
+    }
+
+    // Scroll to contact section
     const contactSection = document.getElementById('contact')
     if (contactSection) {
       contactSection.scrollIntoView({ behavior: 'smooth' })
-      setTimeout(() => {
-        const messageInput = document.querySelector('textarea[name="message"]')
-        if (messageInput) {
-          messageInput.value = message
-          messageInput.dispatchEvent(new Event('input', { bubbles: true }))
-        }
-      }, 500)
     }
+
+    // Dispatch custom event to populate Contact.jsx state cleanly
+    const event = new CustomEvent('svt_populate_estimate', {
+      detail: { message, budget: mappedBudget }
+    })
+    window.dispatchEvent(event)
   }
 
   return (

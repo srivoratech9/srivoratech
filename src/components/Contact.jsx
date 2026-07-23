@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { Send, Phone, Sparkles } from 'lucide-react'
 import { submitToSheet } from '../utils/submitToSheet'
@@ -18,6 +18,20 @@ export default function Contact() {
     budget: '',
     message: '',
   })
+
+  useEffect(() => {
+    const handlePopulate = (e) => {
+      const { message, budget } = e.detail || {}
+      setClientForm(prev => ({
+        ...prev,
+        message: message || prev.message,
+        budget: budget || prev.budget
+      }))
+    }
+
+    window.addEventListener('svt_populate_estimate', handlePopulate)
+    return () => window.removeEventListener('svt_populate_estimate', handlePopulate)
+  }, [])
 
   const handleClientChange = (e) => {
     const { name, value } = e.target

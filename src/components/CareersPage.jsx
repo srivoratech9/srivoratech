@@ -181,6 +181,10 @@ export default function CareersPage({ onBack }) {
     }
 
 
+    if (!d.resume || d.resume.trim().length < 5) {
+      errs.resume = 'Resume / CV link is required.'
+    }
+
     setErrors(errs)
     return Object.keys(errs).length === 0
   }

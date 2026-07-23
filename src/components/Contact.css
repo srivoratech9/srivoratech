@@ -356,24 +356,13 @@
   cursor: not-allowed;
 }
 
-/* Animation for form fields — staggered fade-in */
-.form-group,
-.submit-btn {
-  animation: formFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
+/* Animation for form container */
+.form-container {
+  animation: formContainerFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.form-group:nth-child(1) { animation-delay: 0.05s; }
-.form-group:nth-child(2) { animation-delay: 0.1s; }
-.form-group:nth-child(3) { animation-delay: 0.15s; }
-.form-group:nth-child(4) { animation-delay: 0.2s; }
-.form-group:nth-child(5) { animation-delay: 0.25s; }
-.form-group:nth-child(6) { animation-delay: 0.3s; }
-.form-group:nth-child(7) { animation-delay: 0.35s; }
-.submit-btn { animation-delay: 0.4s; }
-
-@keyframes formFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+@keyframes formContainerFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
