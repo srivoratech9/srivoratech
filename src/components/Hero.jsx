@@ -27,8 +27,11 @@ export default function Hero() {
     const fetchRatingStats = async () => {
       try {
         const res = await fetch('/api/reviews')
+        if (!res.ok) return
+        const contentType = res.headers.get('content-type') || ''
+        if (!contentType.includes('application/json')) return
         const data = await res.json()
-        if (data.success) {
+        if (data && data.success) {
           setRatingStats({
             averageRating: data.averageRating,
             totalCount: data.totalCount

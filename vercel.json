@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/reviews",
+      "destination": "/api/reviews.js"
+    }
+  ]
+}
