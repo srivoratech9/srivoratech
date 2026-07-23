@@ -65,7 +65,7 @@ function getReviews() {
   const targetPath = getWritableStoragePath()
   const uploadsPath = path.join(process.cwd(), 'uploads', 'reviews.json')
 
-  // 1. Try reading target writable path
+  // 1. Always attempt reading fresh target file first
   try {
     if (fs.existsSync(targetPath)) {
       const data = fs.readFileSync(targetPath, 'utf8')
@@ -79,7 +79,7 @@ function getReviews() {
     console.error('Error reading target reviews file:', err)
   }
 
-  // 2. If target path doesn't exist yet, seed from uploadsPath if available
+  // 2. Seed from uploadsPath if target file doesn't exist
   if (targetPath !== uploadsPath) {
     try {
       if (fs.existsSync(uploadsPath)) {
@@ -96,7 +96,7 @@ function getReviews() {
     }
   }
 
-  // 3. Fallback to cached memory or DEFAULT_REVIEWS
+  // 3. Fallback to global memory or DEFAULT_REVIEWS
   if (!global._svt_in_memory_reviews || global._svt_in_memory_reviews.length === 0) {
     global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
     saveReviews(global._svt_in_memory_reviews)
