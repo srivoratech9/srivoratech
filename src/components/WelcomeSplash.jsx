@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sparkles, ArrowRight, Zap, ShieldCheck } from 'lucide-react'
+import { Sparkles, ArrowRight, Zap, Shield, Rocket, Award, Cpu, CheckCircle2 } from 'lucide-react'
 import './WelcomeSplash.css'
 
 export default function WelcomeSplash({ onComplete }) {
@@ -16,19 +16,19 @@ export default function WelcomeSplash({ onComplete }) {
       return
     }
 
-    // Progress counter animation
+    // Smooth Progress counter animation
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval)
           setTimeout(() => {
             triggerDismiss()
-          }, 200)
+          }, 250)
           return 100
         }
-        return prev + 5
+        return prev + 4
       })
-    }, 45)
+    }, 35)
 
     return () => clearInterval(interval)
   }, [])
@@ -40,50 +40,57 @@ export default function WelcomeSplash({ onComplete }) {
     setTimeout(() => {
       setIsDismissed(true)
       if (onComplete) onComplete()
-    }, 550)
+    }, 600)
   }
 
   if (isDismissed) return null
 
   return (
     <div className={`welcome-splash-overlay ${isDismissing ? 'splash-fade-out' : ''}`}>
-      {/* 3D Dynamic Ambient Light Beam Orbs */}
-      <div className="splash-light-beam beam-1" />
-      <div className="splash-light-beam beam-2" />
-      <div className="splash-light-beam beam-3" />
-      <div className="splash-grid-dots" />
+      {/* Dynamic Glassmorphism Mesh Glow Orbs */}
+      <div className="splash-orb orb-primary" />
+      <div className="splash-orb orb-secondary" />
+      <div className="splash-orb orb-tertiary" />
+      <div className="splash-grid-pattern" />
 
-      <div className="splash-content-container">
-        {/* Top Welcome Pill */}
-        <div className="splash-welcome-pill animate-splash-top">
-          <Sparkles size={14} className="sparkle-icon" />
-          <span>Welcome to SriVoraTech.in</span>
+      <div className="splash-content-box">
+        {/* Top Welcome Pill Badge */}
+        <div className="splash-pill-badge animate-splash-top">
+          <Sparkles size={14} className="sparkle-spin" />
+          <span>Official Digital Portal &bull; SriVoraTech.in</span>
         </div>
 
-        {/* 3D Cinematic Movie Title Effect */}
-        <div className="splash-title-3d-wrapper animate-splash-title">
-          <h1 className="splash-3d-logo" data-text="SriVoraTech.in">
-            SriVora<span className="logo-accent">Tech</span><span className="logo-domain">.in</span>
+        {/* 3D Main Title Banner */}
+        <div className="splash-brand-title animate-splash-title">
+          <h1 className="brand-logo-text">
+            SriVora<span className="brand-accent">Tech</span><span className="brand-domain">.in</span>
           </h1>
-          <div className="splash-3d-reflection">SriVoraTech.in</div>
+          <div className="brand-glow-reflection">SriVoraTech.in</div>
         </div>
 
         <p className="splash-tagline animate-splash-sub">
-          Engineering the Future of AI & Digital Product Innovation
+          Engineering Scalable AI Systems, Cloud Web Applications & Next-Gen Digital Products
         </p>
 
-        {/* Progress Bar & Skip Button */}
-        <div className="splash-footer-group animate-splash-footer">
-          <div className="splash-progress-bar-bg">
+        {/* Value Highlights Pill Row */}
+        <div className="splash-features-row animate-splash-features">
+          <span className="feature-pill"><Zap size={13} /> High Performance</span>
+          <span className="feature-pill"><Shield size={13} /> Enterprise Security</span>
+          <span className="feature-pill"><Award size={13} /> 5.0 Star Rated Team</span>
+        </div>
+
+        {/* Progress Fill & Action Button */}
+        <div className="splash-loading-group animate-splash-footer">
+          <div className="splash-progress-track">
             <div className="splash-progress-fill" style={{ width: `${progress}%` }} />
           </div>
 
-          <div className="splash-status-row">
-            <span className="splash-status-text">
-              <Zap size={13} className="live-zap" /> Loading Sprints 60fps... {progress}%
+          <div className="splash-action-row">
+            <span className="splash-loading-status">
+              <Cpu size={14} className="cpu-pulse-icon" /> Initializing Platform Modules... {progress}%
             </span>
-            <button className="splash-skip-btn" onClick={triggerDismiss}>
-              Explore Platform <ArrowRight size={13} />
+            <button className="splash-enter-btn" onClick={triggerDismiss}>
+              Explore Platform <ArrowRight size={14} />
             </button>
           </div>
         </div>
