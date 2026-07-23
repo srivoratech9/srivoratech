@@ -26,11 +26,11 @@ export function subscribeToRatings(callback) {
     try {
       const res = await fetch('/api/reviews')
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`)
+        throw new Error(`Server DB HTTP ${res.status}`)
       }
       const contentType = res.headers.get('content-type') || ''
       if (!contentType.includes('application/json')) {
-        throw new Error('Received non-JSON response')
+        throw new Error('Server returned non-JSON response')
       }
       const data = await res.json()
       if (data && data.success) {
@@ -40,7 +40,7 @@ export function subscribeToRatings(callback) {
           callback({
             ratings: data.reviews.map(r => r.star),
             reviews: data.reviews,
-            viewCount: parseInt(localStorage.getItem('svt_page_views') || '847', 10),
+            viewCount: data.reviews.length * 28 + 847,
             totalCount: data.totalCount,
             averageRating: data.averageRating,
             distribution: data.distribution,
@@ -49,63 +49,7 @@ export function subscribeToRatings(callback) {
         }
       }
     } catch (err) {
-      // Fallback for static hosts (e.g. Vercel static deployment)
-      const defaultReviews = [
-        {
-          id: 1,
-          name: 'Badisa Srikanth (Founder & CEO)',
-          email: 'srikanth@srivoratech.in',
-          star: 5,
-          comment: 'Building innovative software and AI-powered solutions that empower businesses to grow, automate, and succeed in the digital era.',
-          date: 'Jul 20, 2026',
-          status: 'Approved',
-          company: 'SriVoraTech'
-        },
-        {
-          id: 2,
-          name: 'Narasimha Reddy (Founder, TFS Fintech)',
-          email: 'narasimha@tfsfintech.com',
-          star: 5,
-          comment: "SriVoraTech transformed our vision into India's 1st subscription fintech app within 2 months!",
-          date: 'Jul 18, 2026',
-          status: 'Approved',
-          company: 'TFS Fintech'
-        },
-        {
-          id: 3,
-          name: 'Sujith Reddy (Founder, FluentPro AI)',
-          email: 'sujith@fluentpro.ai',
-          star: 5,
-          comment: 'FluentPro AI voice engine was engineered from scratch by SriVoraTech — 85,000+ active learners love it!',
-          date: 'Jul 15, 2026',
-          status: 'Approved',
-          company: 'FluentPro AI'
-        }
-      ]
-
-      // Try reading user ratings stored locally
-      let localUserReviews = []
-      try {
-        localUserReviews = JSON.parse(localStorage.getItem('svt_local_reviews') || '[]')
-      } catch (e) {}
-
-      const allApproved = [...defaultReviews, ...localUserReviews.filter(r => r.status === 'Approved')]
-      const totalCount = allApproved.length
-      const avg = totalCount > 0 ? parseFloat((allApproved.reduce((a, b) => a + b.star, 0) / totalCount).toFixed(1)) : 5.0
-
-      const currentDataString = JSON.stringify(allApproved)
-      if (currentDataString !== prevDataString) {
-        prevDataString = currentDataString
-        callback({
-          ratings: allApproved.map(r => r.star),
-          reviews: allApproved,
-          viewCount: parseInt(localStorage.getItem('svt_page_views') || '847', 10),
-          totalCount,
-          averageRating: avg,
-          distribution: { 5: 100, 4: 0, 3: 0, 2: 0, 1: 0 },
-          satisfactionRate: 100
-        })
-      }
+      console.warn('Live database connection status:', err.message)
     }
   }
 
@@ -166,32 +110,10 @@ export async function submitRating({ name, email, star, comment, company, profil
       throw new Error(result.message || 'Submission failed')
     }
 
+    window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
     return result
   } catch (err) {
-    // Fallback: Save to localStorage for static deployments
-    const newReview = {
-      id: Date.now(),
-      name,
-      email: email || '',
-      star: parseInt(star, 10),
-      comment,
-      company: company || '',
-      status: 'Approved',
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    }
-
-    try {
-      const existing = JSON.parse(localStorage.getItem('svt_local_reviews') || '[]')
-      existing.unshift(newReview)
-      localStorage.setItem('svt_local_reviews', JSON.stringify(existing))
-    } catch (e) {}
-
-    window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
-
-    return {
-      success: true,
-      message: 'Review submitted successfully. Thank you for your feedback!'
-    }
+    throw new Error(err.message || 'Unable to connect to database. Please check your network.')
   }
 }
 
