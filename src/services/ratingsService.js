@@ -20,16 +20,16 @@ export function removeAdminToken() {
  * Polls the public reviews endpoint for real-time visual updates
  */
 export function subscribeToRatings(callback) {
-  let prevDataString = ''
+  let prevReviewsString = ''
 
-  // Read local cache immediately for zero-lag 0ms rendering
+  // 1. Read local cache immediately for zero-lag 0ms initial rendering
   try {
     const cached = localStorage.getItem('svt_reviews_cache')
     if (cached) {
       const parsedCache = JSON.parse(cached)
-      if (parsedCache && parsedCache.reviews) {
+      if (parsedCache && Array.isArray(parsedCache.reviews) && parsedCache.reviews.length > 0) {
+        prevReviewsString = JSON.stringify(parsedCache.reviews)
         callback(parsedCache)
-        prevDataString = JSON.stringify(parsedCache._raw || parsedCache)
       }
     }
   } catch (e) {}
@@ -45,10 +45,11 @@ export function subscribeToRatings(callback) {
         throw new Error('Server returned non-JSON response')
       }
       const data = await res.json()
-      if (data && data.success) {
-        const currentDataString = JSON.stringify(data)
-        if (currentDataString !== prevDataString) {
-          prevDataString = currentDataString
+      if (data && data.success && Array.isArray(data.reviews) && data.reviews.length > 0) {
+        const currentReviewsString = JSON.stringify(data.reviews)
+        // Only trigger React state update if actual review contents changed!
+        if (currentReviewsString !== prevReviewsString) {
+          prevReviewsString = currentReviewsString
           const payload = {
             ratings: data.reviews.map(r => parseInt(r.star, 10) || 5),
             reviews: data.reviews,
@@ -73,15 +74,22 @@ export function subscribeToRatings(callback) {
   // Fetch immediately
   fetchUpdatedRatings()
 
-  // Listen to immediate refresh events
+  // Listen to immediate refresh events & tab focus
   window.addEventListener('svt_reviews_changed', fetchUpdatedRatings)
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      fetchUpdatedRatings()
+    }
+  }
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 
-  // Poll every 1.2 seconds for sub-second UI refresh across all devices
-  const interval = setInterval(fetchUpdatedRatings, 1200)
+  // Poll every 8 seconds for stable, non-glitching background sync
+  const interval = setInterval(fetchUpdatedRatings, 8000)
 
   return () => {
     clearInterval(interval)
     window.removeEventListener('svt_reviews_changed', fetchUpdatedRatings)
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
   }
 }
 

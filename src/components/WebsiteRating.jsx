@@ -85,14 +85,15 @@ export default function WebsiteRating() {
     window.addEventListener('keydown', handleKeyDown)
 
     // Subscribe to real-time ratings updates
-    setLoading(true)
     const unsubscribe = subscribeToRatings((data) => {
-      setReviewsList(data.reviews || [])
-      setTotalCount(data.totalCount || 0)
-      setAverageRating(data.averageRating || 5.0)
-      setDistribution(data.distribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
-      setCounts(data.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
-      setSatisfactionRate(data.satisfactionRate || 100)
+      if (data && Array.isArray(data.reviews) && data.reviews.length > 0) {
+        setReviewsList(data.reviews)
+        setTotalCount(data.totalCount || data.reviews.length)
+        setAverageRating(data.averageRating || 5.0)
+        setDistribution(data.distribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
+        setCounts(data.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
+        setSatisfactionRate(data.satisfactionRate || 100)
+      }
       setLoading(false)
     })
 
