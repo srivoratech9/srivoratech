@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { GoogleSpreadsheet } from 'google-spreadsheet'
 import dotenv from 'dotenv'
+import { connectToDatabase } from './api/mongodb.js'
 
 dotenv.config()
 
@@ -377,9 +378,9 @@ const DEFAULT_REVIEWS = [
     status: 'Approved',
     timestamp: 1784534400000,
     company: 'SriVoraTech',
-    timestamp: 1784534400000,
-    company: 'SriVoraTech',
-    profileImage: ''
+    profileImage: '',
+    isFounder: true,
+    helpfulCount: 0
   }
 ]
 
@@ -388,8 +389,8 @@ if (!fs.existsSync(reviewsDataPath)) {
   fs.writeFileSync(reviewsDataPath, JSON.stringify(DEFAULT_REVIEWS, null, 2))
 }
 
-// Helper functions for reading/writing reviews
-function getReviews() {
+// Helper functions for reading/writing local JSON reviews
+function getLocalReviews() {
   try {
     if (fs.existsSync(reviewsDataPath)) {
       const parsed = JSON.parse(fs.readFileSync(reviewsDataPath, 'utf8'))
@@ -407,7 +408,7 @@ function getReviews() {
   return global._svt_in_memory_reviews
 }
 
-function saveReviews(reviews) {
+function saveLocalReviews(reviews) {
   global._svt_in_memory_reviews = reviews
   try {
     const dir = path.dirname(reviewsDataPath)
@@ -417,6 +418,75 @@ function saveReviews(reviews) {
     fs.writeFileSync(reviewsDataPath, JSON.stringify(reviews, null, 2))
   } catch (err) {
     console.error('Error writing reviews:', err)
+  }
+}
+
+// MongoDB Database Helpers
+async function getReviewsFromDb() {
+  if (process.env.MONGODB_URI) {
+    try {
+      const { db } = await connectToDatabase()
+      if (db) {
+        const collection = db.collection('reviews')
+        const docs = await collection.find({}).toArray()
+        if (Array.isArray(docs) && docs.length > 0) {
+          const normalized = docs.map(d => {
+            const { _id, ...rest } = d
+            return rest
+          })
+          global._svt_in_memory_reviews = normalized
+          saveLocalReviews(normalized)
+          return normalized
+        } else {
+          await collection.insertMany(DEFAULT_REVIEWS)
+          global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
+          saveLocalReviews(global._svt_in_memory_reviews)
+          return global._svt_in_memory_reviews
+        }
+      }
+    } catch (e) {
+      console.warn('MongoDB Atlas fetch fallback:', e.message)
+    }
+  }
+  return getLocalReviews()
+}
+
+async function saveReviewToDb(newReview) {
+  if (process.env.MONGODB_URI) {
+    try {
+      const { db } = await connectToDatabase()
+      if (db) {
+        const collection = db.collection('reviews')
+        await collection.updateOne(
+          { id: newReview.id },
+          { $set: newReview },
+          { upsert: true }
+        )
+      }
+    } catch (e) {
+      console.warn('MongoDB Atlas save fallback:', e.message)
+    }
+  }
+}
+
+async function deleteReviewFromDb(targetId) {
+  if (process.env.MONGODB_URI) {
+    try {
+      const { db } = await connectToDatabase()
+      if (db) {
+        const collection = db.collection('reviews')
+        const numId = parseInt(targetId, 10)
+        await collection.deleteMany({
+          $or: [
+            { id: targetId },
+            { id: String(targetId) },
+            { id: isNaN(numId) ? targetId : numId }
+          ]
+        })
+      }
+    } catch (e) {
+      console.warn('MongoDB Atlas delete fallback:', e.message)
+    }
   }
 }
 
@@ -431,10 +501,10 @@ function sanitizeInput(str = '') {
 // ── Public APIs for Reviews ──
 
 // GET approved reviews + summary metrics
-app.get('/api/reviews', (req, res) => {
+app.get('/api/reviews', async (req, res) => {
   try {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-    const reviews = getReviews()
+    const reviews = await getReviewsFromDb()
     const approvedReviews = reviews.filter(r => r.status === 'Approved')
     
     // Sort newest first
@@ -481,15 +551,16 @@ app.get('/api/reviews', (req, res) => {
 })
 
 // POST mark review helpful
-app.post('/api/reviews/:id/helpful', (req, res) => {
+app.post('/api/reviews/:id/helpful', async (req, res) => {
   try {
     const rId = req.params.id
-    const reviews = getReviews()
+    const reviews = await getReviewsFromDb()
     const match = reviews.find(r => String(r.id) === String(rId) || Number(r.id) === parseInt(rId, 10))
     if (!match) return res.status(404).json({ success: false, message: 'Review not found' })
 
     match.helpfulCount = (match.helpfulCount || 0) + 1
-    saveReviews(reviews)
+    saveLocalReviews(reviews)
+    await saveReviewToDb(match)
     return res.json({ success: true, helpfulCount: match.helpfulCount, review: match })
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Failed to increment helpful count' })
@@ -497,7 +568,7 @@ app.post('/api/reviews/:id/helpful', (req, res) => {
 })
 
 // POST submit a review
-app.post('/api/reviews', upload.single('profileImage'), (req, res) => {
+app.post('/api/reviews', upload.single('profileImage'), async (req, res) => {
   try {
     const ip = req.ip || req.socket.remoteAddress
     const now = Date.now()
@@ -539,7 +610,7 @@ app.post('/api/reviews', upload.single('profileImage'), (req, res) => {
     const cleanCompany = company ? sanitizeInput(company) : ''
     const profileImagePath = imageFile ? `/uploads/${imageFile.filename}` : ''
 
-    const reviews = getReviews()
+    const reviews = await getReviewsFromDb()
 
     // Prevent duplicate spam check
     const isDuplicate = reviews.some(r => 
@@ -568,7 +639,8 @@ app.post('/api/reviews', upload.single('profileImage'), (req, res) => {
     }
 
     reviews.unshift(newReview)
-    saveReviews(reviews)
+    saveLocalReviews(reviews)
+    await saveReviewToDb(newReview)
 
     // Save submission time to rate limit list
     recentSubmissions.push(now)
@@ -607,10 +679,10 @@ function requireAdmin(req, res, next) {
 }
 
 // GET all reviews with query search & filter
-app.get('/api/admin/reviews', requireAdmin, (req, res) => {
+app.get('/api/admin/reviews', requireAdmin, async (req, res) => {
   try {
     const { search, rating, status } = req.query
-    let reviews = getReviews()
+    let reviews = await getReviewsFromDb()
 
     // Filter by rating level
     if (rating) {
@@ -643,10 +715,10 @@ app.get('/api/admin/reviews', requireAdmin, (req, res) => {
 })
 
 // Approve review
-app.post('/api/admin/reviews/:id/approve', requireAdmin, (req, res) => {
+app.post('/api/admin/reviews/:id/approve', requireAdmin, async (req, res) => {
   try {
     const rId = req.params.id
-    const reviews = getReviews()
+    const reviews = await getReviewsFromDb()
     const match = reviews.find(r => String(r.id) === String(rId))
 
     if (!match) {
@@ -654,7 +726,8 @@ app.post('/api/admin/reviews/:id/approve', requireAdmin, (req, res) => {
     }
 
     match.status = 'Approved'
-    saveReviews(reviews)
+    saveLocalReviews(reviews)
+    await saveReviewToDb(match)
     res.json({ success: true, message: 'Review approved successfully', review: match })
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to approve review' })
@@ -662,10 +735,10 @@ app.post('/api/admin/reviews/:id/approve', requireAdmin, (req, res) => {
 })
 
 // Reject review
-app.post('/api/admin/reviews/:id/reject', requireAdmin, (req, res) => {
+app.post('/api/admin/reviews/:id/reject', requireAdmin, async (req, res) => {
   try {
     const rId = req.params.id
-    const reviews = getReviews()
+    const reviews = await getReviewsFromDb()
     const match = reviews.find(r => String(r.id) === String(rId))
 
     if (!match) {
@@ -673,7 +746,8 @@ app.post('/api/admin/reviews/:id/reject', requireAdmin, (req, res) => {
     }
 
     match.status = 'Rejected'
-    saveReviews(reviews)
+    saveLocalReviews(reviews)
+    await saveReviewToDb(match)
     res.json({ success: true, message: 'Review rejected successfully', review: match })
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to reject review' })
@@ -681,10 +755,10 @@ app.post('/api/admin/reviews/:id/reject', requireAdmin, (req, res) => {
 })
 
 // Delete review
-app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
+app.delete('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
   try {
     const rId = req.params.id
-    let reviews = getReviews()
+    let reviews = await getReviewsFromDb()
     const originalLength = reviews.length
     reviews = reviews.filter(r => String(r.id) !== String(rId))
 
@@ -692,7 +766,8 @@ app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
       return res.status(404).json({ success: false, message: 'Review not found' })
     }
 
-    saveReviews(reviews)
+    saveLocalReviews(reviews)
+    await deleteReviewFromDb(rId)
     res.json({ success: true, message: 'Review deleted successfully' })
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to delete review' })
@@ -700,11 +775,11 @@ app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
 })
 
 // Edit review
-app.put('/api/admin/reviews/:id', requireAdmin, (req, res) => {
+app.put('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
   try {
     const rId = req.params.id
     const { name, star, comment, company, adminReply } = req.body
-    const reviews = getReviews()
+    const reviews = await getReviewsFromDb()
     const match = reviews.find(r => String(r.id) === String(rId))
 
     if (!match) {
@@ -723,7 +798,8 @@ app.put('/api/admin/reviews/:id', requireAdmin, (req, res) => {
       }
     }
 
-    saveReviews(reviews)
+    saveLocalReviews(reviews)
+    await saveReviewToDb(match)
     res.json({ success: true, message: 'Review updated successfully', review: match })
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to edit review' })
