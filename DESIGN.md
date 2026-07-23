@@ -129,6 +129,11 @@
 ### E. Interactive Project Estimator (`ProjectEstimator`)
 * **Features:** 60-second budget calculator, currency toggle (INR / USD), step-by-step feature pills, and proposal PDF generator.
 
+### F. Cutting-Edge Tech Ecosystem (`TechStack`)
+* **Visual Structure:** Glassmorphic tech cards (`.glass-card`) featuring interactive category filter pills (Frontend, Backend, Cloud, AI & Data, Databases) and live keyword search.
+* **Skill Progress Meter:** Each technology card features an animated color-coded mastery progress bar (`.skill-meter-fill`) matching its tech accent color (`--tech-accent`).
+* **Icon Dynamics:** On card hover, technology icons scale (`transform: rotate(6deg) scale(1.12)`) inside a color-tinted spotlight halo wrapper.
+
 ---
 
 ## ⚡ 6. Animation & Interaction Rules

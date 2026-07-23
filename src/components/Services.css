@@ -124,7 +124,7 @@
   transform: scale(1.15) rotate(6deg);
   background: var(--service-color, #0067f4);
   color: #ffffff;
-  box-shadow: 0 10px 25px rgba(0, 103, 244, 0.3);
+  box-shadow: 0 10px 25px var(--service-color);
 }
 
 .service-icon {

@@ -11,9 +11,7 @@ import {
   Server,
   Globe,
   Terminal,
-  ShieldCheck,
   Flame,
-  Boxes,
   Search,
   X
 } from 'lucide-react'
@@ -37,8 +35,9 @@ const technologies = [
     desc: 'Component-driven UI architecture for high-speed dynamic web applications.',
     icon: Code2,
     badge: 'Frontend',
-    color: '#61dafb',
+    color: '#0067f4',
     popularity: '98%',
+    level: 98,
     tags: ['UI Framework', 'Hooks', 'Vite', 'SPAs'],
   },
   {
@@ -48,8 +47,9 @@ const technologies = [
     desc: 'Server-side rendering, App Router, and static site generation for SEO.',
     icon: Globe,
     badge: 'Frontend',
-    color: '#a78bfa',
+    color: '#8b5cf6',
     popularity: '96%',
+    level: 96,
     tags: ['SSR/SSG', 'Server Actions', 'SEO Optimized'],
   },
   {
@@ -61,6 +61,7 @@ const technologies = [
     badge: 'Language',
     color: '#3178c6',
     popularity: '95%',
+    level: 95,
     tags: ['Type Safety', 'Interfaces', 'Enterprise'],
   },
   {
@@ -70,8 +71,9 @@ const technologies = [
     desc: 'Utility-first CSS framework for rapid modern UI layout construction.',
     icon: Layers,
     badge: 'Styling',
-    color: '#38bdf8',
+    color: '#06b6d4',
     popularity: '94%',
+    level: 94,
     tags: ['Glassmorphism', 'Responsive', 'Design Systems'],
   },
 
@@ -83,8 +85,9 @@ const technologies = [
     desc: 'Event-driven, asynchronous JavaScript runtime powering REST & GraphQL microservices.',
     icon: Server,
     badge: 'Backend',
-    color: '#4ade80',
+    color: '#10b981',
     popularity: '97%',
+    level: 97,
     tags: ['Event Loop', 'REST API', 'Microservices'],
   },
   {
@@ -94,55 +97,36 @@ const technologies = [
     desc: 'High-performance backend API execution and asynchronous data workflows.',
     icon: Flame,
     badge: 'Backend',
-    color: '#facc15',
+    color: '#f59e0b',
     popularity: '95%',
+    level: 95,
     tags: ['AsyncIO', 'FastAPI', 'Automation'],
-  },
-  {
-    id: 'nest',
-    name: 'NestJS',
-    category: 'backend',
-    desc: 'Progressive Node.js framework built with TypeScript for enterprise applications.',
-    icon: Boxes,
-    badge: 'Architecture',
-    color: '#e11d48',
-    popularity: '90%',
-    tags: ['Dependency Injection', 'Decorators', 'Scalable'],
   },
 
   // Cloud & DevOps
   {
     id: 'aws',
-    name: 'Amazon Web Services',
+    name: 'AWS Cloud',
     category: 'cloud',
-    desc: 'Cloud infrastructure hosting EC2, Lambda, S3, ECS, and CloudFront CDN.',
+    desc: 'Scalable cloud infrastructure, S3 storage, Lambda serverless computing, and CloudFront CDN.',
     icon: Cloud,
-    badge: 'Cloud',
-    color: '#f97316',
-    popularity: '99%',
-    tags: ['Serverless', 'S3', 'EC2', 'CloudFront'],
+    badge: 'Cloud Infrastructure',
+    color: '#ff9900',
+    popularity: '96%',
+    level: 96,
+    tags: ['EC2', 'S3 Storage', 'Lambda Serverless', 'CloudFront'],
   },
   {
     id: 'docker',
-    name: 'Docker & Containers',
+    name: 'Docker Containerization',
     category: 'cloud',
-    desc: 'Containerization for consistent deployment environments across dev and prod.',
-    icon: Boxes,
+    desc: 'Lightweight containerized application environments for smooth staging & production deployments.',
+    icon: Server,
     badge: 'DevOps',
     color: '#0284c7',
-    popularity: '96%',
-    tags: ['Containers', 'Docker Compose', 'CI/CD'],
-  },
-  {
-    id: 'kubernetes',
-    name: 'Kubernetes (K8s)',
-    category: 'cloud',
-    desc: 'Automated container orchestration, scaling, and load-balancing management.',
-    icon: ShieldCheck,
-    badge: 'Orchestration',
-    color: '#3b82f6',
-    popularity: '91%',
-    tags: ['Auto-scaling', 'Clusters', 'Helm'],
+    popularity: '94%',
+    level: 94,
+    tags: ['Containers', 'CI/CD Pipelines', 'Deployments'],
   },
 
   // AI & Data
@@ -155,6 +139,7 @@ const technologies = [
     badge: 'AI / ML',
     color: '#ec4899',
     popularity: '97%',
+    level: 97,
     tags: ['LLMs', 'RAG', 'Vector Embeddings', 'Neural Nets'],
   },
   {
@@ -164,8 +149,9 @@ const technologies = [
     desc: 'High-performance data analysis, cleaning, and predictive modeling algorithms.',
     icon: Sparkles,
     badge: 'Analytics',
-    color: '#8b5cf6',
+    color: '#a855f7',
     popularity: '92%',
+    level: 92,
     tags: ['Data Science', 'ETL Pipelines', 'Analytics'],
   },
 
@@ -177,8 +163,9 @@ const technologies = [
     desc: 'Battle-tested relational database with JSONB support, indexing, and high reliability.',
     icon: Database,
     badge: 'Relational',
-    color: '#38bdf8',
+    color: '#3b82f6',
     popularity: '96%',
+    level: 96,
     tags: ['ACID Compliant', 'SQL', 'JSONB', 'Prisma ORM'],
   },
   {
@@ -190,6 +177,7 @@ const technologies = [
     badge: 'NoSQL',
     color: '#22c55e',
     popularity: '93%',
+    level: 93,
     tags: ['NoSQL', 'Document Store', 'Mongoose'],
   },
   {
@@ -201,6 +189,7 @@ const technologies = [
     badge: 'Caching',
     color: '#ef4444',
     popularity: '94%',
+    level: 94,
     tags: ['In-Memory', 'Pub/Sub', 'High Throughput'],
   },
 ]
@@ -303,24 +292,30 @@ export default function TechStack() {
           </div>
         </div>
 
-        {/* Tech Cards Grid */}
+        {/* Tech Cards Grid with New Startup UI/UX & Animations */}
         <div className="tech-cards-grid">
-          {filteredTech.map((tech) => {
+          {filteredTech.map((tech, idx) => {
             const Icon = tech.icon
             return (
               <div 
                 key={tech.id} 
-                className="tech-card"
-                style={{ '--tech-accent': tech.color }}
+                className={`tech-card glass-card animate-on-scroll delay-${(idx % 4) + 1} ${isVisible ? 'visible' : ''}`}
+                style={{ '--tech-accent': tech.color, '--delay': `${0.05 + idx * 0.05}s` }}
               >
+                {/* Top Glowing Accent Line */}
+                <div className="tech-top-accent-line" style={{ background: `linear-gradient(90deg, ${tech.color}, #38bdf8)` }} />
+
                 <div className="tech-card-header">
-                  <div className="tech-icon-wrapper">
-                    <Icon size={24} style={{ color: tech.color }} />
+                  <div className="tech-icon-wrapper" style={{ background: `linear-gradient(135deg, ${tech.color}20, ${tech.color}08)`, color: tech.color, borderColor: `${tech.color}40` }}>
+                    <Icon size={26} />
+                    <span className="icon-glow-halo" style={{ background: tech.color }} />
                   </div>
                   <div className="tech-meta">
-                    <span className="tech-badge">{tech.badge}</span>
+                    <span className="tech-badge" style={{ color: tech.color, borderColor: `${tech.color}40`, background: `${tech.color}10` }}>
+                      {tech.badge}
+                    </span>
                     <div className="tech-rating">
-                      <span className="pulse-indicator" style={{ background: tech.color }} />
+                      <span className="pulse-indicator" style={{ background: tech.color, boxShadow: `0 0 8px ${tech.color}` }} />
                       <span className="rating-num">{tech.popularity} Match</span>
                     </div>
                   </div>
@@ -329,9 +324,30 @@ export default function TechStack() {
                 <h3 className="tech-name">{tech.name}</h3>
                 <p className="tech-desc">{tech.desc}</p>
 
+                {/* Animated Skill Meter Progress Bar */}
+                <div className="tech-skill-meter">
+                  <div className="skill-meter-header">
+                    <span className="skill-meter-title">Production Readiness</span>
+                    <span className="skill-meter-text" style={{ color: tech.color }}>
+                      {tech.level}%
+                    </span>
+                  </div>
+                  <div className="skill-meter-track">
+                    <div 
+                      className="skill-meter-fill" 
+                      style={{ 
+                        width: `${tech.level}%`, 
+                        background: `linear-gradient(90deg, ${tech.color}aa, ${tech.color})`,
+                        boxShadow: `0 0 10px ${tech.color}88`
+                      }} 
+                    />
+                  </div>
+                </div>
+
                 <div className="tech-tags">
                   {tech.tags.map((tag) => (
                     <span key={tag} className="tech-tag">
+                      <Zap size={10} style={{ color: tech.color }} />
                       {tag}
                     </span>
                   ))}

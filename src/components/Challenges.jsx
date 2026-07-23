@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import { Clock, TrendingDown, Users, Puzzle, ShieldAlert, AlertTriangle, ArrowRight, CheckCircle2, RotateCw } from 'lucide-react'
+import { Clock, TrendingDown, Users, Puzzle, ShieldAlert, AlertTriangle, CheckCircle2, RotateCw } from 'lucide-react'
 import './Challenges.css'
 
 const challenges = [
@@ -60,6 +60,56 @@ const challenges = [
   },
 ]
 
+function ChallengeCard({ item, idx, isFlipped, toggleFlip }) {
+  return (
+    <div
+      className="challenge-card-wrapper"
+      onClick={() => toggleFlip(idx)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          toggleFlip(idx)
+        }
+      }}
+    >
+      <div className={`challenge-card-flipper ${isFlipped ? 'flipped' : ''}`}>
+        {/* FRONT — Problem side */}
+        <div className="challenge-card challenge-front">
+          <div className="challenge-problem-side">
+            <div className="problem-pill">Problem</div>
+            <div className="challenge-icon-box">{item.icon}</div>
+            <h3 className="problem-title">{item.problem}</h3>
+            <p className="problem-desc">{item.problemDesc}</p>
+          </div>
+          <div className="card-flip-hint">
+            <RotateCw size={13} /> Click to see solution
+          </div>
+        </div>
+
+        {/* BACK — Solution side */}
+        <div className="challenge-card challenge-back">
+          <div className="challenge-solution-side">
+            <div className="solution-pill">
+              <CheckCircle2 size={12} /> Solution
+            </div>
+            <h4 className="solution-title">{item.solution}</h4>
+            <p className="solution-desc">{item.solutionDesc}</p>
+            <div className="solution-stat-chip">
+              <strong className="stat-value">{item.stat}</strong>
+              <span className="stat-label">{item.statLabel}</span>
+            </div>
+          </div>
+          <div className="card-flip-hint back-hint">
+            <RotateCw size={13} /> Flip back
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Challenges() {
   const [ref, isVisible] = useScrollAnimation()
   const [flippedCards, setFlippedCards] = useState({})
@@ -96,54 +146,15 @@ export default function Challenges() {
         </div>
 
         <div className="challenges-grid">
-          {challenges.map((item, idx) => {
-            const [cardRef, cardVisible] = useScrollAnimation()
-            const isFlipped = flippedCards[idx]
-            return (
-              <div
-                key={idx}
-                ref={cardRef}
-                className={`challenge-card-wrapper animate-on-scroll delay-${(idx % 3) + 1} ${cardVisible ? 'visible' : ''}`}
-                onClick={() => toggleFlip(idx)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && toggleFlip(idx)}
-              >
-                <div className={`challenge-card-flipper ${isFlipped ? 'flipped' : ''}`}>
-                  {/* FRONT — Problem side */}
-                  <div className="challenge-card challenge-front">
-                    <div className="challenge-problem-side">
-                      <div className="problem-pill">Problem</div>
-                      <div className="challenge-icon-box">{item.icon}</div>
-                      <h3 className="problem-title">{item.problem}</h3>
-                      <p className="problem-desc">{item.problemDesc}</p>
-                    </div>
-                    <div className="card-flip-hint">
-                      <RotateCw size={13} /> Click to see solution
-                    </div>
-                  </div>
-
-                  {/* BACK — Solution side */}
-                  <div className="challenge-card challenge-back">
-                    <div className="challenge-solution-side">
-                      <div className="solution-pill">
-                        <CheckCircle2 size={12} /> Solution
-                      </div>
-                      <h4 className="solution-title">{item.solution}</h4>
-                      <p className="solution-desc">{item.solutionDesc}</p>
-                      <div className="solution-stat-chip">
-                        <strong className="stat-value">{item.stat}</strong>
-                        <span className="stat-label">{item.statLabel}</span>
-                      </div>
-                    </div>
-                    <div className="card-flip-hint back-hint">
-                      <RotateCw size={13} /> Flip back
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+          {challenges.map((item, idx) => (
+            <ChallengeCard
+              key={item.problem}
+              item={item}
+              idx={idx}
+              isFlipped={!!flippedCards[idx]}
+              toggleFlip={toggleFlip}
+            />
+          ))}
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { ArrowRight, Zap, MousePointer2, Figma, Shield, Clock, Rocket, Sparkles, Cpu, Globe, Palette, Users, Briefcase } from 'lucide-react'
+import { subscribeToRatings } from '../services/ratingsService'
 import HeroCanvas from './HeroCanvas'
 import srikanthPhoto from '../assets/badisa_srikanth.jpg'
 import saiPhoto from '../assets/sai_manindra.jpg'
@@ -32,7 +33,6 @@ export default function Hero() {
     if (activeHeroTab === 'fintech') {
       let currentTeam = 0
       let currentClients = 0
-      const steps = 10
       const timer = setInterval(() => {
         currentTeam += 1
         currentClients = Math.min(2, Math.round(currentTeam * 0.2))
@@ -52,30 +52,15 @@ export default function Hero() {
   }, [activeHeroTab])
 
   useEffect(() => {
-    const fetchRatingStats = async () => {
-      try {
-        const res = await fetch(`/api/reviews?_t=${Date.now()}`)
-        if (!res.ok) return
-        const contentType = res.headers.get('content-type') || ''
-        if (!contentType.includes('application/json')) return
-        const data = await res.json()
-        if (data && data.success) {
-          setRatingStats({
-            averageRating: data.averageRating,
-            totalCount: data.totalCount
-          })
-        }
-      } catch (e) {
-        // fallback
+    const unsubscribe = subscribeToRatings((metrics) => {
+      if (metrics) {
+        setRatingStats({
+          averageRating: metrics.averageRating || 5.0,
+          totalCount: metrics.totalCount || 15
+        })
       }
-    }
-    fetchRatingStats()
-    window.addEventListener('svt_reviews_changed', fetchRatingStats)
-    const timer = setInterval(fetchRatingStats, 10000)
-    return () => {
-      clearInterval(timer)
-      window.removeEventListener('svt_reviews_changed', fetchRatingStats)
-    }
+    })
+    return () => unsubscribe()
   }, [])
 
   const currentTheme = colorThemes.find(t => t.id === colorMode) || colorThemes[0]
@@ -183,7 +168,7 @@ export default function Hero() {
                 </svg>
               ))}
             </div>
-            <span className="hero-review-text">Rated {ratingStats.averageRating}/5 ({ratingStats.totalCount} Approved Reviews)</span>
+            <span className="hero-review-text">Rated {Number(ratingStats.averageRating || 5.0).toFixed(1)}/5 ({ratingStats.totalCount || 3} Approved Reviews)</span>
           </a>
         </div>
 
