@@ -183,14 +183,9 @@ function doPost(e) {
 function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : '';
+    var sheet = ss.getSheetByName('Ratings') || ss.getSheetByName('Reviews') || ss.getSheetByName('WebsiteRating');
     
-    if (action === 'getReviews' || action === 'ratings') {
-      var sheet = ss.getSheetByName('Ratings') || ss.getSheetByName('Reviews') || ss.getSheetByName('WebsiteRating');
-      if (!sheet || sheet.getLastRow() <= 1) {
-        return ContentService.createTextOutput(JSON.stringify({ success: true, reviews: [] })).setMimeType(ContentService.MimeType.JSON);
-      }
-      
+    if (sheet && sheet.getLastRow() > 1) {
       var rows = sheet.getDataRange().getValues();
       var headers = rows[0].map(function(h) { return String(h).toLowerCase().trim(); });
       var reviews = [];
@@ -201,24 +196,29 @@ function doGet(e) {
         for (var j = 0; j < headers.length; j++) {
           item[headers[j]] = row[j];
         }
-        reviews.push({
-          id: i,
-          name: item['full name'] || item['name'] || 'Customer',
-          email: item['email'] || '',
-          star: parseInt(item['star rating'] || item['rating'] || item['star'] || 5, 10),
-          comment: item['review message'] || item['comment'] || item['message'] || '',
-          company: item['company'] || '',
-          status: item['status'] || 'Approved',
-          date: item['timestamp'] || item['date'] || 'Jul 20, 2026',
-          timestamp: new Date(item['timestamp'] || Date.now()).getTime()
-        });
+        var revName = item['full name'] || item['name'] || 'Customer';
+        var revComment = item['review message'] || item['comment'] || item['message'] || item['review'] || '';
+        
+        if (revName && revComment) {
+          reviews.push({
+            id: i,
+            name: String(revName),
+            email: item['email'] || '',
+            star: parseInt(item['star rating'] || item['rating'] || item['star'] || 5, 10),
+            comment: String(revComment),
+            company: item['company'] || '',
+            status: item['status'] || 'Approved',
+            date: String(item['timestamp'] || item['date'] || 'Jul 20, 2026'),
+            timestamp: new Date(item['timestamp'] || Date.now()).getTime() || (Date.now() - i * 1000)
+          });
+        }
       }
       
       return ContentService.createTextOutput(JSON.stringify({ success: true, reviews: reviews })).setMimeType(ContentService.MimeType.JSON);
     }
     
     return ContentService.createTextOutput(
-      JSON.stringify({ status: 'ok', message: 'SriVoraTech Multi-Tab Sheets API is running' })
+      JSON.stringify({ success: true, reviews: [], message: 'SriVoraTech Multi-Tab Sheets API is running' })
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(

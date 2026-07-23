@@ -87,7 +87,25 @@ function saveLocalReviews(reviews) {
   } catch (err) {}
 }
 
+function mergeUniqueReviews(existing = [], incoming = []) {
+  const map = new Map()
+  incoming.forEach(r => {
+    if (r && r.id) map.set(String(r.id), r)
+  })
+  existing.forEach(r => {
+    if (r && r.id) {
+      if (!map.has(String(r.id))) map.set(String(r.id), r)
+    }
+  })
+  const merged = Array.from(map.values())
+  merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+  return merged
+}
+
 async function getReviewsFromDb() {
+  let reviews = []
+
+  // 1. Fetch from MongoDB Atlas if connection URI is available
   if (process.env.MONGODB_URI) {
     try {
       const { db } = await connectToDatabase()
@@ -95,25 +113,39 @@ async function getReviewsFromDb() {
         const collection = db.collection('reviews')
         const docs = await collection.find({}).toArray()
         if (Array.isArray(docs) && docs.length > 0) {
-          const normalized = docs.map(d => {
+          reviews = docs.map(d => {
             const { _id, ...rest } = d
             return rest
           })
-          global._svt_in_memory_reviews = normalized
-          saveLocalReviews(normalized)
-          return normalized
-        } else {
-          await collection.insertMany(DEFAULT_REVIEWS)
-          global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
-          saveLocalReviews(global._svt_in_memory_reviews)
-          return global._svt_in_memory_reviews
         }
       }
     } catch (e) {
       console.warn('MongoDB Atlas fetch fallback:', e.message)
     }
   }
-  return getLocalReviews()
+
+  // 2. Fetch from Google Apps Script centralized database (cross-device user sync)
+  try {
+    const sheetRes = await fetch('https://script.google.com/macros/s/AKfycbzzB8S5E3JqKFYuj-2RX7oHWXkv0taRPv0aQBAjIr2TQkVp0K0grPCIcZWVrbbXQlSo/exec?action=ratings')
+    if (sheetRes.ok) {
+      const contentType = sheetRes.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        const sheetData = await sheetRes.json()
+        if (sheetData && sheetData.success && Array.isArray(sheetData.reviews) && sheetData.reviews.length > 0) {
+          reviews = mergeUniqueReviews(reviews, sheetData.reviews)
+        }
+      }
+    }
+  } catch (sheetErr) {
+    console.warn('Google Sheet reviews fetch warning:', sheetErr.message)
+  }
+
+  // 3. Fallback to local memory reviews
+  const local = getLocalReviews()
+  const merged = mergeUniqueReviews(local, reviews)
+  global._svt_in_memory_reviews = merged
+  saveLocalReviews(merged)
+  return merged
 }
 
 async function saveReviewToDb(newReview) {
