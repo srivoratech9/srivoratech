@@ -76,14 +76,13 @@ function mergeUniqueReviews(existing = [], incoming = []) {
   return merged
 }
 
-// ── Public Ratings / Reviews ──
+// // ── Public Ratings / Reviews ──
 
 /**
  * Polls the public reviews endpoint for real-time visual updates
  */
 export function subscribeToRatings(callback) {
   let prevReviewsString = ''
-  let currentLocalReviews = []
 
   // 1. Read local cache immediately for zero-lag 0ms initial rendering
   try {
@@ -91,9 +90,8 @@ export function subscribeToRatings(callback) {
     if (cached) {
       const parsedCache = JSON.parse(cached)
       if (parsedCache && Array.isArray(parsedCache.reviews) && parsedCache.reviews.length > 0) {
-        currentLocalReviews = parsedCache.reviews
-        prevReviewsString = JSON.stringify(currentLocalReviews)
-        callback(calculateMetrics(currentLocalReviews))
+        prevReviewsString = JSON.stringify(parsedCache.reviews)
+        callback(calculateMetrics(parsedCache.reviews))
       }
     }
   } catch (e) {}
@@ -110,14 +108,11 @@ export function subscribeToRatings(callback) {
       }
       const data = await res.json()
       if (data && data.success && Array.isArray(data.reviews)) {
-        // Merge server reviews with local reviews so user ratings are never lost/dropped across serverless containers
-        const mergedReviews = mergeUniqueReviews(currentLocalReviews, data.reviews)
-        currentLocalReviews = mergedReviews
-        const currentReviewsString = JSON.stringify(mergedReviews)
+        const currentReviewsString = JSON.stringify(data.reviews)
 
         if (currentReviewsString !== prevReviewsString) {
           prevReviewsString = currentReviewsString
-          const payload = calculateMetrics(mergedReviews)
+          const payload = calculateMetrics(data.reviews)
           try {
             localStorage.setItem('svt_reviews_cache', JSON.stringify({ ...payload, _raw: data }))
           } catch (e) {}
@@ -141,8 +136,8 @@ export function subscribeToRatings(callback) {
   }
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
-  // Poll every 8 seconds for stable, non-glitching background sync
-  const interval = setInterval(fetchUpdatedRatings, 8000)
+  // Poll every 6 seconds for fast, stable, non-glitching background sync
+  const interval = setInterval(fetchUpdatedRatings, 6000)
 
   return () => {
     clearInterval(interval)
@@ -219,16 +214,20 @@ export async function submitRating({ name, email, star, comment, company, profil
  * Simple local page view incrementer
  */
 export async function incrementViewCount() {
-  let views = parseInt(localStorage.getItem('svt_page_views') || '847', 10)
-  views += 1
-  localStorage.setItem('svt_page_views', String(views))
-  return views
+  try {
+    const current = localStorage.getItem('svt_page_views') || '847'
+    const count = parseInt(current, 10) + 1
+    localStorage.setItem('svt_page_views', count.toString())
+    return count
+  } catch (e) {
+    return 847
+  }
 }
 
-// ── Admin Rating Management ──
+// ── Admin Section Services ──
 
 /**
- * Admin login authentication
+ * Admin Login
  */
 export async function adminLogin(username, password) {
   const response = await fetch('/api/admin/login', {
@@ -242,24 +241,23 @@ export async function adminLogin(username, password) {
     throw new Error(result.message || 'Login failed')
   }
 
-  if (result.success && result.token) {
+  if (result.token) {
     saveAdminToken(result.token)
   }
-
   return result
 }
 
 /**
- * Get all reviews (Approved/Pending/Rejected) for Admin console
+ * Get all reviews for admin console
  */
 export async function adminGetReviews({ search = '', rating = '', status = '' } = {}) {
-  const query = new URLSearchParams()
-  if (search) query.append('search', search)
-  if (rating) query.append('rating', rating)
-  if (status) query.append('status', status)
-
   const token = getAdminToken()
-  const response = await fetch(`/api/admin/reviews?${query.toString()}`, {
+  const params = new URLSearchParams()
+  if (search) params.append('search', search)
+  if (rating) params.append('rating', rating)
+  if (status) params.append('status', status)
+
+  const response = await fetch(`/api/admin/reviews?${params.toString()}`, {
     headers: {
       'x-admin-token': token
     }
@@ -267,10 +265,10 @@ export async function adminGetReviews({ search = '', rating = '', status = '' } 
 
   const result = await response.json()
   if (!response.ok) {
-    throw new Error(result.message || 'Failed to load admin reviews')
+    throw new Error(result.message || 'Failed to fetch reviews')
   }
 
-  return result.reviews || []
+  return result
 }
 
 /**
@@ -358,6 +356,19 @@ export async function adminDeleteReview(id) {
   if (!response.ok) {
     throw new Error(result.message || 'Failed to delete review')
   }
+
+  // Remove deleted review from local cache immediately
+  try {
+    const cachedStr = localStorage.getItem('svt_reviews_cache')
+    if (cachedStr) {
+      const parsed = JSON.parse(cachedStr)
+      if (parsed && Array.isArray(parsed.reviews)) {
+        const filtered = parsed.reviews.filter(r => String(r.id) !== String(id) && Number(r.id) !== parseInt(id, 10))
+        const updatedMetrics = calculateMetrics(filtered)
+        localStorage.setItem('svt_reviews_cache', JSON.stringify({ ...updatedMetrics, _raw: updatedMetrics }))
+      }
+    }
+  } catch (e) {}
 
   window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
   return result
