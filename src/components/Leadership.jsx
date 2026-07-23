@@ -76,7 +76,7 @@ export default function Leadership() {
 
   const scrollLeadership = (direction) => {
     if (scrollStreamRef.current) {
-      const scrollAmount = direction === 'left' ? -380 : 380
+      const scrollAmount = direction === 'left' ? -520 : 520
       scrollStreamRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
     }
   }
@@ -84,7 +84,7 @@ export default function Leadership() {
   const scrollToCard = (index) => {
     setActiveIndex(index)
     if (scrollStreamRef.current) {
-      const cardWidth = 380
+      const cardWidth = 520
       scrollStreamRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' })
     }
   }
@@ -131,12 +131,11 @@ export default function Leadership() {
             Meet Our <span className="gradient-text">Leadership</span>
           </h2>
           <p className="section-subtitle">
-            Driven by Innovation. United by Vision. At SriVoraTech, our leadership team combines technical expertise, innovation, and strategic thinking.
-            <span className="hover-hint-span"> (Click or hover any card to reveal executive bio & expertise)</span>
+            Driven by Innovation. United by Vision. At SriVoraTech, our executive leadership combines technical expertise, innovation, and strategic direction.
           </p>
         </div>
 
-        {/* Executive Leader Cards Carousel (Left-to-Right Horizontal Stream) */}
+        {/* Executive Leader Cards Carousel (Left Profile Photo & Right Details Layout) */}
         <div className="leadership-carousel-wrapper" ref={scrollStreamRef}>
           <div className={`leadership-carousel-track ${isVisible ? 'cards-visible' : ''}`}>
             {leaders.map((leader, idx) => {
@@ -155,8 +154,8 @@ export default function Leadership() {
                   {/* Top Accent Gradient Ribbon */}
                   <div className="card-top-accent-line" style={{ background: `linear-gradient(90deg, ${leader.color}, #38bdf8)` }} />
 
-                  {/* Circular Profile Avatar (Strict 100% Circular Shape) */}
-                  <div className="leader-top-profile">
+                  {/* LEFT SIDE: Circular Profile Image Avatar & Info */}
+                  <div className="leader-left-profile">
                     <div className="leader-avatar-wrapper">
                       {leader.photo ? (
                         <img src={leader.photo} alt={leader.name} className="leader-avatar-img circular-pic" />
@@ -168,23 +167,17 @@ export default function Leadership() {
                       <span className="avatar-glow-ring" style={{ background: `${leader.color}45` }} />
                     </div>
 
-                    <div className="leader-badge-row">
+                    <div className="leader-badge-stack">
                       <span className="leader-level-badge" style={{ color: leader.color, borderColor: `${leader.color}40`, background: `${leader.color}10` }}>
                         <Award size={13} /> {leader.level}
                       </span>
                       <span className="verified-leadership-chip">
-                        <ShieldCheck size={12} style={{ color: '#10b981' }} /> Verified Executive
+                        <ShieldCheck size={12} style={{ color: '#10b981' }} /> Verified
                       </span>
                     </div>
 
                     <h3 className="leader-name">{leader.name}</h3>
                     <p className="leader-role" style={{ color: leader.color }}>{leader.role}</p>
-
-                    {/* Interactive Click / Hover Hint */}
-                    <div className="leader-hover-hint">
-                      {isExpanded ? <ChevronDown size={13} /> : <Eye size={13} />}
-                      <span>{isExpanded ? 'Hide Details' : 'Click/Hover for Bio'}</span>
-                    </div>
 
                     {/* Social Action Buttons */}
                     <div className="leader-social-actions" onClick={(e) => e.stopPropagation()}>
@@ -209,8 +202,8 @@ export default function Leadership() {
                     </div>
                   </div>
 
-                  {/* Animated Hover Description Drawer */}
-                  <div className="leader-hover-drawer">
+                  {/* RIGHT SIDE: Executive Bio & Core Expertise */}
+                  <div className="leader-right-details">
                     <div className="leader-bio-body">
                       <p>{leader.bio}</p>
                     </div>
