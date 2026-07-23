@@ -18,6 +18,40 @@
   width: fit-content;
 }
 
+.currency-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 16px auto 24px;
+}
+
+.currency-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+}
+
+.currency-btn {
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: 1px solid var(--color-gray-200);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.currency-btn:hover,
+.currency-btn.active {
+  background: #0067f4;
+  border-color: #0067f4;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 103, 244, 0.2);
+}
+
 .estimator-card {
   padding: 36px;
   background: #ffffff;

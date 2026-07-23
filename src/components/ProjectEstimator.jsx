@@ -30,6 +30,17 @@ export default function ProjectEstimator() {
   const [selectedType, setSelectedType] = useState(projectTypes[0])
   const [selectedFeatures, setSelectedFeatures] = useState(['auth', 'admin-panel'])
   const [selectedTimeline, setSelectedTimeline] = useState(timelines[1])
+  const [currency, setCurrency] = useState('INR') // 'INR' or 'USD'
+
+  const exchangeRate = 83.5
+
+  const formatPrice = (inrAmount) => {
+    if (currency === 'USD') {
+      const usdVal = Math.round(inrAmount / exchangeRate)
+      return `$${usdVal.toLocaleString('en-US')}`
+    }
+    return `₹${Math.round(inrAmount).toLocaleString('en-IN')}`
+  }
 
   const toggleFeature = (id) => {
     if (selectedFeatures.includes(id)) {
@@ -53,8 +64,8 @@ export default function ProjectEstimator() {
   const rawCost = (selectedType.baseCost + featureCost) * selectedTimeline.multiplier
   const totalWeeks = Math.ceil((selectedType.weeks + featureWeeks))
 
-  const formattedCostMin = Math.round(rawCost * 0.9).toLocaleString('en-IN')
-  const formattedCostMax = Math.round(rawCost * 1.15).toLocaleString('en-IN')
+  const formattedCostMin = formatPrice(rawCost * 0.9)
+  const formattedCostMax = formatPrice(rawCost * 1.15)
 
   const handleSendToContact = () => {
     const featureNames = selectedFeatures
@@ -67,7 +78,7 @@ export default function ProjectEstimator() {
 - Selected Features: ${featureNames || 'None'}
 - Speed: ${selectedTimeline.label}
 - Estimated Timeline: ${totalWeeks} Weeks
-- Estimated Budget Range: ₹${formattedCostMin} - ₹${formattedCostMax}`
+- Estimated Budget Range: ${formattedCostMin} - ${formattedCostMax}`
 
     // Map calculated cost to a category in Contact form selection
     let mappedBudget = "Let's Discuss"
@@ -110,6 +121,24 @@ export default function ProjectEstimator() {
           <p className="section-subtitle">
             Configure your scope, features, and target timeline for an instant transparent estimation.
           </p>
+
+          <div className="currency-toggle-wrapper">
+            <span className="currency-label">Display Currency:</span>
+            <button 
+              type="button"
+              onClick={() => setCurrency('INR')} 
+              className={`currency-btn ${currency === 'INR' ? 'active' : ''}`}
+            >
+              ₹ INR
+            </button>
+            <button 
+              type="button"
+              onClick={() => setCurrency('USD')} 
+              className={`currency-btn ${currency === 'USD' ? 'active' : ''}`}
+            >
+              $ USD
+            </button>
+          </div>
         </div>
 
         <div className="estimator-card glass-card">
@@ -212,7 +241,7 @@ export default function ProjectEstimator() {
                   </div>
                   <div className="output-box">
                     <span className="output-label">Estimated Investment</span>
-                    <span className="output-value">₹{formattedCostMin} – ₹{formattedCostMax}</span>
+                    <span className="output-value">{formattedCostMin} – {formattedCostMax}</span>
                   </div>
                 </div>
 
