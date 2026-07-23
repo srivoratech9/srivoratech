@@ -259,15 +259,12 @@ export default function WebsiteRating() {
           <div className="rating-badge">
             <Sparkles size={14} />
             <span>Community Reviews & Feedback</span>
-            <button 
-              type="button"
-              className="admin-badge-toggle-btn"
-              onClick={() => setShowAdminPortal(!showAdminPortal)}
-              title="Admin Console for Review Moderation & Approval"
-            >
-              <Shield size={12} />
-              <span>{showAdminPortal ? 'Public Reviews View' : 'Admin Moderation Console'}</span>
-            </button>
+            <Lock 
+              size={13} 
+              className="admin-secret-lock" 
+              onClick={() => setShowAdminPortal(!showAdminPortal)} 
+              title="Admin Portal (Ctrl+Alt+A)" 
+            />
           </div>
           <h2 className="section-title">
             Live User <span className="gradient-text">Ratings & Reviews</span>
@@ -563,7 +560,7 @@ export default function WebsiteRating() {
                 ) : (
                   <form onSubmit={handleReviewSubmit} className="interactive-rating-form">
                     <h3 className="form-heading">Leave a Customer Rating & Review</h3>
-                    <p className="form-sub-heading">Submissions go to database and show immediately after Admin approval.</p>
+                    <p className="form-sub-heading">Share your experience! Ratings are saved and show live to all visitors in real-time.</p>
 
                     <div className="star-selector-wrapper">
                       <label className="picker-label">Click to Select Your Rating *</label>

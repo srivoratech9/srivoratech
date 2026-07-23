@@ -566,7 +566,7 @@ app.post('/api/reviews', upload.single('profileImage'), (req, res) => {
       comment: cleanComment,
       company: cleanCompany,
       profileImage: profileImagePath,
-      status: 'Pending', // Pending admin approval
+      status: 'Approved', // Display live to all visitors immediately!
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       timestamp: now
     }
@@ -580,7 +580,7 @@ app.post('/api/reviews', upload.single('profileImage'), (req, res) => {
 
     res.json({
       success: true,
-      message: 'Review submitted successfully. It will display on the website once approved by our administrator.',
+      message: 'Review submitted successfully! Your rating has been saved and is now live for all visitors.',
       review: newReview
     })
   } catch (err) {

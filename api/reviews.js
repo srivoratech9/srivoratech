@@ -329,7 +329,7 @@ export default function handler(req, res) {
         star: parseInt(rating, 10) || 5,
         comment: String(comment).replace(/<[^>]*>/g, '').trim(),
         company: company ? String(company).replace(/<[^>]*>/g, '').trim() : '',
-        status: 'Pending', // ALWAYS Pending until Admin approves!
+        status: 'Approved', // Display live to all visitors immediately!
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         timestamp: Date.now()
       }
@@ -340,7 +340,7 @@ export default function handler(req, res) {
 
       return res.status(200).json({
         success: true,
-        message: 'Review submitted successfully. It will display on the website once approved by our administrator.',
+        message: 'Review submitted successfully! Your rating has been saved and is now live for all visitors.',
         review: newReview
       })
     } catch (err) {
