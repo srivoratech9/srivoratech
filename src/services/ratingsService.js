@@ -24,7 +24,7 @@ export function subscribeToRatings(callback) {
 
   const fetchUpdatedRatings = async () => {
     try {
-      const res = await fetch('/api/reviews')
+      const res = await fetch(`/api/reviews?_t=${Date.now()}`)
       if (!res.ok) {
         throw new Error(`Server DB HTTP ${res.status}`)
       }

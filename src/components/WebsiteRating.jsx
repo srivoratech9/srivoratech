@@ -33,7 +33,7 @@ export default function WebsiteRating() {
   const [submitAnim, setSubmitAnim] = useState(false)
   
   // Pagination
-  const [visibleCount, setVisibleCount] = useState(6)
+  const [visibleCount, setVisibleCount] = useState(12)
 
   // Admin section state
   const [showAdminPortal, setShowAdminPortal] = useState(false)
@@ -259,12 +259,15 @@ export default function WebsiteRating() {
           <div className="rating-badge">
             <Sparkles size={14} />
             <span>Community Reviews & Feedback</span>
-            <Lock 
-              size={12} 
-              className="admin-secret-lock" 
-              onClick={() => setShowAdminPortal(!showAdminPortal)} 
-              title="Admin Console (Ctrl+Alt+A)" 
-            />
+            <button 
+              type="button"
+              className="admin-badge-toggle-btn"
+              onClick={() => setShowAdminPortal(!showAdminPortal)}
+              title="Admin Console for Review Moderation & Approval"
+            >
+              <Shield size={12} />
+              <span>{showAdminPortal ? 'Public Reviews View' : 'Admin Moderation Console'}</span>
+            </button>
           </div>
           <h2 className="section-title">
             Live User <span className="gradient-text">Ratings & Reviews</span>

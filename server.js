@@ -15,6 +15,13 @@ const PORT = 3001
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com https://cdn.fontshare.com; font-src 'self' data: https://fonts.gstatic.com https://api.fontshare.com https://cdn.fontshare.com; img-src 'self' data: https: blob:; connect-src 'self' https:;"
+  )
+  next()
+})
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(process.cwd(), 'uploads')
@@ -407,16 +414,28 @@ if (!fs.existsSync(reviewsDataPath)) {
 function getReviews() {
   try {
     if (fs.existsSync(reviewsDataPath)) {
-      return JSON.parse(fs.readFileSync(reviewsDataPath, 'utf8'))
+      const parsed = JSON.parse(fs.readFileSync(reviewsDataPath, 'utf8'))
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        global._svt_in_memory_reviews = parsed
+        return parsed
+      }
     }
   } catch (err) {
     console.error('Error reading reviews:', err)
   }
-  return DEFAULT_REVIEWS
+  if (!global._svt_in_memory_reviews) {
+    global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
+  }
+  return global._svt_in_memory_reviews
 }
 
 function saveReviews(reviews) {
+  global._svt_in_memory_reviews = reviews
   try {
+    const dir = path.dirname(reviewsDataPath)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
     fs.writeFileSync(reviewsDataPath, JSON.stringify(reviews, null, 2))
   } catch (err) {
     console.error('Error writing reviews:', err)
@@ -436,6 +455,7 @@ function sanitizeInput(str = '') {
 // GET approved reviews + summary metrics
 app.get('/api/reviews', (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     const reviews = getReviews()
     const approvedReviews = reviews.filter(r => r.status === 'Approved')
     
@@ -551,7 +571,7 @@ app.post('/api/reviews', upload.single('profileImage'), (req, res) => {
       timestamp: now
     }
 
-    reviews.push(newReview)
+    reviews.unshift(newReview)
     saveReviews(reviews)
 
     // Save submission time to rate limit list
@@ -633,9 +653,9 @@ app.get('/api/admin/reviews', requireAdmin, (req, res) => {
 // Approve review
 app.post('/api/admin/reviews/:id/approve', requireAdmin, (req, res) => {
   try {
-    const rId = parseInt(req.params.id, 10)
+    const rId = req.params.id
     const reviews = getReviews()
-    const match = reviews.find(r => r.id === rId)
+    const match = reviews.find(r => String(r.id) === String(rId))
 
     if (!match) {
       return res.status(404).json({ success: false, message: 'Review not found' })
@@ -652,9 +672,9 @@ app.post('/api/admin/reviews/:id/approve', requireAdmin, (req, res) => {
 // Reject review
 app.post('/api/admin/reviews/:id/reject', requireAdmin, (req, res) => {
   try {
-    const rId = parseInt(req.params.id, 10)
+    const rId = req.params.id
     const reviews = getReviews()
-    const match = reviews.find(r => r.id === rId)
+    const match = reviews.find(r => String(r.id) === String(rId))
 
     if (!match) {
       return res.status(404).json({ success: false, message: 'Review not found' })
@@ -671,10 +691,10 @@ app.post('/api/admin/reviews/:id/reject', requireAdmin, (req, res) => {
 // Delete review
 app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
   try {
-    const rId = parseInt(req.params.id, 10)
+    const rId = req.params.id
     let reviews = getReviews()
     const originalLength = reviews.length
-    reviews = reviews.filter(r => r.id !== rId)
+    reviews = reviews.filter(r => String(r.id) !== String(rId))
 
     if (reviews.length === originalLength) {
       return res.status(404).json({ success: false, message: 'Review not found' })
@@ -690,10 +710,10 @@ app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
 // Edit review
 app.put('/api/admin/reviews/:id', requireAdmin, (req, res) => {
   try {
-    const rId = parseInt(req.params.id, 10)
+    const rId = req.params.id
     const { name, star, comment, company } = req.body
     const reviews = getReviews()
-    const match = reviews.find(r => r.id === rId)
+    const match = reviews.find(r => String(r.id) === String(rId))
 
     if (!match) {
       return res.status(404).json({ success: false, message: 'Review not found' })

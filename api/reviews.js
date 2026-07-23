@@ -1,5 +1,5 @@
-// Vercel Serverless Function for /api/reviews and /api/admin/reviews
-// Automatically deployed by Vercel for https://srivoratech.vercel.app/api/reviews
+import fs from 'fs'
+import path from 'path'
 
 const ADMIN_TOKEN = 'srivoratech_admin_secure_session_token_2026'
 
@@ -42,22 +42,107 @@ const DEFAULT_REVIEWS = [
   }
 ]
 
-// Serverless persistent memory database
-let inMemoryReviews = [...DEFAULT_REVIEWS]
+// Determine storage file path for persistent memory across serverless restarts safely
+function getWritableStoragePath() {
+  const tmpPath = path.join('/tmp', 'reviews.json')
+  const uploadsDir = path.join(process.cwd(), 'uploads')
+  const uploadsPath = path.join(uploadsDir, 'reviews.json')
+
+  try {
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true })
+    }
+    const testFile = path.join(uploadsDir, '.write_test')
+    fs.writeFileSync(testFile, 'test')
+    fs.unlinkSync(testFile)
+    return uploadsPath
+  } catch (e) {
+    return tmpPath
+  }
+}
+
+function getReviews() {
+  const targetPath = getWritableStoragePath()
+  const uploadsPath = path.join(process.cwd(), 'uploads', 'reviews.json')
+
+  // 1. Try reading target writable path
+  try {
+    if (fs.existsSync(targetPath)) {
+      const data = fs.readFileSync(targetPath, 'utf8')
+      const parsed = JSON.parse(data)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        global._svt_in_memory_reviews = parsed
+        return parsed
+      }
+    }
+  } catch (err) {
+    console.error('Error reading target reviews file:', err)
+  }
+
+  // 2. If target path doesn't exist yet, seed from uploadsPath if available
+  if (targetPath !== uploadsPath) {
+    try {
+      if (fs.existsSync(uploadsPath)) {
+        const seedData = fs.readFileSync(uploadsPath, 'utf8')
+        const seedParsed = JSON.parse(seedData)
+        if (Array.isArray(seedParsed) && seedParsed.length > 0) {
+          global._svt_in_memory_reviews = seedParsed
+          saveReviews(seedParsed)
+          return seedParsed
+        }
+      }
+    } catch (err) {
+      console.error('Error seeding from uploadsPath:', err)
+    }
+  }
+
+  // 3. Fallback to cached memory or DEFAULT_REVIEWS
+  if (!global._svt_in_memory_reviews || global._svt_in_memory_reviews.length === 0) {
+    global._svt_in_memory_reviews = [...DEFAULT_REVIEWS]
+    saveReviews(global._svt_in_memory_reviews)
+  }
+
+  return global._svt_in_memory_reviews
+}
+
+function saveReviews(reviews) {
+  global._svt_in_memory_reviews = reviews
+  try {
+    const targetPath = getWritableStoragePath()
+    const dir = path.dirname(targetPath)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(targetPath, JSON.stringify(reviews, null, 2))
+  } catch (err) {
+    console.error('Error saving persistent reviews:', err)
+  }
+}
 
 function checkAdminAuth(req) {
   const token = req.headers['x-admin-token']
   return token === ADMIN_TOKEN
 }
 
+function extractReviewId(url) {
+  const cleanUrl = url.split('?')[0]
+  const match = cleanUrl.match(/\/admin\/reviews\/([^/]+)/)
+  return match ? match[1] : ''
+}
+
 export default function handler(req, res) {
-  // CORS Headers
+  // CORS & Cache & CSP Headers
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-admin-token'
+  )
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com https://cdn.fontshare.com; font-src 'self' data: https://fonts.gstatic.com https://api.fontshare.com https://cdn.fontshare.com; img-src 'self' data: https: blob:; connect-src 'self' https:;"
   )
 
   if (req.method === 'OPTIONS') {
@@ -94,7 +179,7 @@ export default function handler(req, res) {
       const rating = urlObj.searchParams.get('rating') || ''
       const status = urlObj.searchParams.get('status') || ''
 
-      let resultList = [...inMemoryReviews]
+      let resultList = getReviews()
       if (rating) {
         const rVal = parseInt(rating, 10)
         resultList = resultList.filter(r => r.star === rVal)
@@ -117,25 +202,23 @@ export default function handler(req, res) {
 
     // Admin POST (Approve / Reject)
     if (req.method === 'POST') {
-      let body = req.body || {}
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body) } catch(e) {}
-      }
-
-      const reviewId = parseInt(url.split('/').pop().replace(/[^0-9]/g, ''), 10)
-      const reviewIndex = inMemoryReviews.findIndex(r => r.id === reviewId)
+      const reviewIdStr = extractReviewId(url)
+      const reviews = getReviews()
+      const reviewIndex = reviews.findIndex(r => String(r.id) === String(reviewIdStr))
 
       if (reviewIndex === -1) {
         return res.status(404).json({ success: false, message: 'Review not found' })
       }
 
       if (url.includes('/approve')) {
-        inMemoryReviews[reviewIndex].status = 'Approved'
-        return res.status(200).json({ success: true, message: 'Review approved', review: inMemoryReviews[reviewIndex] })
+        reviews[reviewIndex].status = 'Approved'
+        saveReviews(reviews)
+        return res.status(200).json({ success: true, message: 'Review approved successfully', review: reviews[reviewIndex] })
       }
       if (url.includes('/reject')) {
-        inMemoryReviews[reviewIndex].status = 'Rejected'
-        return res.status(200).json({ success: true, message: 'Review rejected', review: inMemoryReviews[reviewIndex] })
+        reviews[reviewIndex].status = 'Rejected'
+        saveReviews(reviews)
+        return res.status(200).json({ success: true, message: 'Review rejected successfully', review: reviews[reviewIndex] })
       }
     }
 
@@ -146,33 +229,44 @@ export default function handler(req, res) {
         try { body = JSON.parse(body) } catch(e) {}
       }
 
-      const reviewId = parseInt(url.split('/').pop().replace(/[^0-9]/g, ''), 10)
-      const reviewIndex = inMemoryReviews.findIndex(r => r.id === reviewId)
+      const reviewIdStr = extractReviewId(url)
+      const reviews = getReviews()
+      const reviewIndex = reviews.findIndex(r => String(r.id) === String(reviewIdStr))
 
       if (reviewIndex === -1) {
         return res.status(404).json({ success: false, message: 'Review not found' })
       }
 
       const { name, company, star, comment } = body
-      if (name) inMemoryReviews[reviewIndex].name = String(name).replace(/<[^>]*>/g, '').trim()
-      if (company !== undefined) inMemoryReviews[reviewIndex].company = String(company).replace(/<[^>]*>/g, '').trim()
-      if (star) inMemoryReviews[reviewIndex].star = parseInt(star, 10) || 5
-      if (comment) inMemoryReviews[reviewIndex].comment = String(comment).replace(/<[^>]*>/g, '').trim()
+      if (name) reviews[reviewIndex].name = String(name).replace(/<[^>]*>/g, '').trim()
+      if (company !== undefined) reviews[reviewIndex].company = String(company).replace(/<[^>]*>/g, '').trim()
+      if (star) reviews[reviewIndex].star = parseInt(star, 10) || 5
+      if (comment) reviews[reviewIndex].comment = String(comment).replace(/<[^>]*>/g, '').trim()
 
-      return res.status(200).json({ success: true, message: 'Review updated successfully', review: inMemoryReviews[reviewIndex] })
+      saveReviews(reviews)
+      return res.status(200).json({ success: true, message: 'Review updated successfully', review: reviews[reviewIndex] })
     }
 
     // Admin DELETE (Delete review)
     if (req.method === 'DELETE') {
-      const reviewId = parseInt(url.split('/').pop().replace(/[^0-9]/g, ''), 10)
-      inMemoryReviews = inMemoryReviews.filter(r => r.id !== reviewId)
+      const reviewIdStr = extractReviewId(url)
+      let reviews = getReviews()
+      const originalLength = reviews.length
+      reviews = reviews.filter(r => String(r.id) !== String(reviewIdStr))
+
+      if (reviews.length === originalLength) {
+        return res.status(404).json({ success: false, message: 'Review not found' })
+      }
+
+      saveReviews(reviews)
       return res.status(200).json({ success: true, message: 'Review deleted successfully' })
     }
   }
 
   // ── 3. Public GET /api/reviews Endpoint (Approved Only) ──
   if (req.method === 'GET') {
-    const approved = inMemoryReviews.filter(r => r.status === 'Approved')
+    const allReviews = getReviews()
+    const approved = allReviews.filter(r => r.status === 'Approved')
     approved.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
 
     const totalApproved = approved.length
@@ -240,7 +334,9 @@ export default function handler(req, res) {
         timestamp: Date.now()
       }
 
-      inMemoryReviews.unshift(newReview)
+      const reviews = getReviews()
+      reviews.unshift(newReview)
+      saveReviews(reviews)
 
       return res.status(200).json({
         success: true,
@@ -254,3 +350,4 @@ export default function handler(req, res) {
 
   res.status(405).json({ success: false, message: 'Method Not Allowed' })
 }
+

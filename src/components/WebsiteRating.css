@@ -18,6 +18,30 @@
   width: fit-content;
 }
 
+.admin-badge-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  padding: 4px 12px;
+  background: rgba(0, 103, 244, 0.08);
+  border: 1px solid rgba(0, 103, 244, 0.22);
+  border-radius: var(--radius-full);
+  color: #0067f4;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.admin-badge-toggle-btn:hover {
+  background: #0067f4;
+  border-color: #0067f4;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 103, 244, 0.25);
+}
+
 .admin-secret-lock {
   cursor: pointer;
   opacity: 0.35;
