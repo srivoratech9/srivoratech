@@ -276,7 +276,7 @@ export async function adminGetReviews({ search = '', rating = '', status = '' } 
     throw new Error(result.message || 'Failed to fetch reviews')
   }
 
-  return result
+  return Array.isArray(result.reviews) ? result.reviews : (Array.isArray(result) ? result : [])
 }
 
 /**

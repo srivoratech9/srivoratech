@@ -58,6 +58,8 @@ export default function WebsiteRating() {
   const fileInputRef = useRef(null)
   const scrollStreamRef = useRef(null)
 
+  const safeAdminReviews = Array.isArray(adminReviews) ? adminReviews : []
+
   const scrollStream = (direction) => {
     if (scrollStreamRef.current) {
       const scrollAmount = direction === 'left' ? -320 : 320
@@ -113,14 +115,16 @@ export default function WebsiteRating() {
   const loadAdminReviews = async () => {
     setAdminLoading(true)
     try {
-      const reviews = await adminGetReviews({
+      const res = await adminGetReviews({
         search: adminSearch,
         rating: adminRatingFilter,
         status: adminStatusFilter
       })
-      setAdminReviews(reviews)
+      const list = Array.isArray(res) ? res : (res && Array.isArray(res.reviews) ? res.reviews : [])
+      setAdminReviews(list)
     } catch (err) {
       console.error(err)
+      setAdminReviews([])
     } finally {
       setAdminLoading(false)
     }
@@ -343,19 +347,19 @@ export default function WebsiteRating() {
                 {/* Dashboard Stats */}
                 <div className="admin-stats-summary-row">
                   <div className="admin-stat-card-mini">
-                    <span className="mini-num">{adminReviews.length}</span>
+                    <span className="mini-num">{safeAdminReviews.length}</span>
                     <span className="mini-lbl">Total Reviews</span>
                   </div>
                   <div className="admin-stat-card-mini pending-card">
-                    <span className="mini-num">{adminReviews.filter(r => r.status === 'Pending').length}</span>
+                    <span className="mini-num">{safeAdminReviews.filter(r => r.status === 'Pending').length}</span>
                     <span className="mini-lbl">Pending Review</span>
                   </div>
                   <div className="admin-stat-card-mini approved-card">
-                    <span className="mini-num">{adminReviews.filter(r => r.status === 'Approved').length}</span>
+                    <span className="mini-num">{safeAdminReviews.filter(r => r.status === 'Approved').length}</span>
                     <span className="mini-lbl">Approved Live</span>
                   </div>
                   <div className="admin-stat-card-mini rejected-card">
-                    <span className="mini-num">{adminReviews.filter(r => r.status === 'Rejected').length}</span>
+                    <span className="mini-num">{safeAdminReviews.filter(r => r.status === 'Rejected').length}</span>
                     <span className="mini-lbl">Rejected</span>
                   </div>
                 </div>
@@ -409,16 +413,16 @@ export default function WebsiteRating() {
                   {adminLoading ? (
                     <div className="admin-skeleton-loading">
                       <RefreshCw size={24} className="spin-anim loading-icon" />
-                      <p>Querying local reviews database...</p>
+                      <p>Querying reviews database...</p>
                     </div>
-                  ) : adminReviews.length === 0 ? (
+                  ) : safeAdminReviews.length === 0 ? (
                     <div className="admin-empty-state">
                       <MessageSquare size={32} />
                       <p>No reviews match your filter parameters.</p>
                     </div>
                   ) : (
                     <div className="admin-reviews-grid">
-                      {adminReviews.map(review => (
+                      {safeAdminReviews.map(review => (
                         <div key={review.id} className={`admin-review-card-item status-${review.status.toLowerCase()}`}>
                           <div className="card-top-row">
                             <div className="user-profile-meta">
