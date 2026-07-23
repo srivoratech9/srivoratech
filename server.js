@@ -466,9 +466,11 @@ app.get('/api/reviews', (req, res) => {
       ? Math.round((highRatings / totalApproved) * 100)
       : 100
 
+    const displayReviews = approvedReviews.slice(0, 100)
+
     res.json({
       success: true,
-      reviews: approvedReviews,
+      reviews: displayReviews,
       totalCount: totalApproved,
       averageRating,
       distribution: percentages,

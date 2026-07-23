@@ -384,9 +384,11 @@ export default async function handler(req, res) {
       ? Math.round((highRatings / totalApproved) * 100)
       : 100
 
+    const displayReviews = approved.slice(0, 100)
+
     return res.status(200).json({
       success: true,
-      reviews: approved,
+      reviews: displayReviews,
       totalCount: totalApproved,
       averageRating,
       distribution: percentages,
