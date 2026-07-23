@@ -213,6 +213,7 @@ export default function WebsiteRating() {
     try {
       await adminApproveReview(id)
       loadAdminReviews()
+      window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
     } catch (err) {
       alert('Error approving review: ' + err.message)
     }
@@ -222,6 +223,7 @@ export default function WebsiteRating() {
     try {
       await adminRejectReview(id)
       loadAdminReviews()
+      window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
     } catch (err) {
       alert('Error rejecting review: ' + err.message)
     }
@@ -232,6 +234,7 @@ export default function WebsiteRating() {
     try {
       await adminDeleteReview(id)
       loadAdminReviews()
+      window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
     } catch (err) {
       alert('Error deleting review: ' + err.message)
     }
@@ -256,6 +259,7 @@ export default function WebsiteRating() {
       })
       setEditingReview(null)
       loadAdminReviews()
+      window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
     } catch (err) {
       alert('Error saving review edits: ' + err.message)
     }
