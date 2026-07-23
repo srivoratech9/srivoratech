@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight, Download, ThumbsUp, BadgeCheck } from 'lucide-react'
+import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight, Download, ThumbsUp, BadgeCheck, LayoutGrid, Layers } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { subscribeToRatings, submitRating, incrementViewCount, adminLogin, adminGetReviews, adminApproveReview, adminRejectReview, adminEditReview, adminDeleteReview, markReviewHelpful, getAdminToken, removeAdminToken } from '../services/ratingsService'
 import srikanthPhoto from '../assets/badisa_srikanth.jpg'
@@ -26,6 +26,7 @@ export default function WebsiteRating() {
   const [loading, setLoading] = useState(true)
   const [publicStarFilter, setPublicStarFilter] = useState('')
   const [publicSearchQuery, setPublicSearchQuery] = useState('')
+  const [publicViewMode, setPublicViewMode] = useState('carousel') // 'carousel' | 'grid'
   const [votedHelpful, setVotedHelpful] = useState({})
 
   const handleHelpfulClick = async (id) => {
@@ -781,24 +782,48 @@ export default function WebsiteRating() {
                   </h4>
                   {reviewsList.length > 0 && (
                     <div className="stream-nav-controls">
-                      <button 
-                        type="button" 
-                        onClick={() => scrollStream('left')} 
-                        className="carousel-nav-btn" 
-                        title="Scroll Left"
-                        aria-label="Scroll reviews left"
-                      >
-                        <ChevronLeft size={18} />
-                      </button>
-                      <button 
-                        type="button" 
-                        onClick={() => scrollStream('right')} 
-                        className="carousel-nav-btn" 
-                        title="Scroll Right"
-                        aria-label="Scroll reviews right"
-                      >
-                        <ChevronRight size={18} />
-                      </button>
+                      {/* View Mode Toggle */}
+                      <div className="view-mode-toggle-group">
+                        <button 
+                          type="button" 
+                          onClick={() => setPublicViewMode('carousel')} 
+                          className={`toggle-view-btn ${publicViewMode === 'carousel' ? 'active' : ''}`}
+                          title="Carousel Stream"
+                        >
+                          <Layers size={14} /> Carousel
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => setPublicViewMode('grid')} 
+                          className={`toggle-view-btn ${publicViewMode === 'grid' ? 'active' : ''}`}
+                          title="Grid View (Show All)"
+                        >
+                          <LayoutGrid size={14} /> Show All ({filteredPublicReviews.length})
+                        </button>
+                      </div>
+
+                      {publicViewMode === 'carousel' && (
+                        <div className="carousel-arrows-group">
+                          <button 
+                            type="button" 
+                            onClick={() => scrollStream('left')} 
+                            className="carousel-nav-btn" 
+                            title="Scroll Left"
+                            aria-label="Scroll reviews left"
+                          >
+                            <ChevronLeft size={18} />
+                          </button>
+                          <button 
+                            type="button" 
+                            onClick={() => scrollStream('right')} 
+                            className="carousel-nav-btn" 
+                            title="Scroll Right"
+                            aria-label="Scroll reviews right"
+                          >
+                            <ChevronRight size={18} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -833,6 +858,24 @@ export default function WebsiteRating() {
                     >
                       4 ★ ({counts[4] || 0})
                     </button>
+                    <button 
+                      onClick={() => setPublicStarFilter('3')} 
+                      className={`star-pill-btn ${publicStarFilter === '3' ? 'active' : ''}`}
+                    >
+                      3 ★ ({counts[3] || 0})
+                    </button>
+                    <button 
+                      onClick={() => setPublicStarFilter('2')} 
+                      className={`star-pill-btn ${publicStarFilter === '2' ? 'active' : ''}`}
+                    >
+                      2 ★ ({counts[2] || 0})
+                    </button>
+                    <button 
+                      onClick={() => setPublicStarFilter('1')} 
+                      className={`star-pill-btn ${publicStarFilter === '1' ? 'active' : ''}`}
+                    >
+                      1 ★ ({counts[1] || 0})
+                    </button>
                   </div>
                 </div>
 
@@ -853,6 +896,73 @@ export default function WebsiteRating() {
                   <div className="admin-empty-state">
                     <MessageSquare size={32} />
                     <p>No customer reviews match your search filter.</p>
+                  </div>
+                ) : publicViewMode === 'grid' ? (
+                  <div className="reviews-all-grid-wrapper">
+                    {filteredPublicReviews.map((review) => {
+                      const profileImg = getProfileImage(review)
+                      const isFounderReview = review.isFounder || (review.name && review.name.toLowerCase().includes('srikanth'))
+                      return (
+                        <div key={review.id} className={`review-card-item ${isFounderReview ? 'founder-review-card' : ''}`}>
+                          <div className="review-card-top">
+                            <div className="review-name-group">
+                              {profileImg ? (
+                                <div className="customer-avatar-wrapper">
+                                  <img src={profileImg} alt={review.name} className="customer-avatar-img" />
+                                  {isFounderReview && (
+                                    <span className="avatar-verified-dot" title="Verified Founder">
+                                      <BadgeCheck size={12} />
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="review-avatar">
+                                  {review.name.charAt(0).toUpperCase()}
+                                </span>
+                              )}
+                              <div className="customer-info-meta">
+                                <strong className="r-name">
+                                  {review.name}
+                                  {isFounderReview && <span className="founder-badge-inline">Founder</span>}
+                                </strong>
+                                {review.company && <span className="r-company">{review.company}</span>}
+                              </div>
+                            </div>
+                            <div className="r-stars">
+                              {[...Array(5)].map((_, i) => (
+                                <Star 
+                                  key={i} 
+                                  size={13} 
+                                  fill={i < review.star ? '#f59e0b' : 'none'} 
+                                  color={i < review.star ? '#f59e0b' : '#cbd5e1'} 
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="r-comment">"{review.comment}"</p>
+                          {review.adminReply && (
+                            <div className="official-admin-reply-box">
+                              <div className="reply-header-meta">
+                                <ShieldCheck size={13} className="reply-badge-icon" />
+                                <span>Official Response from SriVoraTech</span>
+                              </div>
+                              <p className="reply-content-text">"{review.adminReply}"</p>
+                            </div>
+                          )}
+                          <div className="card-footer-meta">
+                            <span className="r-date">{review.date}</span>
+                            <button 
+                              type="button"
+                              onClick={() => handleHelpfulClick(review.id)} 
+                              className={`helpful-btn ${votedHelpful[review.id] ? 'voted' : ''}`}
+                              title="Mark review as helpful"
+                            >
+                              <ThumbsUp size={12} /> {votedHelpful[review.id] ? 'Helpful' : 'Helpful'} ({review.helpfulCount || 0})
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 ) : (
                   <div className="reviews-carousel-wrapper" ref={scrollStreamRef}>
