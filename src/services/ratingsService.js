@@ -22,6 +22,18 @@ export function removeAdminToken() {
 export function subscribeToRatings(callback) {
   let prevDataString = ''
 
+  // Read local cache immediately for zero-lag 0ms rendering
+  try {
+    const cached = localStorage.getItem('svt_reviews_cache')
+    if (cached) {
+      const parsedCache = JSON.parse(cached)
+      if (parsedCache && parsedCache.reviews) {
+        callback(parsedCache)
+        prevDataString = JSON.stringify(parsedCache._raw || parsedCache)
+      }
+    }
+  } catch (e) {}
+
   const fetchUpdatedRatings = async () => {
     try {
       const res = await fetch(`/api/reviews?_t=${Date.now()}`)
@@ -37,7 +49,7 @@ export function subscribeToRatings(callback) {
         const currentDataString = JSON.stringify(data)
         if (currentDataString !== prevDataString) {
           prevDataString = currentDataString
-          callback({
+          const payload = {
             ratings: data.reviews.map(r => parseInt(r.star, 10) || 5),
             reviews: data.reviews,
             viewCount: data.reviews.length * 28 + 847,
@@ -46,7 +58,11 @@ export function subscribeToRatings(callback) {
             distribution: data.distribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
             counts: data.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
             satisfactionRate: data.satisfactionRate
-          })
+          }
+          try {
+            localStorage.setItem('svt_reviews_cache', JSON.stringify({ ...payload, _raw: data }))
+          } catch (e) {}
+          callback(payload)
         }
       }
     } catch (err) {

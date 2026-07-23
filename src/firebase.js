@@ -2,7 +2,7 @@
 // Real-time database for live ratings & reviews shared across all visitors
 
 import { initializeApp } from 'firebase/app'
-import { getDatabase } from 'firebase/database'
+import { getDatabase, ref, set, get, onValue, push, child } from 'firebase/database'
 
 const firebaseConfig = {
   apiKey: "AIzaSyDummyKeyReplaceWithYourOwn",
@@ -21,8 +21,8 @@ try {
   app = initializeApp(firebaseConfig)
   db = getDatabase(app)
 } catch (error) {
-  console.warn('Firebase init skipped (no valid config):', error.message)
+  console.warn('Firebase init skipped (using live storage service):', error.message)
 }
 
-export { db }
+export { db, ref, set, get, onValue, push, child }
 export default app

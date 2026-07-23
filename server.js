@@ -377,30 +377,8 @@ const DEFAULT_REVIEWS = [
     status: 'Approved',
     timestamp: 1784534400000,
     company: 'SriVoraTech',
-    profileImage: ''
-  },
-  {
-    id: 2,
-    name: 'Narasimha Reddy (Founder, TFS Fintech)',
-    email: 'narasimha@tfsfintech.com',
-    star: 5,
-    comment: "SriVoraTech transformed our vision into India's 1st subscription fintech app within 2 months!",
-    date: 'Jul 18, 2026',
-    status: 'Approved',
-    timestamp: 1784361600000,
-    company: 'TFS Fintech',
-    profileImage: ''
-  },
-  {
-    id: 3,
-    name: 'Sujith Reddy (Founder, FluentPro AI)',
-    email: 'sujith@fluentpro.ai',
-    star: 5,
-    comment: 'FluentPro AI voice engine was engineered from scratch by SriVoraTech — 85,000+ active learners love it!',
-    date: 'Jul 15, 2026',
-    status: 'Approved',
-    timestamp: 1784102400000,
-    company: 'FluentPro AI',
+    timestamp: 1784534400000,
+    company: 'SriVoraTech',
     profileImage: ''
   }
 ]
