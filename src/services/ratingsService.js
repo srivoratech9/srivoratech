@@ -49,10 +49,16 @@ export function subscribeToRatings(callback) {
   // Fetch immediately
   fetchUpdatedRatings()
 
-  // Poll every 4 seconds for instant UI refresh
-  const interval = setInterval(fetchUpdatedRatings, 4000)
+  // Listen to immediate refresh events
+  window.addEventListener('svt_reviews_changed', fetchUpdatedRatings)
 
-  return () => clearInterval(interval)
+  // Poll every 2.5 seconds for instant UI refresh
+  const interval = setInterval(fetchUpdatedRatings, 2500)
+
+  return () => {
+    clearInterval(interval)
+    window.removeEventListener('svt_reviews_changed', fetchUpdatedRatings)
+  }
 }
 
 /**
@@ -157,6 +163,7 @@ export async function adminApproveReview(id) {
     throw new Error(result.message || 'Failed to approve review')
   }
 
+  window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
   return result
 }
 
@@ -177,6 +184,7 @@ export async function adminRejectReview(id) {
     throw new Error(result.message || 'Failed to reject review')
   }
 
+  window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
   return result
 }
 
@@ -199,6 +207,7 @@ export async function adminEditReview(id, data) {
     throw new Error(result.message || 'Failed to update review')
   }
 
+  window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
   return result
 }
 
@@ -219,5 +228,6 @@ export async function adminDeleteReview(id) {
     throw new Error(result.message || 'Failed to delete review')
   }
 
+  window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
   return result
 }

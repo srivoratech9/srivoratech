@@ -66,6 +66,15 @@ export default function WebsiteRating() {
       setIsAdminLoggedIn(true)
     }
 
+    // Secret keyboard shortcut to toggle admin portal: Ctrl+Alt+A or Cmd+Alt+A
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault()
+        setShowAdminPortal(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+
     // Subscribe to real-time ratings updates
     setLoading(true)
     const unsubscribe = subscribeToRatings((data) => {
@@ -77,7 +86,10 @@ export default function WebsiteRating() {
       setLoading(false)
     })
 
-    return () => unsubscribe()
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      unsubscribe()
+    }
   }, [])
 
   // Refetch admin reviews whenever filters change
@@ -246,25 +258,20 @@ export default function WebsiteRating() {
         <div ref={ref} className={`animate-on-scroll ${isVisible ? 'visible' : ''}`}>
           <div className="rating-badge">
             <Sparkles size={14} />
-            Community Reviews & Feedback
+            <span>Community Reviews & Feedback</span>
+            <Lock 
+              size={12} 
+              className="admin-secret-lock" 
+              onClick={() => setShowAdminPortal(!showAdminPortal)} 
+              title="Admin Console (Ctrl+Alt+A)" 
+            />
           </div>
           <h2 className="section-title">
             Live User <span className="gradient-text">Ratings & Reviews</span>
           </h2>
           <p className="section-subtitle">
-            Every review updates live. Click the Admin badge to manage submissions.
+            Real feedback from real users. Every rating updates dynamically in real-time across all visitors.
           </p>
-        </div>
-
-        {/* Admin Portal Trigger */}
-        <div className="admin-console-trigger-row">
-          <button 
-            className={`admin-portal-toggle-btn ${showAdminPortal ? 'active' : ''}`}
-            onClick={() => setShowAdminPortal(!showAdminPortal)}
-          >
-            <Shield size={14} />
-            {showAdminPortal ? 'View Public Review Feed' : 'Manage Reviews (Admin Portal)'}
-          </button>
         </div>
 
         {/* ── ADMIN MANAGEMENT PORTAL ── */}

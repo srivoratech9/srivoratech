@@ -18,6 +18,19 @@
   width: fit-content;
 }
 
+.admin-secret-lock {
+  cursor: pointer;
+  opacity: 0.35;
+  margin-left: 6px;
+  transition: all 200ms ease;
+}
+
+.admin-secret-lock:hover {
+  opacity: 1;
+  color: #0067f4;
+  transform: scale(1.2);
+}
+
 /* ── Real-time Connection Status ── */
 .rating-connection-status {
   display: flex;
