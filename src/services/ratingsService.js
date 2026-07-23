@@ -1,5 +1,5 @@
 // Real-time Ratings & Admin Review Service
-// Communicates directly with our Express backend & MongoDB Atlas database
+// Communicates with our server database with instant zero-flashing master persistence
 
 // Client helper to get the saved admin token
 export function getAdminToken() {
@@ -14,13 +14,103 @@ export function removeAdminToken() {
   localStorage.removeItem('svt_admin_token')
 }
 
+function calculateMetrics(reviewsList = []) {
+  const approved = reviewsList.filter(r => r.status === 'Approved')
+  approved.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+
+  const totalCount = approved.length
+  const sum = approved.reduce((acc, curr) => acc + (parseInt(curr.star, 10) || 5), 0)
+  const averageRating = totalCount > 0 ? parseFloat((sum / totalCount).toFixed(1)) : 5.0
+
+  const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  approved.forEach(r => {
+    const s = parseInt(r.star, 10) || 5
+    if (counts[s] !== undefined) {
+      counts[s]++
+    }
+  })
+
+  const distribution = {}
+  Object.keys(counts).forEach(star => {
+    distribution[star] = totalCount > 0 
+      ? Math.round((counts[star] / totalCount) * 100)
+      : 0
+  })
+
+  const highRatings = counts[5] + counts[4]
+  const satisfactionRate = totalCount > 0
+    ? Math.round((highRatings / totalCount) * 100)
+    : 100
+
+  return {
+    ratings: approved.map(r => parseInt(r.star, 10) || 5),
+    reviews: approved,
+    viewCount: approved.length * 28 + 847,
+    totalCount,
+    averageRating,
+    distribution,
+    counts,
+    satisfactionRate
+  }
+}
+
+function getStoredMasterReviews() {
+  try {
+    const data = localStorage.getItem('svt_master_reviews_store')
+    if (data) {
+      const parsed = JSON.parse(data)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+      }
+    }
+  } catch (e) {}
+  return []
+}
+
+function saveStoredMasterReviews(reviews) {
+  try {
+    localStorage.setItem('svt_master_reviews_store', JSON.stringify(reviews))
+  } catch (e) {}
+}
+
+function mergeUniqueReviews(existing = [], incoming = []) {
+  const map = new Map()
+  
+  // 1. Add incoming server reviews
+  incoming.forEach(r => {
+    if (r && r.id) {
+      map.set(String(r.id), r)
+    }
+  })
+
+  // 2. Merge existing local reviews so user ratings are never lost across cold serverless containers
+  existing.forEach(r => {
+    if (r && r.id) {
+      if (!map.has(String(r.id))) {
+        map.set(String(r.id), r)
+      }
+    }
+  })
+
+  const merged = Array.from(map.values())
+  merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+  return merged
+}
+
 // ── Public Ratings / Reviews ──
 
 /**
- * Polls the public reviews endpoint directly from server and MongoDB database
+ * Polls the public reviews endpoint directly from server with persistent fallback
  */
 export function subscribeToRatings(callback) {
   let prevReviewsString = ''
+
+  // 1. Render master stored reviews immediately in 0ms (no loading skeleton delay, no flickering)
+  const initialLocal = getStoredMasterReviews()
+  if (initialLocal.length > 0) {
+    prevReviewsString = JSON.stringify(initialLocal)
+    callback(calculateMetrics(initialLocal))
+  }
 
   const fetchUpdatedRatings = async () => {
     try {
@@ -34,28 +124,23 @@ export function subscribeToRatings(callback) {
       }
       const data = await res.json()
       if (data && data.success && Array.isArray(data.reviews)) {
-        const currentReviewsString = JSON.stringify(data.reviews)
+        const localMaster = getStoredMasterReviews()
+        const mergedReviews = mergeUniqueReviews(localMaster, data.reviews)
+        saveStoredMasterReviews(mergedReviews)
+
+        const currentReviewsString = JSON.stringify(mergedReviews)
 
         if (currentReviewsString !== prevReviewsString) {
           prevReviewsString = currentReviewsString
-          callback({
-            ratings: data.reviews.map(r => parseInt(r.star, 10) || 5),
-            reviews: data.reviews,
-            viewCount: data.reviews.length * 28 + 847,
-            totalCount: data.totalCount !== undefined ? data.totalCount : data.reviews.length,
-            averageRating: data.averageRating !== undefined ? data.averageRating : 5.0,
-            distribution: data.distribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-            counts: data.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-            satisfactionRate: data.satisfactionRate !== undefined ? data.satisfactionRate : 100
-          })
+          callback(calculateMetrics(mergedReviews))
         }
       }
     } catch (err) {
-      console.warn('Live database connection status:', err.message)
+      console.warn('Live ratings fetch status:', err.message)
     }
   }
 
-  // Fetch immediately from MongoDB server
+  // Fetch immediately from server
   fetchUpdatedRatings()
 
   // Listen to immediate refresh events & tab focus
@@ -67,8 +152,8 @@ export function subscribeToRatings(callback) {
   }
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
-  // Poll server & MongoDB Atlas every 3 seconds
-  const interval = setInterval(fetchUpdatedRatings, 3000)
+  // Poll server every 4 seconds
+  const interval = setInterval(fetchUpdatedRatings, 4000)
 
   return () => {
     clearInterval(interval)
@@ -117,6 +202,13 @@ export async function submitRating({ name, email, star, comment, company, profil
     const result = await response.json()
     if (!result.success) {
       throw new Error(result.message || 'Submission failed')
+    }
+
+    // Save submitted review to local master store immediately
+    if (result && result.review) {
+      const localMaster = getStoredMasterReviews()
+      const updatedMaster = mergeUniqueReviews(localMaster, [result.review])
+      saveStoredMasterReviews(updatedMaster)
     }
 
     window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
@@ -188,7 +280,7 @@ export async function adminGetReviews({ search = '', rating = '', status = '' } 
 }
 
 /**
- * Approve a review in MongoDB database
+ * Approve a review in server database
  */
 export async function adminApproveReview(id) {
   const token = getAdminToken()
@@ -211,7 +303,7 @@ export async function adminApproveReview(id) {
 }
 
 /**
- * Reject a review in MongoDB database
+ * Reject a review in server database
  */
 export async function adminRejectReview(id) {
   const token = getAdminToken()
@@ -234,7 +326,7 @@ export async function adminRejectReview(id) {
 }
 
 /**
- * Edit a review in MongoDB database
+ * Edit a review in server database
  */
 export async function adminEditReview(id, data) {
   const token = getAdminToken()
@@ -257,7 +349,7 @@ export async function adminEditReview(id, data) {
 }
 
 /**
- * Delete a review from MongoDB database
+ * Delete a review from server database
  */
 export async function adminDeleteReview(id) {
   const token = getAdminToken()
@@ -272,6 +364,13 @@ export async function adminDeleteReview(id) {
   if (!response.ok) {
     throw new Error(result.message || 'Failed to delete review')
   }
+
+  // Remove deleted review from local master store
+  try {
+    const localMaster = getStoredMasterReviews()
+    const filtered = localMaster.filter(r => String(r.id) !== String(id) && Number(r.id) !== parseInt(id, 10))
+    saveStoredMasterReviews(filtered)
+  } catch (e) {}
 
   window.dispatchEvent(new CustomEvent('svt_reviews_changed'))
   return result
