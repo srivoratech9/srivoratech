@@ -17,11 +17,11 @@
     },
     {
       "source": "/api/admin/(.*)",
-      "destination": "/api/reviews.js"
+      "destination": "/api/reviews.js?route=/admin/$1"
     },
     {
       "source": "/api/admin",
-      "destination": "/api/reviews.js"
+      "destination": "/api/reviews.js?route=/admin"
     }
   ]
 }

@@ -195,7 +195,7 @@ export default function handler(req, res) {
   const url = req.url || ''
 
   // ── 1. Admin Login Endpoint ──
-  if (url.includes('/admin/login')) {
+  if (url.includes('/login') || url.includes('/admin/login')) {
     if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' })
     let body = req.body || {}
     if (typeof body === 'string') {
@@ -209,7 +209,14 @@ export default function handler(req, res) {
   }
 
   // ── 2. Admin Operations Endpoint ──
-  if (url.includes('/admin/reviews')) {
+  const isAdminOp = req.headers['x-admin-token'] || 
+                    url.includes('admin') || 
+                    url.includes('/approve') || 
+                    url.includes('/reject') || 
+                    req.method === 'PUT' || 
+                    req.method === 'DELETE'
+
+  if (isAdminOp && (req.method !== 'GET' || url.includes('admin'))) {
     if (!checkAdminAuth(req)) {
       return res.status(403).json({ success: false, message: 'Access denied: Administrator token required' })
     }
