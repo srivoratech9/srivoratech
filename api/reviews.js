@@ -1,5 +1,7 @@
-// Vercel Serverless Function for /api/reviews
+// Vercel Serverless Function for /api/reviews and /api/admin/reviews
 // Automatically deployed by Vercel for https://srivoratech.vercel.app/api/reviews
+
+const ADMIN_TOKEN = 'srivoratech_admin_secure_session_token_2026'
 
 const DEFAULT_REVIEWS = [
   {
@@ -40,7 +42,13 @@ const DEFAULT_REVIEWS = [
   }
 ]
 
+// Serverless persistent memory database
 let inMemoryReviews = [...DEFAULT_REVIEWS]
+
+function checkAdminAuth(req) {
+  const token = req.headers['x-admin-token']
+  return token === ADMIN_TOKEN
+}
 
 export default function handler(req, res) {
   // CORS Headers
@@ -57,6 +65,112 @@ export default function handler(req, res) {
     return
   }
 
+  const url = req.url || ''
+
+  // ── 1. Admin Login Endpoint ──
+  if (url.includes('/admin/login')) {
+    if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' })
+    let body = req.body || {}
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body) } catch(e) {}
+    }
+    const { username, password } = body
+    if (username === 'admin' && password === 'admin_password_srivoratech_2026') {
+      return res.status(200).json({ success: true, token: ADMIN_TOKEN })
+    }
+    return res.status(401).json({ success: false, message: 'Invalid administrative credentials' })
+  }
+
+  // ── 2. Admin Operations Endpoint ──
+  if (url.includes('/admin/reviews')) {
+    if (!checkAdminAuth(req)) {
+      return res.status(403).json({ success: false, message: 'Access denied: Administrator token required' })
+    }
+
+    // Admin GET reviews list (search & filter)
+    if (req.method === 'GET') {
+      const urlObj = new URL(url, `http://${req.headers.host || 'localhost'}`)
+      const search = urlObj.searchParams.get('search') || ''
+      const rating = urlObj.searchParams.get('rating') || ''
+      const status = urlObj.searchParams.get('status') || ''
+
+      let resultList = [...inMemoryReviews]
+      if (rating) {
+        const rVal = parseInt(rating, 10)
+        resultList = resultList.filter(r => r.star === rVal)
+      }
+      if (status) {
+        resultList = resultList.filter(r => r.status.toLowerCase() === status.toLowerCase())
+      }
+      if (search) {
+        const q = search.toLowerCase()
+        resultList = resultList.filter(r => 
+          r.name.toLowerCase().includes(q) || 
+          r.comment.toLowerCase().includes(q) || 
+          (r.company && r.company.toLowerCase().includes(q))
+        )
+      }
+
+      resultList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+      return res.status(200).json({ success: true, reviews: resultList })
+    }
+
+    // Admin POST (Approve / Reject)
+    if (req.method === 'POST') {
+      let body = req.body || {}
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body) } catch(e) {}
+      }
+
+      const reviewId = parseInt(url.split('/').pop().replace(/[^0-9]/g, ''), 10)
+      const reviewIndex = inMemoryReviews.findIndex(r => r.id === reviewId)
+
+      if (reviewIndex === -1) {
+        return res.status(404).json({ success: false, message: 'Review not found' })
+      }
+
+      if (url.includes('/approve')) {
+        inMemoryReviews[reviewIndex].status = 'Approved'
+        return res.status(200).json({ success: true, message: 'Review approved', review: inMemoryReviews[reviewIndex] })
+      }
+      if (url.includes('/reject')) {
+        inMemoryReviews[reviewIndex].status = 'Rejected'
+        return res.status(200).json({ success: true, message: 'Review rejected', review: inMemoryReviews[reviewIndex] })
+      }
+    }
+
+    // Admin PUT (Edit review)
+    if (req.method === 'PUT') {
+      let body = req.body || {}
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body) } catch(e) {}
+      }
+
+      const reviewId = parseInt(url.split('/').pop().replace(/[^0-9]/g, ''), 10)
+      const reviewIndex = inMemoryReviews.findIndex(r => r.id === reviewId)
+
+      if (reviewIndex === -1) {
+        return res.status(404).json({ success: false, message: 'Review not found' })
+      }
+
+      const { name, company, star, comment } = body
+      if (name) inMemoryReviews[reviewIndex].name = String(name).replace(/<[^>]*>/g, '').trim()
+      if (company !== undefined) inMemoryReviews[reviewIndex].company = String(company).replace(/<[^>]*>/g, '').trim()
+      if (star) inMemoryReviews[reviewIndex].star = parseInt(star, 10) || 5
+      if (comment) inMemoryReviews[reviewIndex].comment = String(comment).replace(/<[^>]*>/g, '').trim()
+
+      return res.status(200).json({ success: true, message: 'Review updated successfully', review: inMemoryReviews[reviewIndex] })
+    }
+
+    // Admin DELETE (Delete review)
+    if (req.method === 'DELETE') {
+      const reviewId = parseInt(url.split('/').pop().replace(/[^0-9]/g, ''), 10)
+      inMemoryReviews = inMemoryReviews.filter(r => r.id !== reviewId)
+      return res.status(200).json({ success: true, message: 'Review deleted successfully' })
+    }
+  }
+
+  // ── 3. Public GET /api/reviews Endpoint (Approved Only) ──
   if (req.method === 'GET') {
     const approved = inMemoryReviews.filter(r => r.status === 'Approved')
     approved.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
@@ -94,6 +208,7 @@ export default function handler(req, res) {
     })
   }
 
+  // ── 4. Public POST /api/reviews Endpoint (Defaults to Pending) ──
   if (req.method === 'POST') {
     try {
       let body = req.body || {}
@@ -114,13 +229,13 @@ export default function handler(req, res) {
       }
 
       const newReview = {
-        id: Date.now(),
+        id: Date.now() + Math.floor(Math.random() * 1000),
         name: String(name).replace(/<[^>]*>/g, '').trim(),
         email: email ? String(email).replace(/<[^>]*>/g, '').trim() : '',
         star: parseInt(rating, 10) || 5,
         comment: String(comment).replace(/<[^>]*>/g, '').trim(),
         company: company ? String(company).replace(/<[^>]*>/g, '').trim() : '',
-        status: 'Approved', // Auto approve on serverless instance
+        status: 'Pending', // ALWAYS Pending until Admin approves!
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         timestamp: Date.now()
       }
@@ -129,7 +244,7 @@ export default function handler(req, res) {
 
       return res.status(200).json({
         success: true,
-        message: 'Review submitted successfully!',
+        message: 'Review submitted successfully. It will display on the website once approved by our administrator.',
         review: newReview
       })
     } catch (err) {

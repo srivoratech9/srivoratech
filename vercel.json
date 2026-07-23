@@ -3,6 +3,14 @@
     {
       "source": "/api/reviews",
       "destination": "/api/reviews.js"
+    },
+    {
+      "source": "/api/admin/(.*)",
+      "destination": "/api/reviews.js"
+    },
+    {
+      "source": "/api/admin",
+      "destination": "/api/reviews.js"
     }
   ]
 }
