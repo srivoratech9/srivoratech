@@ -1,4 +1,4 @@
-// Google Apps Script — SriVoraTech Multi-Tab Application Receiver
+// Google Apps Script — SriVoraTech Multi-Tab Application & Ratings Receiver
 // Paste this into Google Sheets > Extensions > Apps Script
 // Then Deploy > New Deployment > Web App > Execute as "Me" > Access "Anyone"
 
@@ -21,13 +21,18 @@ function doPost(e) {
     var type = String(data.type || '').toLowerCase();
     var targetSheet = null;
 
-    // 1. Try to find the exact tab based on form application type
+    // 1. Try to find the exact tab based on form application type or ratings
     if (type.indexOf('fresher') !== -1) {
       targetSheet = ss.getSheetByName('FresherApplications') || ss.getSheetByName('Fresher');
     } else if (type.indexOf('exp') !== -1) {
       targetSheet = ss.getSheetByName('ExperienceApplications') || ss.getSheetByName('ExperiencedApplications') || ss.getSheetByName('Experienced');
     } else if (type.indexOf('contact') !== -1) {
       targetSheet = ss.getSheetByName('ContactForm') || ss.getSheetByName('Contact');
+    } else if (type.indexOf('rating') !== -1 || type.indexOf('review') !== -1) {
+      targetSheet = ss.getSheetByName('Ratings') || ss.getSheetByName('Reviews') || ss.getSheetByName('WebsiteRating');
+      if (!targetSheet) {
+        targetSheet = ss.insertSheet('Ratings');
+      }
     }
 
     // 2. Fallback to active sheet if tab name not found
@@ -36,7 +41,7 @@ function doPost(e) {
     }
 
     // Build combined helper variables
-    var fullName = data.fullName || '';
+    var fullName = data.fullName || data.name || '';
     if (!fullName && (data.firstName || data.lastName)) {
       fullName = ((data.firstName || '') + ' ' + (data.lastName || '')).trim();
     }
@@ -47,21 +52,26 @@ function doPost(e) {
     var collegeVal = data.college || data.company || '';
     var degreeVal = data.degree || data.designation || '';
 
-    // If sheet is completely empty, initialize headers
+    // If sheet is completely empty, initialize headers based on tab type
     if (targetSheet.getLastRow() === 0) {
-      var defaultHeaders = [
-        'Timestamp',
-        'Full Name',
-        'Email',
-        'Phone',
-        'College / Company',
-        'Degree / Designation',
-        'Graduation Year / Exp',
-        'Skills',
-        'Portfolio / Resume Link',
-        'Why SriVoraTech',
-        'Notice Period'
-      ];
+      var defaultHeaders = [];
+      if (type.indexOf('rating') !== -1 || type.indexOf('review') !== -1) {
+        defaultHeaders = ['Timestamp', 'Full Name', 'Email', 'Star Rating', 'Review Message', 'Company', 'Status'];
+      } else {
+        defaultHeaders = [
+          'Timestamp',
+          'Full Name',
+          'Email',
+          'Phone',
+          'College / Company',
+          'Degree / Designation',
+          'Graduation Year / Exp',
+          'Skills',
+          'Portfolio / Resume Link',
+          'Why SriVoraTech',
+          'Notice Period'
+        ];
+      }
       targetSheet.appendRow(defaultHeaders);
       targetSheet.getRange(1, 1, 1, defaultHeaders.length).setFontWeight('bold');
     }
@@ -80,6 +90,15 @@ function doPost(e) {
       }
       if (h.indexOf('full name') !== -1 || h === 'name') {
         return fullName;
+      }
+      if (h.indexOf('star') !== -1 || h.indexOf('rating') !== -1) {
+        return data.star || data.rating || 5;
+      }
+      if (h.indexOf('comment') !== -1 || h.indexOf('review') !== -1 || h.indexOf('message') !== -1) {
+        return data.comment || data.message || data.whySriVoraTech || '';
+      }
+      if (h.indexOf('status') !== -1) {
+        return data.status || 'Approved';
       }
       if (h.indexOf('first name') !== -1) {
         return data.firstName || (fullName.split(' ')[0] || '');
@@ -115,7 +134,6 @@ function doPost(e) {
         return skillsVal;
       }
       if (h.indexOf('portfolio') !== -1 || h.indexOf('github') !== -1 || h.indexOf('linkedin') !== -1 || h.indexOf('website') !== -1) {
-        // Append portfolio + resume URL if both exist
         if (data.portfolio && resumeUrl) {
           return data.portfolio + ' | Resume: ' + resumeUrl;
         }
@@ -124,7 +142,7 @@ function doPost(e) {
       if (h.indexOf('resume') !== -1 || h.indexOf('cv') !== -1) {
         return resumeUrl;
       }
-      if (h.indexOf('why') !== -1 || h.indexOf('srivoratech') !== -1 || h.indexOf('reason') !== -1 || h.indexOf('message') !== -1) {
+      if (h.indexOf('why') !== -1 || h.indexOf('srivoratech') !== -1 || h.indexOf('reason') !== -1) {
         return data.whySriVoraTech || '';
       }
       if (h.indexOf('interested') !== -1 || h.indexOf('role') !== -1 || h.indexOf('category') !== -1) {
@@ -137,7 +155,7 @@ function doPost(e) {
         return data.noticePeriod || '';
       }
       if (h.indexOf('type') !== -1) {
-        return data.type || 'Fresher';
+        return data.type || 'Rating';
       }
 
       // Exact match fallback
@@ -163,7 +181,49 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput(
-    JSON.stringify({ status: 'ok', message: 'SriVoraTech Multi-Tab Sheets API is running' })
-  ).setMimeType(ContentService.MimeType.JSON);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : '';
+    
+    if (action === 'getReviews' || action === 'ratings') {
+      var sheet = ss.getSheetByName('Ratings') || ss.getSheetByName('Reviews') || ss.getSheetByName('WebsiteRating');
+      if (!sheet || sheet.getLastRow() <= 1) {
+        return ContentService.createTextOutput(JSON.stringify({ success: true, reviews: [] })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0].map(function(h) { return String(h).toLowerCase().trim(); });
+      var reviews = [];
+      
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var item = {};
+        for (var j = 0; j < headers.length; j++) {
+          item[headers[j]] = row[j];
+        }
+        reviews.push({
+          id: i,
+          name: item['full name'] || item['name'] || 'Customer',
+          email: item['email'] || '',
+          star: parseInt(item['star rating'] || item['rating'] || item['star'] || 5, 10),
+          comment: item['review message'] || item['comment'] || item['message'] || '',
+          company: item['company'] || '',
+          status: item['status'] || 'Approved',
+          date: item['timestamp'] || item['date'] || 'Jul 20, 2026',
+          timestamp: new Date(item['timestamp'] || Date.now()).getTime()
+        });
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify({ success: true, reviews: reviews })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: 'ok', message: 'SriVoraTech Multi-Tab Sheets API is running' })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: false, error: err.toString() })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
 }
+
