@@ -70,6 +70,19 @@ const projects = [
     icon: Briefcase,
     metrics: ['Socket.IO Real-Time Chat', 'Automated Invoicing', 'Lead Pipeline Graph']
   },
+  {
+    id: 7,
+    name: 'SriVora AI Autonomous Agents',
+    category: 'Enterprise AI • Autonomous Agents',
+    desc: 'An upcoming autonomous multi-agent platform designed to orchestrate complex enterprise tasks, execute data pipelines, run automated software testing, and manage AI customer interactions.',
+    techs: ['Python', 'LangGraph', 'FastAPI', 'DeepSeek-V3', 'Pinecone'],
+    color: '#8b5cf6',
+    initial: 'A',
+    icon: Cpu,
+    isUpcoming: true,
+    statusTag: 'Upcoming Project (Q4 2026)',
+    metrics: ['Multi-Agent Graph Orchestrator', '10x Speed Scaling', 'Q4 2026 Expected Launch']
+  },
 ]
 
 const founderQuote = {
@@ -88,6 +101,9 @@ function ProjectMockup({ project }) {
         <div className="b-header">
           <div className="b-dots"><span /><span /><span /></div>
           <span className="b-url">srivoratech.com/products/{project.name.toLowerCase().replace(/\s+/g, '-')}</span>
+          {project.isUpcoming && (
+            <span className="b-upcoming-tag">🚀 Upcoming Project</span>
+          )}
         </div>
         <div className="b-body">
           <div className="b-score-card" style={{ background: `${project.color}08`, borderColor: `${project.color}30` }}>

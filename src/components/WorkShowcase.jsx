@@ -256,10 +256,140 @@ const works = [
     technologies: ['React.js', 'Express.js', 'MongoDB', 'Socket.IO', 'Docker'],
     results: ['35% Higher Lead Conversion', '25% Faster Milestone Delivery', '150+ Teams Onboarded']
   },
+  {
+    id: 'srivora-ai-agents',
+    title: 'SriVora AI Autonomous Agents',
+    headline: 'Next-Gen Multi-Agent Enterprise Automation Platform',
+    category: 'Enterprise AI • Autonomous Agents',
+    catGroup: 'upcoming',
+    isUpcoming: true,
+    statusTag: 'Upcoming Project (Q4 2026)',
+    clientName: 'Badisa Srikanth',
+    clientRole: 'Founder & CEO, SriVoraTech',
+    color: '#8b5cf6',
+    gradient: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
+    about: 'An upcoming autonomous multi-agent platform designed to orchestrate complex enterprise tasks, execute data pipelines, run automated software testing, and manage AI customer interactions.',
+    hq: 'Hyderabad, India',
+    industry: 'Artificial Intelligence',
+    companySize: 'Enterprise & AI Startups',
+    servicesOffered: ['Multi-Agent Architecture', 'LangGraph & Python FastAPI', 'LLM Function Calling', 'DeepSeek-V3 & Gemini Integration'],
+    heroQuote: 'Autonomous Multi-Agent Platform Engineered to Execute Complex Enterprise Task Orchestration',
+    challenge: 'Enterprises struggle to connect separate AI LLMs into unified workflows capable of executing multi-step business logic autonomously.',
+    solution: 'SriVoraTech is engineering SriVora AI Autonomous Agents — a state-of-the-art framework leveraging LangGraph, Python, and function-calling vector pipelines.',
+    approach: [
+      'Architected multi-agent graph topologies for parallel task execution.',
+      'Integrated DeepSeek-V3 & Google Gemini model endpoints.',
+      'Engineered safe sandboxed execution environments for database operations.',
+      'Designed real-time telemetry dashboards for monitoring agent reasoning.'
+    ],
+    features: [
+      'Multi-Agent Workflow Graph Orchestration',
+      'Autonomous Code Generation & Software Testing',
+      'Sub-Second Vector Knowledge Base Retrieval',
+      'Sandboxed Enterprise Execution Safeguards',
+      'Real-Time Telemetry & Agent Step Inspector',
+      'Custom LLM Function Calling Webhooks'
+    ],
+    resultsList: [
+      'Expected 85% reduction in manual multi-step workflow execution times.',
+      'Built for 10x throughput scaling over traditional single-prompt assistants.',
+      'Architected for strict enterprise security and data privacy isolation.'
+    ],
+    closingQuote: 'SriVora AI Agents unlock true autonomous task execution for modern digital enterprises.',
+    technologies: ['Python', 'LangGraph', 'FastAPI', 'DeepSeek-V3', 'Pinecone'],
+    results: ['Q4 2026 Expected Launch', 'Multi-Agent Graph Architecture', '10x Speed Scaling']
+  },
+  {
+    id: 'omnichannel-erp',
+    title: 'OmniChannel ERP Cloud',
+    headline: 'Multi-Store Inventory, POS & Supply Chain Automation',
+    category: 'Enterprise Software • Cloud ERP',
+    catGroup: 'upcoming',
+    isUpcoming: true,
+    statusTag: 'Upcoming Project (Q4 2026)',
+    clientName: 'Badisa Srikanth',
+    clientRole: 'Founder & CEO, SriVoraTech',
+    color: '#0067f4',
+    gradient: 'linear-gradient(135deg, #0067f4, #06b6d4)',
+    about: 'An upcoming cloud-native ERP platform built specifically for retail chains, franchise networks, and multi-location warehouses to unify point-of-sale (POS), inventory, and automated replenishment.',
+    hq: 'Hyderabad, India',
+    industry: 'Retail & Enterprise Tech',
+    companySize: 'Multi-Store Chains & Distributors',
+    servicesOffered: ['Go (Golang) Microservices', 'React.js Cloud POS', 'Kafka Streaming Engine', 'Kubernetes Cloud Deployment'],
+    heroQuote: 'Next-Generation OmniChannel Retail ERP Built for Ultra-Fast POS & Supply Chain Synchronization',
+    challenge: 'Multi-location retailers encounter inventory sync delays, stockouts, and manual transfer errors between offline stores and online storefronts.',
+    solution: 'SriVoraTech is building OmniChannel ERP Cloud — driven by Go microservices and Apache Kafka for millisecond inventory state updates across all locations.',
+    approach: [
+      'Engineered ultra-fast Go (Golang) backend microservices for low latency.',
+      'Integrated Apache Kafka event streaming for real-time inventory sync.',
+      'Built offline-first Progressive Web App (PWA) POS terminal interface.',
+      'Automated dynamic reorder points based on machine learning sales trends.'
+    ],
+    features: [
+      'Millisecond Multi-Store Stock Synchronization',
+      'Offline-First Progressive Web App (PWA) POS',
+      'Automated Purchase Orders & Supplier Workflows',
+      'Real-Time Multi-Warehouse Supply Chain Tracking',
+      'Centralized Financial Accounting & Tax Invoicing',
+      'Kubernetes Cloud Infrastructure Scaling'
+    ],
+    resultsList: [
+      'Eliminates stockout errors across offline and e-commerce channels.',
+      'Sub-50ms transaction processing speed at POS checkout counters.',
+      'Built to scale across 1,000+ retail outlets effortlessly.'
+    ],
+    closingQuote: 'Unifying physical retail stores and digital storefronts into one synchronized cloud platform.',
+    technologies: ['Golang', 'React.js', 'Apache Kafka', 'PostgreSQL', 'Kubernetes'],
+    results: ['Q4 2026 Expected Launch', 'Sub-50ms POS Transaction', 'Kafka Real-Time Streaming']
+  },
+  {
+    id: 'payshield-v2',
+    title: 'FinTech PayShield Gateway v2',
+    headline: 'AI Fraud Detection & Global Payout Settlement Engine',
+    category: 'Fintech • Payments & Security',
+    catGroup: 'upcoming',
+    isUpcoming: true,
+    statusTag: 'Upcoming Project (Q1 2027)',
+    clientName: 'Badisa Srikanth',
+    clientRole: 'Founder & CEO, SriVoraTech',
+    color: '#10b981',
+    gradient: 'linear-gradient(135deg, #10b981, #3b82f6)',
+    about: 'An upcoming payment gateway and fraud prevention platform with AI transaction risk scoring, multi-currency payouts, instant settlements, and chargeback protection.',
+    hq: 'Hyderabad, India',
+    industry: 'Financial Technology',
+    companySize: 'Fintechs & Global Merchants',
+    servicesOffered: ['Fintech Payment Architecture', 'AI Risk Analytics Engine', 'ClickHouse Data Pipeline', 'Redis High-Speed Cache'],
+    heroQuote: 'AI-Powered Payment Gateway Infrastructure Engineered for Sub-Second Risk Analysis & Instant Payouts',
+    challenge: 'Online merchants lose billions annually to fraudulent transactions, chargeback penalties, and delayed settlement cycles.',
+    solution: 'SriVoraTech is developing PayShield Gateway v2 — combining real-time machine learning risk models with high-throughput settlement routing.',
+    approach: [
+      'Built machine learning risk models for millisecond fraud detection.',
+      'Utilized ClickHouse analytical database for real-time fraud pattern analytics.',
+      'Designed multi-processor payout routing to minimize transaction fees.',
+      'Architected PCI-DSS compliant tokenized vault storage.'
+    ],
+    features: [
+      'Millisecond AI Transaction Fraud Risk Scoring',
+      'Multi-Currency Global Merchant Settlements',
+      'Automated Chargeback Protection & Disputing',
+      'PCI-DSS Compliant Tokenized Payment Vault',
+      'Instant Merchant Payouts & Escrow Management',
+      'ClickHouse Analytical Real-Time Reporting'
+    ],
+    resultsList: [
+      'Reduces payment fraud risk by over 90% using predictive AI scoring.',
+      'Processes transactions with 99.999% high-availability uptime SLA.',
+      'Instant settlement options for merchant liquidity management.'
+    ],
+    closingQuote: 'Next-generation payment security and instant settlements for global commerce.',
+    technologies: ['Next.js', 'Node.js', 'ClickHouse', 'Redis', 'Stripe Connect'],
+    results: ['Q1 2027 Expected Launch', '90% Fraud Reduction Model', 'Sub-100ms Risk Analysis']
+  }
 ]
 
 const categories = [
   { id: 'all', label: 'All Solutions' },
+  { id: 'upcoming', label: '🚀 Upcoming Projects' },
   { id: 'enterprise', label: 'Enterprise Software' },
   { id: 'ai', label: 'Artificial Intelligence' },
   { id: 'commerce', label: 'E-Commerce' },
@@ -285,6 +415,12 @@ function WorkCard({ work, idx, onSelect }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(work); } }}
       aria-label={`View solution details for ${work.title}`}
     >
+      {work.isUpcoming && (
+        <div className="work-upcoming-badge">
+          <span>🚀 {work.statusTag || 'Upcoming Project'}</span>
+        </div>
+      )}
+
       <div className="work-card-image" style={{ background: work.gradient }}>
         <div className="work-card-mockup">
           <div className="mockup-browser">
