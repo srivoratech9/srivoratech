@@ -463,26 +463,27 @@ app.get('/api/reviews', (req, res) => {
     approvedReviews.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
 
     const totalApproved = approvedReviews.length
-    const sum = approvedReviews.reduce((acc, curr) => acc + curr.star, 0)
+    const sum = approvedReviews.reduce((acc, curr) => acc + (parseInt(curr.star, 10) || 5), 0)
     const averageRating = totalApproved > 0 ? parseFloat((sum / totalApproved).toFixed(1)) : 5.0
 
     // Rating distribution calculations
-    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
     approvedReviews.forEach(r => {
-      if (distribution[r.star] !== undefined) {
-        distribution[r.star]++
+      const s = parseInt(r.star, 10) || 5
+      if (counts[s] !== undefined) {
+        counts[s]++
       }
     })
 
     const percentages = {}
-    Object.keys(distribution).forEach(star => {
+    Object.keys(counts).forEach(star => {
       percentages[star] = totalApproved > 0 
-        ? Math.round((distribution[star] / totalApproved) * 100)
+        ? Math.round((counts[star] / totalApproved) * 100)
         : 0
     })
 
     // Satisfaction score (percentage of 4 and 5 star ratings)
-    const highRatings = distribution[5] + distribution[4]
+    const highRatings = counts[5] + counts[4]
     const satisfactionRate = totalApproved > 0
       ? Math.round((highRatings / totalApproved) * 100)
       : 100
@@ -493,6 +494,7 @@ app.get('/api/reviews', (req, res) => {
       totalCount: totalApproved,
       averageRating,
       distribution: percentages,
+      counts,
       satisfactionRate
     })
   } catch (err) {

@@ -270,24 +270,25 @@ export default function handler(req, res) {
     approved.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
 
     const totalApproved = approved.length
-    const sum = approved.reduce((acc, curr) => acc + curr.star, 0)
+    const sum = approved.reduce((acc, curr) => acc + (parseInt(curr.star, 10) || 5), 0)
     const averageRating = totalApproved > 0 ? parseFloat((sum / totalApproved).toFixed(1)) : 5.0
 
-    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
     approved.forEach(r => {
-      if (distribution[r.star] !== undefined) {
-        distribution[r.star]++
+      const s = parseInt(r.star, 10) || 5
+      if (counts[s] !== undefined) {
+        counts[s]++
       }
     })
 
     const percentages = {}
-    Object.keys(distribution).forEach(star => {
+    Object.keys(counts).forEach(star => {
       percentages[star] = totalApproved > 0 
-        ? Math.round((distribution[star] / totalApproved) * 100)
+        ? Math.round((counts[star] / totalApproved) * 100)
         : 0
     })
 
-    const highRatings = distribution[5] + distribution[4]
+    const highRatings = counts[5] + counts[4]
     const satisfactionRate = totalApproved > 0
       ? Math.round((highRatings / totalApproved) * 100)
       : 100
@@ -298,11 +299,12 @@ export default function handler(req, res) {
       totalCount: totalApproved,
       averageRating,
       distribution: percentages,
+      counts,
       satisfactionRate
     })
   }
 
-  // ── 4. Public POST /api/reviews Endpoint (Defaults to Pending) ──
+  // ── 4. Public POST /api/reviews Endpoint (Defaults to Approved) ──
   if (req.method === 'POST') {
     try {
       let body = req.body || {}
@@ -314,11 +316,14 @@ export default function handler(req, res) {
         }
       }
 
-      const { name, rating, comment, email, company } = body
-      if (!name || !rating || !comment) {
+      const { name, comment, email, company } = body
+      const rawRating = body.rating !== undefined ? body.rating : body.star
+      const starNum = parseInt(rawRating, 10)
+      
+      if (!name || isNaN(starNum) || starNum < 1 || starNum > 5 || !comment) {
         return res.status(400).json({
           success: false,
-          message: 'Name, Star Rating, and Review Message are required.'
+          message: 'Name, valid Star Rating (1-5), and Review Message are required.'
         })
       }
 
@@ -326,7 +331,7 @@ export default function handler(req, res) {
         id: Date.now() + Math.floor(Math.random() * 1000),
         name: String(name).replace(/<[^>]*>/g, '').trim(),
         email: email ? String(email).replace(/<[^>]*>/g, '').trim() : '',
-        star: parseInt(rating, 10) || 5,
+        star: starNum,
         comment: String(comment).replace(/<[^>]*>/g, '').trim(),
         company: company ? String(company).replace(/<[^>]*>/g, '').trim() : '',
         status: 'Approved', // Display live to all visitors immediately!

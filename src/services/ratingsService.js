@@ -38,12 +38,13 @@ export function subscribeToRatings(callback) {
         if (currentDataString !== prevDataString) {
           prevDataString = currentDataString
           callback({
-            ratings: data.reviews.map(r => r.star),
+            ratings: data.reviews.map(r => parseInt(r.star, 10) || 5),
             reviews: data.reviews,
             viewCount: data.reviews.length * 28 + 847,
             totalCount: data.totalCount,
             averageRating: data.averageRating,
-            distribution: data.distribution,
+            distribution: data.distribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+            counts: data.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
             satisfactionRate: data.satisfactionRate
           })
         }

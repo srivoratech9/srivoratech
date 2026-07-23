@@ -12,6 +12,7 @@ export default function WebsiteRating() {
   const [totalCount, setTotalCount] = useState(0)
   const [averageRating, setAverageRating] = useState(5.0)
   const [distribution, setDistribution] = useState({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
+  const [counts, setCounts] = useState({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
   const [satisfactionRate, setSatisfactionRate] = useState(100)
   const [viewCount, setViewCount] = useState(847)
   const [loading, setLoading] = useState(true)
@@ -82,6 +83,7 @@ export default function WebsiteRating() {
       setTotalCount(data.totalCount || 0)
       setAverageRating(data.averageRating || 5.0)
       setDistribution(data.distribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
+      setCounts(data.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 })
       setSatisfactionRate(data.satisfactionRate || 100)
       setLoading(false)
     })
@@ -525,6 +527,7 @@ export default function WebsiteRating() {
                 <div className="rating-breakdown-box">
                   {[5, 4, 3, 2, 1].map((starLevel) => {
                     const pct = distribution[starLevel] || 0
+                    const starCount = counts[starLevel] || 0
                     return (
                       <div key={starLevel} className="breakdown-row">
                         <span className="star-level-label">{starLevel} ★</span>
@@ -534,7 +537,9 @@ export default function WebsiteRating() {
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <span className="breakdown-percent">{pct}%</span>
+                        <span className="breakdown-percent">
+                          {pct}% <span className="star-count-tag">({starCount})</span>
+                        </span>
                       </div>
                     )
                   })}

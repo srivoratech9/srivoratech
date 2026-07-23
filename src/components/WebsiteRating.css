@@ -270,11 +270,16 @@
 .star-bar-1 { background: linear-gradient(90deg, #ef4444, #f87171); }
 
 .breakdown-percent {
-  width: 75px;
+  width: 90px;
   font-size: 11.5px;
   font-weight: 600;
   color: var(--color-gray-500);
   text-align: right;
+}
+
+.star-count-tag {
+  font-weight: 700;
+  color: var(--color-gray-700);
 }
 
 .rating-divider {
