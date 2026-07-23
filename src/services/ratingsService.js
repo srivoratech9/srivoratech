@@ -181,11 +181,13 @@ export async function adminGetReviews({ search = '', rating = '', status = '' } 
  */
 export async function adminApproveReview(id) {
   const token = getAdminToken()
-  const response = await fetch(`/api/admin/reviews/${id}/approve`, {
+  const response = await fetch(`/api/admin/reviews/${id}/approve?id=${id}`, {
     method: 'POST',
     headers: {
+      'Content-Type': 'application/json',
       'x-admin-token': token
-    }
+    },
+    body: JSON.stringify({ id })
   })
 
   const result = await response.json()
@@ -202,11 +204,13 @@ export async function adminApproveReview(id) {
  */
 export async function adminRejectReview(id) {
   const token = getAdminToken()
-  const response = await fetch(`/api/admin/reviews/${id}/reject`, {
+  const response = await fetch(`/api/admin/reviews/${id}/reject?id=${id}`, {
     method: 'POST',
     headers: {
+      'Content-Type': 'application/json',
       'x-admin-token': token
-    }
+    },
+    body: JSON.stringify({ id })
   })
 
   const result = await response.json()
@@ -223,13 +227,13 @@ export async function adminRejectReview(id) {
  */
 export async function adminEditReview(id, data) {
   const token = getAdminToken()
-  const response = await fetch(`/api/admin/reviews/${id}`, {
+  const response = await fetch(`/api/admin/reviews/${id}?id=${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'x-admin-token': token
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify({ ...data, id })
   })
 
   const result = await response.json()
@@ -246,7 +250,7 @@ export async function adminEditReview(id, data) {
  */
 export async function adminDeleteReview(id) {
   const token = getAdminToken()
-  const response = await fetch(`/api/admin/reviews/${id}`, {
+  const response = await fetch(`/api/admin/reviews/${id}?id=${id}`, {
     method: 'DELETE',
     headers: {
       'x-admin-token': token

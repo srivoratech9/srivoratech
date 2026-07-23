@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert } from 'lucide-react'
+import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, Shield, ShieldCheck, X, Edit, Trash, Lock, Search, Filter, RefreshCw, Upload, FileImage, ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { subscribeToRatings, submitRating, incrementViewCount, adminLogin, adminGetReviews, adminApproveReview, adminRejectReview, adminEditReview, adminDeleteReview, getAdminToken, removeAdminToken } from '../services/ratingsService'
 import './WebsiteRating.css'
@@ -56,6 +56,14 @@ export default function WebsiteRating() {
   const [editComment, setEditComment] = useState('')
   
   const fileInputRef = useRef(null)
+  const scrollStreamRef = useRef(null)
+
+  const scrollStream = (direction) => {
+    if (scrollStreamRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320
+      scrollStreamRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+    }
+  }
 
   useEffect(() => {
     // Increment view count locally
@@ -697,6 +705,28 @@ export default function WebsiteRating() {
                   <h4 className="stream-title">
                     <MessageSquare size={16} /> Client Feedback & Sprints Reviews ({totalCount})
                   </h4>
+                  {reviewsList.length > 0 && (
+                    <div className="stream-nav-controls">
+                      <button 
+                        type="button" 
+                        onClick={() => scrollStream('left')} 
+                        className="carousel-nav-btn" 
+                        title="Scroll Left"
+                        aria-label="Scroll reviews left"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => scrollStream('right')} 
+                        className="carousel-nav-btn" 
+                        title="Scroll Right"
+                        aria-label="Scroll reviews right"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {loading ? (
@@ -718,10 +748,10 @@ export default function WebsiteRating() {
                     <p>No approved customer reviews found. Be the first to leave one!</p>
                   </div>
                 ) : (
-                  <>
-                    <div className="reviews-grid">
-                      {reviewsList.slice(0, visibleCount).map((review) => (
-                        <div key={review.id} className="review-card-item animate-pop">
+                  <div className="reviews-carousel-wrapper" ref={scrollStreamRef}>
+                    <div className="reviews-carousel-track">
+                      {reviewsList.map((review) => (
+                        <div key={review.id} className="review-card-item">
                           <div className="review-card-top">
                             <div className="review-name-group">
                               {review.profileImage ? (
@@ -752,15 +782,7 @@ export default function WebsiteRating() {
                         </div>
                       ))}
                     </div>
-                    {reviewsList.length > visibleCount && (
-                      <button 
-                        onClick={() => setVisibleCount(visibleCount + 6)} 
-                        className="btn-secondary-light load-more-reviews-btn"
-                      >
-                        Load More Customer Reviews
-                      </button>
-                    )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>

@@ -124,10 +124,52 @@ function checkAdminAuth(req) {
   return token === ADMIN_TOKEN
 }
 
-function extractReviewId(url) {
-  const cleanUrl = url.split('?')[0]
-  const match = cleanUrl.match(/\/admin\/reviews\/([^/]+)/)
-  return match ? match[1] : ''
+function extractReviewId(url, req) {
+  if (!url) return ''
+  try {
+    const urlObj = new URL(url, `http://${req?.headers?.host || 'localhost'}`)
+    const queryId = urlObj.searchParams.get('id')
+    if (queryId) return queryId
+
+    let bodyId = null
+    if (req?.body) {
+      let b = req.body
+      if (typeof b === 'string') {
+        try { b = JSON.parse(b) } catch(e) {}
+      }
+      if (b && b.id) bodyId = String(b.id)
+    }
+    if (bodyId) return bodyId
+
+    const cleanUrl = urlObj.pathname
+    let match = cleanUrl.match(/\/admin\/reviews\/([^/]+)/)
+    if (match && match[1]) return match[1]
+
+    match = cleanUrl.match(/\/reviews\/([^/]+)/)
+    if (match && match[1] && match[1] !== 'admin') return match[1]
+
+    const parts = cleanUrl.split('/').filter(Boolean)
+    const ignored = ['api', 'admin', 'reviews', 'approve', 'reject']
+    for (let i = parts.length - 1; i >= 0; i--) {
+      if (!ignored.includes(parts[i].toLowerCase())) {
+        return parts[i]
+      }
+    }
+  } catch (e) {}
+  return ''
+}
+
+function findReviewIndex(reviews, url, req) {
+  const targetId = extractReviewId(url, req)
+  if (!targetId) return -1
+  let index = reviews.findIndex(r => String(r.id) === String(targetId))
+  if (index === -1) {
+    const numId = parseInt(targetId, 10)
+    if (!isNaN(numId)) {
+      index = reviews.findIndex(r => Number(r.id) === numId)
+    }
+  }
+  return index
 }
 
 export default function handler(req, res) {
@@ -202,9 +244,8 @@ export default function handler(req, res) {
 
     // Admin POST (Approve / Reject)
     if (req.method === 'POST') {
-      const reviewIdStr = extractReviewId(url)
       const reviews = getReviews()
-      const reviewIndex = reviews.findIndex(r => String(r.id) === String(reviewIdStr))
+      const reviewIndex = findReviewIndex(reviews, url, req)
 
       if (reviewIndex === -1) {
         return res.status(404).json({ success: false, message: 'Review not found' })
@@ -229,9 +270,8 @@ export default function handler(req, res) {
         try { body = JSON.parse(body) } catch(e) {}
       }
 
-      const reviewIdStr = extractReviewId(url)
       const reviews = getReviews()
-      const reviewIndex = reviews.findIndex(r => String(r.id) === String(reviewIdStr))
+      const reviewIndex = findReviewIndex(reviews, url, req)
 
       if (reviewIndex === -1) {
         return res.status(404).json({ success: false, message: 'Review not found' })
@@ -249,10 +289,11 @@ export default function handler(req, res) {
 
     // Admin DELETE (Delete review)
     if (req.method === 'DELETE') {
-      const reviewIdStr = extractReviewId(url)
       let reviews = getReviews()
+      const targetId = extractReviewId(url, req)
       const originalLength = reviews.length
-      reviews = reviews.filter(r => String(r.id) !== String(reviewIdStr))
+
+      reviews = reviews.filter(r => String(r.id) !== String(targetId) && Number(r.id) !== parseInt(targetId, 10))
 
       if (reviews.length === originalLength) {
         return res.status(404).json({ success: false, message: 'Review not found' })
