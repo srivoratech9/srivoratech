@@ -4,6 +4,7 @@ import { ArrowRight, Zap, MousePointer2, Figma, Shield, Clock, Rocket, Sparkles,
 import { subscribeToRatings } from '../services/ratingsService'
 import HeroCanvas from './HeroCanvas'
 import srikanthPhoto from '../assets/badisa_srikanth.jpg'
+import vamsiPhoto from '../assets/vamsi_krishna.jpg'
 import saiPhoto from '../assets/sai_manindra.jpg'
 import './Hero.css'
 
@@ -153,10 +154,10 @@ export default function Hero() {
 
         {/* Social Proof Row */}
         <div ref={ref6} className={`hero-social-proof animate-on-scroll delay-3 ${vis6 ? 'visible' : ''}`}>
-          <div className="hero-avatars-stack" title="Badisa Srikanth (Founder & CEO), Garapati Sai Manindra (CTO), Badisa Vamsi Krishna (COO)">
+          <div className="hero-avatars-stack" title="Badisa Srikanth (Founder & CEO), Badisa Vamsi Krishna (COO), Garapati Sai Manindra (CTO)">
             <img src={srikanthPhoto} alt="Badisa Srikanth" className="hero-avatar hero-avatar-img" />
+            <img src={vamsiPhoto} alt="Badisa Vamsi Krishna" className="hero-avatar hero-avatar-img" />
             <img src={saiPhoto} alt="Garapati Sai Manindra" className="hero-avatar hero-avatar-img" />
-            <div className="hero-avatar" style={{ background: '#8b5cf6', color: '#fff', fontWeight: 800 }}>VK</div>
             <span className="hero-avatar-count">+07</span>
           </div>
 

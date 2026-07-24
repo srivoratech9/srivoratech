@@ -3,15 +3,20 @@ import { Star, Send, Sparkles, CheckCircle2, Award, Eye, Users, MessageSquare, S
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { subscribeToRatings, submitRating, incrementViewCount, adminLogin, adminGetReviews, adminApproveReview, adminRejectReview, adminEditReview, adminDeleteReview, markReviewHelpful, getAdminToken, removeAdminToken } from '../services/ratingsService'
 import srikanthPhoto from '../assets/badisa_srikanth.jpg'
+import vamsiPhoto from '../assets/vamsi_krishna.jpg'
+import saiPhoto from '../assets/sai_manindra.jpg'
 import './WebsiteRating.css'
 
 export default function WebsiteRating() {
   const [ref, isVisible] = useScrollAnimation()
   
-  // Helper to get profile image - use founder photo for known founder reviews
+  // Helper to get profile image - use leader photos for executive team reviews
   const getProfileImage = (review) => {
     if (review.profileImage) return review.profileImage
-    if (review.isFounder || (review.name && review.name.toLowerCase().includes('srikanth'))) return srikanthPhoto
+    const nameLower = (review.name || '').toLowerCase()
+    if (review.isFounder || nameLower.includes('srikanth')) return srikanthPhoto
+    if (nameLower.includes('vamsi')) return vamsiPhoto
+    if (nameLower.includes('manindra') || nameLower.includes('sai')) return saiPhoto
     return null
   }
   

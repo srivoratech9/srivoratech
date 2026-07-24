@@ -16,7 +16,12 @@ export function removeAdminToken() {
 }
 
 function calculateMetrics(reviewsList = []) {
-  const approved = reviewsList.filter(r => r.status === 'Approved')
+  const approved = reviewsList.filter(r => {
+    if (!r) return false
+    if (!r.status) return true
+    const s = String(r.status).trim().toLowerCase()
+    return s !== 'rejected'
+  })
   approved.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
 
   const totalCount = approved.length
@@ -72,6 +77,20 @@ const DEFAULT_APPROVED_REVIEWS = [
   },
   {
     id: 2,
+    name: 'Badisa Vamsi Krishna (Co-Founder & COO)',
+    email: 'vamsibadisabadisa126@gmail.com',
+    star: 5,
+    comment: 'Ensuring seamless project delivery, customer success, and operational excellence for all our enterprise software and cloud clients.',
+    date: 'Jul 20, 2026',
+    status: 'Approved',
+    timestamp: 1784580000000,
+    company: 'SriVoraTech',
+    profileImage: '',
+    isFounder: true,
+    helpfulCount: 10
+  },
+  {
+    id: 3,
     name: 'Garapati Sai Manindra (CTO)',
     email: 'saimanindragarapati@gmail.com',
     star: 5,
@@ -85,7 +104,7 @@ const DEFAULT_APPROVED_REVIEWS = [
     helpfulCount: 9
   },
   {
-    id: 3,
+    id: 4,
     name: 'Fintech Enterprise Client',
     email: 'client@fintech.co',
     star: 5,
