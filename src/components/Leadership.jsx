@@ -4,6 +4,7 @@ import { Sparkles, Award, CheckCircle2, Linkedin, Mail, ShieldCheck, ChevronLeft
 import './Leadership.css'
 import saiPhoto from '../assets/sai_manindra.jpg'
 import srikanthPhoto from '../assets/badisa_srikanth.jpg'
+import vamsiPhoto from '../assets/vamsi_krishna.jpg'
 
 const leaders = [
   {
@@ -33,8 +34,8 @@ const leaders = [
     level: 'Executive Leadership',
     initials: 'VK',
     color: '#8b5cf6',
-    photo: null,
-    linkedin: 'https://in.linkedin.com/in/vamsi-krishna-badisa-8b03ba1aa',
+    photo: vamsiPhoto,
+    linkedin: 'https://linkedin.com/in/vamsikrishna-badisa-7b99872a3/',
     email: 'vamsi@srivoratech.com',
     bio: 'Badisa Vamsi Krishna oversees daily operations, project delivery, business development, and customer relationships. He ensures efficient execution, operational excellence, and seamless collaboration between teams and clients.',
     expertise: [
