@@ -292,30 +292,49 @@ export default function TechStack() {
           </div>
         </div>
 
-        {/* Tech Cards Grid with New Startup UI/UX & Animations */}
+        {/* Tech Cards Grid — Clean Professional White Startup UI/UX */}
         <div className="tech-cards-grid">
           {filteredTech.map((tech, idx) => {
             const Icon = tech.icon
             return (
               <div 
                 key={tech.id} 
-                className={`tech-card glass-card animate-on-scroll delay-${(idx % 4) + 1} ${isVisible ? 'visible' : ''}`}
-                style={{ '--tech-accent': tech.color, '--delay': `${0.05 + idx * 0.05}s` }}
+                className={`tech-card animate-on-scroll delay-${(idx % 4) + 1} ${isVisible ? 'visible' : ''}`}
+                style={{ 
+                  '--tech-accent': tech.color, 
+                  '--delay': `${0.04 + idx * 0.04}s` 
+                }}
               >
-                {/* Top Glowing Accent Line */}
-                <div className="tech-top-accent-line" style={{ background: `linear-gradient(90deg, ${tech.color}, #38bdf8)` }} />
+                {/* Top Subtle Brand Color Line */}
+                <div 
+                  className="tech-top-accent-line" 
+                  style={{ background: tech.color }} 
+                />
 
                 <div className="tech-card-header">
-                  <div className="tech-icon-wrapper" style={{ background: `linear-gradient(135deg, ${tech.color}20, ${tech.color}08)`, color: tech.color, borderColor: `${tech.color}40` }}>
-                    <Icon size={26} />
-                    <span className="icon-glow-halo" style={{ background: tech.color }} />
+                  <div 
+                    className="tech-icon-wrapper" 
+                    style={{ 
+                      background: `linear-gradient(135deg, ${tech.color}14, ${tech.color}06)`, 
+                      color: tech.color, 
+                      borderColor: `${tech.color}30` 
+                    }}
+                  >
+                    <Icon size={24} />
                   </div>
                   <div className="tech-meta">
-                    <span className="tech-badge" style={{ color: tech.color, borderColor: `${tech.color}40`, background: `${tech.color}10` }}>
+                    <span 
+                      className="tech-badge" 
+                      style={{ 
+                        color: tech.color, 
+                        borderColor: `${tech.color}30`, 
+                        background: `${tech.color}0f` 
+                      }}
+                    >
                       {tech.badge}
                     </span>
                     <div className="tech-rating">
-                      <span className="pulse-indicator" style={{ background: tech.color, boxShadow: `0 0 8px ${tech.color}` }} />
+                      <span className="pulse-indicator" style={{ background: tech.color }} />
                       <span className="rating-num">{tech.popularity} Match</span>
                     </div>
                   </div>
@@ -324,7 +343,7 @@ export default function TechStack() {
                 <h3 className="tech-name">{tech.name}</h3>
                 <p className="tech-desc">{tech.desc}</p>
 
-                {/* Animated Skill Meter Progress Bar */}
+                {/* Skill Meter Progress Bar */}
                 <div className="tech-skill-meter">
                   <div className="skill-meter-header">
                     <span className="skill-meter-title">Production Readiness</span>
@@ -337,8 +356,7 @@ export default function TechStack() {
                       className="skill-meter-fill" 
                       style={{ 
                         width: `${tech.level}%`, 
-                        background: `linear-gradient(90deg, ${tech.color}aa, ${tech.color})`,
-                        boxShadow: `0 0 10px ${tech.color}88`
+                        background: tech.color
                       }} 
                     />
                   </div>
@@ -346,14 +364,15 @@ export default function TechStack() {
 
                 <div className="tech-tags">
                   {tech.tags.map((tag) => (
-                    <span key={tag} className="tech-tag">
+                    <span 
+                      key={tag} 
+                      className="tech-tag"
+                    >
                       <Zap size={10} style={{ color: tech.color }} />
                       {tag}
                     </span>
                   ))}
                 </div>
-
-                <div className="tech-card-shine" />
               </div>
             )
           })}
