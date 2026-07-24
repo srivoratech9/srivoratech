@@ -59,7 +59,7 @@ const DEFAULT_APPROVED_REVIEWS = [
   {
     id: 1,
     name: 'Badisa Srikanth (Founder & CEO)',
-    email: 'srikanth@srivoratech.in',
+    email: 'srikanthbsqy@gmail.com',
     star: 5,
     comment: 'Building innovative software and AI-powered solutions that empower businesses to grow, automate, and succeed in the digital era.',
     date: 'Jul 20, 2026',
@@ -73,7 +73,7 @@ const DEFAULT_APPROVED_REVIEWS = [
   {
     id: 2,
     name: 'Garapati Sai Manindra (CTO)',
-    email: 'manindra@srivoratech.com',
+    email: 'saimanindragarapati@gmail.com',
     star: 5,
     comment: 'Engineering scalable cloud architectures, high-performance web apps, and custom AI automation pipelines with battle-tested standards.',
     date: 'Jul 21, 2026',

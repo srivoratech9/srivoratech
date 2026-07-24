@@ -60,15 +60,30 @@ export default function FloatingActions() {
             </button>
 
             <a
-              href="mailto:contact@srivoratech.com?subject=Project%20Inquiry%20from%20Website"
+              href="https://wa.me/919182030946?text=Hi%20SriVoraTech,%20I'd%20like%20to%20discuss%20a%20project!"
               className="drawer-btn"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <div className="drawer-icon-box bg-emerald">
                 <MessageSquare size={18} />
               </div>
               <div className="drawer-btn-text">
+                <strong>WhatsApp Us</strong>
+                <span>+91 9182030946</span>
+              </div>
+            </a>
+
+            <a
+              href="mailto:srivoratech9@gmail.com?subject=Project%20Inquiry%20from%20Website"
+              className="drawer-btn"
+            >
+              <div className="drawer-icon-box bg-purple">
+                <PhoneCall size={18} />
+              </div>
+              <div className="drawer-btn-text">
                 <strong>Email Us Directly</strong>
-                <span>contact@srivoratech.com</span>
+                <span>srivoratech9@gmail.com</span>
               </div>
             </a>
           </div>

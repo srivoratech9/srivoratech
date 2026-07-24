@@ -24,9 +24,10 @@ const servicesList = [
 ]
 
 const socialLinks = [
-  { label: 'Email', href: 'mailto:srivoratech9@gmail.com' },
-  { label: 'LinkedIn', href: 'https://linkedin.com' },
-  { label: 'Instagram', href: 'https://instagram.com' },
+  { label: 'Email Us', href: 'mailto:srivoratech9@gmail.com' },
+  { label: 'WhatsApp Chat', href: 'https://wa.me/919182030946' },
+  { label: 'Instagram', href: 'https://www.instagram.com/srivora_tech?igsh=MTg2eTZnczRuemJ6bg==' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/srikanthbadisa/' },
   { label: 'GitHub', href: 'https://github.com/srivoratech9' },
 ]
 
